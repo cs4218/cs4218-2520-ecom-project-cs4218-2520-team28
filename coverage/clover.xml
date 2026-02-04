@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1770176589370" clover="3.2.0">
-  <project timestamp="1770176589370" name="All files">
-    <metrics statements="53" coveredstatements="50" conditionals="16" coveredconditionals="12" methods="17" coveredmethods="16" elements="86" coveredelements="78" complexity="0" loc="53" ncloc="53" packages="2" files="3" classes="3"/>
+<coverage generated="1770184521067" clover="3.2.0">
+  <project timestamp="1770184521067" name="All files">
+    <metrics statements="65" coveredstatements="62" conditionals="22" coveredconditionals="18" methods="20" coveredmethods="19" elements="107" coveredelements="99" complexity="0" loc="65" ncloc="65" packages="3" files="4" classes="4"/>
     <package name="components">
       <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
       <file name="UserMenu.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\components\UserMenu.js">
         <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="3" count="1" type="stmt"/>
         <line num="4" count="5" type="stmt"/>
+      </file>
+    </package>
+    <package name="components.Routes">
+      <metrics statements="12" coveredstatements="12" conditionals="6" coveredconditionals="6" methods="3" coveredmethods="3"/>
+      <file name="Private.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\components\Routes\Private.js">
+        <metrics statements="12" coveredstatements="12" conditionals="6" coveredconditionals="6" methods="3" coveredmethods="3"/>
+        <line num="8" count="19" type="stmt"/>
+        <line num="9" count="19" type="stmt"/>
+        <line num="11" count="19" type="stmt"/>
+        <line num="12" count="11" type="stmt"/>
+        <line num="13" count="9" type="stmt"/>
+        <line num="14" count="9" type="cond" truecount="2" falsecount="0"/>
+        <line num="15" count="6" type="stmt"/>
+        <line num="17" count="3" type="stmt"/>
+        <line num="20" count="11" type="cond" truecount="2" falsecount="0"/>
+        <line num="21" count="9" type="stmt"/>
+        <line num="23" count="2" type="stmt"/>
+        <line num="27" count="19" type="cond" truecount="2" falsecount="0"/>
       </file>
     </package>
     <package name="pages.Auth">
