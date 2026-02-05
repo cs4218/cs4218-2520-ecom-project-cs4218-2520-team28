@@ -1,4 +1,4 @@
-// AI generated using github copilot(Grok Code Fast 1) UI fixes for the following issues:
+// AI generated UI fixes using github copilot(Grok Code Fast 1) for the following issues:
 // Problem 1: Product cards had varying heights based on content, unlike the fixed width.
 // Solution: Set fixed height (400px) for cards and image height (300px) to standardize dimensions.
 // Problem 2: When content was short, it didn't center vertically in the card.
