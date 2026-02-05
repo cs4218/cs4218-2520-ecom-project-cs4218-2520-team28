@@ -198,7 +198,7 @@ describe("Products Page", () => {
     expect(screen.queryByTestId("product-link")).not.toBeInTheDocument();
   });
 
-  // Test 3: Single product - test Link component
+  // Test 3.1: Single product - test Link component
   it("renders Link component for single product", async () => {
     // Arrange
     const mockProduct = {
@@ -223,7 +223,7 @@ describe("Products Page", () => {
     });
   });
 
-  // Test 3: Single product - test img component
+  // Test 3.2: Single product - test img component
   it("renders img component for single product with correct src", async () => {
     // Arrange
     const mockProduct = {
@@ -250,7 +250,7 @@ describe("Products Page", () => {
     });
   });
 
-  // Test 3: Single product - test name component
+  // Test 3.3: Single product - test name component
   it("renders product name for single product", async () => {
     // Arrange
     const mockProduct = {
@@ -277,7 +277,7 @@ describe("Products Page", () => {
     });
   });
 
-  // Test 3: Single product - test description component
+  // Test 3.4: Single product - test description component
   it("renders product description for single product", async () => {
     // Arrange
     const mockProduct = {
@@ -335,7 +335,7 @@ describe("Products Page", () => {
     });
   });
 
-  // Test 5: Missing name field
+  // Test 5.1: Missing name field
   it("handles missing product name gracefully - LOGIC ERROR: displays undefined", async () => {
     // Arrange
     const mockProduct = {
@@ -362,7 +362,7 @@ describe("Products Page", () => {
     expect(cardTitle.textContent).not.toBe("null");
   });
 
-  // Test 5: Missing description field
+  // Test 5.2: Missing description field
   it("handles missing product description gracefully - LOGIC ERROR: displays undefined", async () => {
     // Arrange
     const mockProduct = {
@@ -390,7 +390,7 @@ describe("Products Page", () => {
     expect(cardText.textContent).not.toBe("null");
   });
 
-  // Test 5: Missing slug field
+  // Test 5.3: Missing slug field
   it("handles missing product slug gracefully", async () => {
     // Arrange
     const mockProduct = {
@@ -477,7 +477,7 @@ describe("Products Page", () => {
     });
   });
 
-  // Test 8: Null data from API
+  // Test 8.1: Null data from API
   it("handles null data from API gracefully", async () => {
     // Arrange
     axios.get.mockResolvedValueOnce({
@@ -498,7 +498,7 @@ describe("Products Page", () => {
     expect(screen.queryByTestId("product-link")).not.toBeInTheDocument();
   });
 
-  // Test 8: data.products is null
+  // Test 8.2: data.products is null
   it("handles data.products being null gracefully", async () => {
     // Arrange
     axios.get.mockResolvedValueOnce({
@@ -519,7 +519,7 @@ describe("Products Page", () => {
     expect(screen.queryByTestId("product-link")).not.toBeInTheDocument();
   });
 
-  // Test 8: data.products is undefined
+  // Test 8.3: data.products is undefined
   it("handles data.products being undefined gracefully", async () => {
     // Arrange
     axios.get.mockResolvedValueOnce({
@@ -538,7 +538,7 @@ describe("Products Page", () => {
     expect(screen.queryByTestId("product-link")).not.toBeInTheDocument();
   });
 
-  // Test 9: API is called on component mount
+  // Test 9.1: API is called on component mount
   it("calls API on component mount", async () => {
     // Arrange
     axios.get.mockResolvedValueOnce({
@@ -556,7 +556,7 @@ describe("Products Page", () => {
     });
   });
 
-  // Test 9: Products container has correct styling
+  // Test 9.2: Products container has correct styling
   it("renders products container with correct styling for scrolling", async () => {
     // Arrange
     axios.get.mockResolvedValueOnce({
@@ -576,7 +576,7 @@ describe("Products Page", () => {
     });
   });
 
-  // Test 9: Product card has correct dimensions
+  // Test 9.3: Product card has correct dimensions
   it("renders product card with standardized dimensions", async () => {
     // Arrange
     const mockProduct = {
@@ -607,7 +607,7 @@ describe("Products Page", () => {
     });
   });
 
-  // Test 9: Product image has correct dimensions
+  // Test 9.4: Product image has correct dimensions
   it("renders product image with standardized height", async () => {
     // Arrange
     const mockProduct = {
@@ -633,7 +633,7 @@ describe("Products Page", () => {
     });
   });
 
-  // Test 9: Each product has unique key
+  // Test 9.5: Each product has unique key
   it("assigns unique key to each product based on _id", async () => {
     // Arrange
     const mockProducts = [
@@ -669,7 +669,7 @@ describe("Products Page", () => {
     });
   });
 
-  // Test 9: Missing _id field (no key)
+  // Test 9.6: Missing _id field (no key)
   it("handles missing _id field - potential React warning", async () => {
     // Arrange
     const mockProduct = {
@@ -691,7 +691,7 @@ describe("Products Page", () => {
     });
   });
 
-  // Test 9: Layout structure verification
+  // Test 9.7: Layout structure verification
   it("renders correct layout structure with row and columns", async () => {
     // Arrange
     axios.get.mockResolvedValueOnce({
