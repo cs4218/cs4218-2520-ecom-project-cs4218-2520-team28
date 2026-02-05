@@ -176,35 +176,58 @@ export const deleteProductController = async (req, res) => {
 //upate producta
 export const updateProductController = async (req, res) => {
   try {
+    const { pid } = req.params;
+    
+    // Validate product ID is provided
+    if (!pid) {
+      return res.status(400).send({
+        success: false,
+        message: "Product ID is required",
+      });
+    }
+    
+    if (!req.fields) {
+      return res.status(400).send({ message: "Please provide all fields" });
+    }
     const { name, description, price, category, quantity, shipping } =
       req.fields;
-    const { photo } = req.files;
-    //alidation
+    const photo = req?.files?.photo;
+    //validation
     switch (true) {
       case !name:
-        return res.status(500).send({ error: "Name is Required" });
+        return res.status(400).send({ error: "Name is Required" });
       case !description:
-        return res.status(500).send({ error: "Description is Required" });
+        return res.status(400).send({ error: "Description is Required" });
       case !price:
-        return res.status(500).send({ error: "Price is Required" });
+        return res.status(400).send({ error: "Price is Required" });
       case !category:
-        return res.status(500).send({ error: "Category is Required" });
+        return res.status(400).send({ error: "Category is Required" });
       case !quantity:
-        return res.status(500).send({ error: "Quantity is Required" });
+        return res.status(400).send({ error: "Quantity is Required" });
       case photo && photo.size > 1000000:
         return res
-          .status(500)
-          .send({ error: "photo is Required and should be less then 1mb" });
+          .status(400)
+          .send({ error: "Photo should be less than 1mb" });
     }
 
     const products = await productModel.findByIdAndUpdate(
-      req.params.pid,
-      { ...req.fields, slug: slugify(name) },
+      pid,
+      { name, description, price, category, quantity, shipping, slug: slugify(name) },
       { new: true }
     );
+    
+    if (!products) {
+      return res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
+    }
+    
     if (photo) {
-      products.photo.data = fs.readFileSync(photo.path);
-      products.photo.contentType = photo.type;
+      products.photo = {
+        data: fs.readFileSync(photo.path),
+        contentType: photo.type
+      };
     }
     await products.save();
     res.status(201).send({
@@ -217,7 +240,7 @@ export const updateProductController = async (req, res) => {
     res.status(500).send({
       success: false,
       error,
-      message: "Error in Updte product",
+      message: "Error in updating product",
     });
   }
 };
