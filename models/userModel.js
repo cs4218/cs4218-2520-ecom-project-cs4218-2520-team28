@@ -11,22 +11,25 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
     password: {
       type: String,
       required: true,
     },
     phone: {
-      type: String,
+      type: Number,
       required: true,
     },
     address: {
-      type: {},
+      type: String,
       required: true,
+      trim: true,
     },
     answer: {
       type: String,
       required: true,
+      trim: true,
     },
     role: {
       type: Number,
