@@ -24,7 +24,7 @@ jest.mock("braintree", () => ({
 import {
     createCategoryController,
     updateCategoryController,
-    deleteCategoryController,
+    deleteCategoryCOntroller,
 } from "./categoryController.js";
 
 describe('createCategoryController', () => {
