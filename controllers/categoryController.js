@@ -37,11 +37,37 @@ export const updateCategoryController = async (req, res) => {
   try {
     const { name } = req.body;
     const { id } = req.params;
+    
+    // Validate category ID
+    if (!id) {
+      return res.status(400).send({
+        success: false,
+        message: "Category ID is required",
+      });
+    }
+    
+    // Validate name
+    if (!name) {
+      return res.status(400).send({
+        success: false,
+        message: "Name is required",
+      });
+    }
+    
     const category = await categoryModel.findByIdAndUpdate(
       id,
       { name, slug: slugify(name) },
       { new: true }
     );
+    
+    // Check if category was found
+    if (!category) {
+      return res.status(404).send({
+        success: false,
+        message: "Category not found",
+      });
+    }
+    
     res.status(200).send({
       success: true,
       messsage: "Category Updated Successfully",
@@ -99,7 +125,25 @@ export const singleCategoryController = async (req, res) => {
 export const deleteCategoryCOntroller = async (req, res) => {
   try {
     const { id } = req.params;
-    await categoryModel.findByIdAndDelete(id);
+    
+    // Validate category ID
+    if (!id) {
+      return res.status(400).send({
+        success: false,
+        message: "Category ID is required",
+      });
+    }
+    
+    const category = await categoryModel.findByIdAndDelete(id);
+    
+    // Check if category was found
+    if (!category) {
+      return res.status(404).send({
+        success: false,
+        message: "Category not found",
+      });
+    }
+    
     res.status(200).send({
       success: true,
       message: "Categry Deleted Successfully",
