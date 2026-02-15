@@ -13,7 +13,7 @@
 // " + GPT's code
 // Output: Modified file here
 
-import { useState, useContext, createContext, useEffect, useMemo } from "react";
+import { useState, useContext, createContext, useEffect, useMemo, useRef } from "react";
 import { useAuth } from "./auth";
 
 const CartContext = createContext();
@@ -25,15 +25,30 @@ const CartProvider = ({ children }) => {
 
   const [cart, setCart] = useState([]);
 
+  // track whether we've loaded for the current key
+  const loadedKeyRef = useRef(null);
+
   // load cart whenever user changes
   useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    setCart(saved ? JSON.parse(saved) : []);
+    try {
+      const saved = localStorage.getItem(storageKey);
+      const parsed = saved ? JSON.parse(saved) : [];
+      setCart(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setCart([]);
+    } finally {
+      loadedKeyRef.current = storageKey;
+    }
   }, [storageKey]);
 
-  // persist cart
+  // persist cart ONLY after load for that key is done
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(cart));
+    if (loadedKeyRef.current !== storageKey) return;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(cart));
+    } catch {
+      // optionally no-op or report
+    }
   }, [storageKey, cart]);
 
   return (
@@ -43,7 +58,10 @@ const CartProvider = ({ children }) => {
   );
 };
 
-// custom hook
-const useCart = () => useContext(CartContext);
+const useCart = () => {
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error("useCart must be used within a CartProvider");
+  return ctx;
+};
 
 export { useCart, CartProvider };
