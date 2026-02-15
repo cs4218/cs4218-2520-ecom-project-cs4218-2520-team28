@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1771131385072" clover="3.2.0">
-  <project timestamp="1771131385072" name="All files">
-    <metrics statements="119" coveredstatements="112" conditionals="42" coveredconditionals="32" methods="41" coveredmethods="38" elements="202" coveredelements="182" complexity="0" loc="119" ncloc="119" packages="5" files="8" classes="8"/>
+<coverage generated="1771143045025" clover="3.2.0">
+  <project timestamp="1771143045025" name="All files">
+    <metrics statements="121" coveredstatements="114" conditionals="42" coveredconditionals="32" methods="42" coveredmethods="39" elements="205" coveredelements="185" complexity="0" loc="121" ncloc="121" packages="6" files="9" classes="9"/>
     <package name="components">
       <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
       <file name="UserMenu.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\components\UserMenu.js">
@@ -26,6 +26,14 @@
         <line num="27" count="9" type="stmt"/>
         <line num="29" count="2" type="stmt"/>
         <line num="33" count="19" type="cond" truecount="2" falsecount="0"/>
+      </file>
+    </package>
+    <package name="pages">
+      <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <file name="Contact.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\pages\Contact.js">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="14" type="stmt"/>
       </file>
     </package>
     <package name="pages.Auth">

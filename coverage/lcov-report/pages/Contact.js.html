@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for components/UserMenu.js</title>
+    <title>Code coverage report for pages/Contact.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">components</a> UserMenu.js</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">pages</a> Contact.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -89,10 +89,26 @@
 <a name='L24'></a><a href='#L24'>24</a>
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
-<a name='L27'></a><a href='#L27'>27</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">14x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -115,33 +131,53 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import React from "react";
-import { NavLink } from "react-router-dom";
-const UserMenu = () =&gt; {
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// Foo Chao, A0272024R
+// Modified alt text for img to be more meaningful
+&nbsp;
+import React from "react";
+import Layout from "./../components/Layout";
+import { BiMailSend, BiPhoneCall, BiSupport } from "react-icons/bi";
+const Contact = () =&gt; {
   return (
-    &lt;div&gt;
-      &lt;div className="text-center"&gt;
-        &lt;div className="list-group"&gt;
-          &lt;h4&gt;Dashboard&lt;/h4&gt;
-          &lt;NavLink
-            to="/dashboard/user/profile"
-            className="list-group-item list-group-item-action"
-          &gt;
-            Profile
-          &lt;/NavLink&gt;
-          &lt;NavLink
-            to="/dashboard/user/orders"
-            className="list-group-item list-group-item-action"
-          &gt;
-            Orders
-          &lt;/NavLink&gt;         
+    &lt;Layout title={"Contact us"}&gt;
+      &lt;div className="row contactus "&gt;
+        &lt;div className="col-md-6 "&gt;
+          &lt;img
+            src="/images/contactus.jpeg"
+            alt="Contact us illustration"
+            style={{ width: "100%" }}
+          /&gt;
+        &lt;/div&gt;
+        &lt;div className="col-md-4"&gt;
+          &lt;h1 className="bg-dark p-2 text-white text-center"&gt;CONTACT US&lt;/h1&gt;
+          &lt;p className="text-justify mt-2"&gt;
+            For any query or info about product, feel free to call anytime. We are
+            available 24X7.  
+          &lt;/p&gt;
+          &lt;p className="mt-3"&gt;
+            &lt;BiMailSend /&gt; : www.help@ecommerceapp.com
+          &lt;/p&gt;
+          &lt;p className="mt-3"&gt;
+            &lt;BiPhoneCall /&gt; : 012-3456789
+          &lt;/p&gt;
+          &lt;p className="mt-3"&gt;
+            &lt;BiSupport /&gt; : 1800-0000-0000 (toll free)
+          &lt;/p&gt;
         &lt;/div&gt;
       &lt;/div&gt;
-    &lt;/div&gt;
+    &lt;/Layout&gt;
   );
 };
 &nbsp;
-export default UserMenu;</pre></td></tr></table></pre>
+export default Contact;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
