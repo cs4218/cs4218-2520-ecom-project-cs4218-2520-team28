@@ -67,7 +67,7 @@
 // State Transitions - User Change (10 tests):
 //   16. GE -> U1E: Login from empty guest cart, user 1 has no saved cart
 //   17. GE -> U1N: Login from empty guest cart, user 1 has saved cart
-//   18. GN -> U1E: Login from non-empty guest cart, user 1 has no saved cart
+//   18. GN -> U1N: Login from non-empty guest cart, user 1 has no saved cart (guest cart transfers)
 //   19. GN -> U1N: Login from non-empty guest cart, user 1 has saved cart
 //   20. U1E -> GE: Logout from user 1 with empty cart, guest has no saved cart
 //   21. U1E -> U2E: Logout + login, user 1 empty cart, user 2 has no saved cart
@@ -82,6 +82,10 @@
 // Prompt 3 (Github Copilot Claude Opus 4.6):
 // run test for cat.js and figure out why branch coverage not 100% and fix it
 // Output: Added error handling test cases
+
+// Prompt 4 (Github Copilot Claude Opus 4.6):
+// Modify the cart logic such that if log in from guest to user and user has no data set the guest data to user data. 
+// This is because when user shop and then want to make acc to checkout they should keep their cart
 
 import React from "react";
 import { render, screen, act } from "@testing-library/react";
@@ -451,7 +455,7 @@ describe("CartProvider", () => {
       );
     });
 
-    it("GN -> U1E: login from non-empty guest cart, user 1 has no saved cart", () => {
+    it("GN -> U1N: login from non-empty guest cart, user 1 has no saved cart, guest cart transfers", () => {
       // Arrange -> Guest user with items in cart
       mockAuthValue = [{ user: null }, jest.fn()];
       localStorage.setItem("cart:guest", JSON.stringify([item1]));
@@ -470,9 +474,13 @@ describe("CartProvider", () => {
         </CartProvider>
       );
 
-      // Assert -> Cart is empty for user 1
-      expect(screen.getByTestId("cart-length").textContent).toBe("0");
-      expect(screen.getByTestId("cart-data").textContent).toBe("[]");
+      // Assert -> Guest cart transferred to user 1
+      expect(screen.getByTestId("cart-length").textContent).toBe("1");
+      expect(screen.getByTestId("cart-data").textContent).toBe(
+        JSON.stringify([item1])
+      );
+      // Guest cart should be cleared after transfer
+      expect(localStorage.getItem("cart:guest")).toBeNull();
     });
 
     it("GN -> U1N: login from non-empty guest cart, user 1 has saved cart", () => {

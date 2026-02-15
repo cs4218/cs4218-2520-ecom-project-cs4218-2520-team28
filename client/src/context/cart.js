@@ -4,14 +4,17 @@
 // This ensures that each user's cart is preserved when they log out and another user logs in,
 // preventing data loss and improving user experience.
 
-// AI assistance: ChatGPT 5.2 Thinking, modified by Github Copilot (Grok Code Fast 1) Agent Mode
+// AI assistance: ChatGPT 5.2 Thinking, modified by Github Copilot (Grok Code Fast 1) Agent Mode and Claude Opus 4.6 Agent Mode
 // Link to ChatGPT Prompt: https://chatgpt.com/share/69918c47-e8ec-8005-bb63-f37d41e0696d
 // ChatGPT 5.2 Prompt: initial code + "this code looks very sus to me because when i log out i still see same cart or change acc"
 // Output: Suggest code but not specified to how we store our user data
-// Github Copilot Prompt: "
+// Github Copilot Prompt(Grok): "
 //  GPT suggest this approach but it is not specified to this file so can u adapt it based on the overall code logic
 // " + GPT's code
 // Output: Modified file here
+// Github Copilot Prompt(Claude):
+// Modify the cart logic such that if log in from guest to user and user has no data set the guest data to user data. 
+// This is because when user shop and then want to make acc to checkout they should keep their cart
 
 import React, { useState, useContext, createContext, useEffect, useMemo } from "react";
 import { useAuth } from "./auth";
@@ -30,7 +33,26 @@ const CartProvider = ({ children }) => {
     try {
       const saved = localStorage.getItem(storageKey);
       const parsed = saved ? JSON.parse(saved) : [];
-      setCart(Array.isArray(parsed) ? parsed : []);
+      let cartData = Array.isArray(parsed) ? parsed : [];
+
+      // When a guest logs in and the user has no saved cart,
+      // transfer the guest cart so items added before login are preserved
+      if (storageKey !== "cart:guest" && cartData.length === 0) {
+        try {
+          const guestSaved = localStorage.getItem("cart:guest");
+          if (guestSaved) {
+            const guestParsed = JSON.parse(guestSaved);
+            if (Array.isArray(guestParsed) && guestParsed.length > 0) {
+              cartData = guestParsed;
+              localStorage.removeItem("cart:guest");
+            }
+          }
+        } catch {
+          // guest cart corrupted, ignore
+        }
+      }
+
+      setCart(cartData);
     } catch {
       setCart([]);
     }
