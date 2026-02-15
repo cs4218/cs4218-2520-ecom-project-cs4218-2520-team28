@@ -1,15 +1,33 @@
+// Foo Chao, A0272024R
+// Changes Made:
+// - Fix bug where removing duplicated items will not work except for the first click, 
+//    by using index-pid as key and for removing item instead of product id, 
+//    since duplicated items will have same product id but different index
+// - Remove `localStorage.removeItem("cart")` to standardise with changes made in cart.js
+// - Add toasts when payment failed
+// - Fix typo of "Plase" to "Please" in login button when user not logged in
+// - Made handling of empty description more robust by using optional chaining and default value (p.description?.substring(0, 30) || "")
+
+// AI Assistance: Github Copilot (Grok Code Fast 1) Agent Mode
+// Prompt 1: when removing item it has bug when there r duplicate items. 
+//    it is due to product id being used as key and used to remove item, 
+//    can u make it such that it uses index?
+// Output: Modified delete logic to use index instead of product id, 
+//    and also updated key for cart items to use index 
+//    to ensure correct item is removed when there are duplicates.
+
 import React, { useState, useEffect } from "react";
 import Layout from "./../components/Layout";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
 import { useNavigate } from "react-router-dom";
 import DropIn from "braintree-web-drop-in-react";
-import { AiFillWarning } from "react-icons/ai";
 import axios from "axios";
 import toast from "react-hot-toast";
 import "../styles/CartStyles.css";
 
 const CartPage = () => {
+  // eslint-disable-next-line
   const [auth, setAuth] = useAuth();
   const [cart, setCart] = useCart();
   const [clientToken, setClientToken] = useState("");
@@ -21,8 +39,9 @@ const CartPage = () => {
   const totalPrice = () => {
     try {
       let total = 0;
+      // eslint-disable-next-line
       cart?.map((item) => {
-        total = total + item.price;
+        total = total + (item?.price?? 0);
       });
       return total.toLocaleString("en-US", {
         style: "currency",
@@ -32,14 +51,15 @@ const CartPage = () => {
       console.log(error);
     }
   };
+
+  // Foo Chao, A0272024R
+  // Fix duplicate item removal bug by using index instead of product id, and also update key for cart items to use index
   //detele item
-  const removeCartItem = (pid) => {
+  const removeCartItem = (index) => {
     try {
       let myCart = [...cart];
-      let index = myCart.findIndex((item) => item._id === pid);
       myCart.splice(index, 1);
       setCart(myCart);
-      localStorage.setItem("cart", JSON.stringify(myCart));
     } catch (error) {
       console.log(error);
     }
@@ -48,6 +68,7 @@ const CartPage = () => {
   //get payment gateway token
   const getToken = async () => {
     try {
+      // TODO: currently has backend errors verify after backend fixed
       const { data } = await axios.get("/api/v1/product/braintree/token");
       setClientToken(data?.clientToken);
     } catch (error) {
@@ -63,18 +84,24 @@ const CartPage = () => {
     try {
       setLoading(true);
       const { nonce } = await instance.requestPaymentMethod();
+      // TODO: currently has backend errors verify after backend fixed
+      // Need to check data returned is ok or not and handle accordingly, currently just assume ok if no error thrown
+      // Will be handled in integration testing
+      // eslint-disable-next-line
       const { data } = await axios.post("/api/v1/product/braintree/payment", {
         nonce,
         cart,
       });
       setLoading(false);
-      localStorage.removeItem("cart");
       setCart([]);
       navigate("/dashboard/user/orders");
       toast.success("Payment Completed Successfully ");
     } catch (error) {
       console.log(error);
       setLoading(false);
+      // Foo Chao, A0272024R
+      // Add toast
+      toast.error("Payment failed. Please try again.");
     }
   };
   return (
@@ -99,8 +126,8 @@ const CartPage = () => {
         <div className="container ">
           <div className="row ">
             <div className="col-md-7  p-0 m-0">
-              {cart?.map((p) => (
-                <div className="row card flex-row" key={p._id}>
+              {cart?.map((p, index) => (
+                <div className="row card flex-row" key={`${p._id}-${index}`}>
                   <div className="col-md-4">
                     <img
                       src={`/api/v1/product/product-photo/${p._id}`}
@@ -112,13 +139,13 @@ const CartPage = () => {
                   </div>
                   <div className="col-md-4">
                     <p>{p.name}</p>
-                    <p>{p.description.substring(0, 30)}</p>
+                    <p>{(p.description?.substring(0, 30) || "")}</p>
                     <p>Price : {p.price}</p>
                   </div>
                   <div className="col-md-4 cart-remove-btn">
                     <button
                       className="btn btn-danger"
-                      onClick={() => removeCartItem(p._id)}
+                      onClick={() => removeCartItem(index)}
                     >
                       Remove
                     </button>
@@ -162,7 +189,7 @@ const CartPage = () => {
                         })
                       }
                     >
-                      Plase Login to checkout
+                      Please Login to checkout
                     </button>
                   )}
                 </div>
