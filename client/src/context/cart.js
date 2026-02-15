@@ -13,7 +13,7 @@
 // " + GPT's code
 // Output: Modified file here
 
-import { useState, useContext, createContext, useEffect, useMemo, useRef } from "react";
+import React, { useState, useContext, createContext, useEffect, useMemo } from "react";
 import { useAuth } from "./auth";
 
 const CartContext = createContext();
@@ -25,9 +25,6 @@ const CartProvider = ({ children }) => {
 
   const [cart, setCart] = useState([]);
 
-  // track whether we've loaded for the current key
-  const loadedKeyRef = useRef(null);
-
   // load cart whenever user changes
   useEffect(() => {
     try {
@@ -36,18 +33,15 @@ const CartProvider = ({ children }) => {
       setCart(Array.isArray(parsed) ? parsed : []);
     } catch {
       setCart([]);
-    } finally {
-      loadedKeyRef.current = storageKey;
     }
   }, [storageKey]);
 
-  // persist cart ONLY after load for that key is done
+  // persist cart on every change
   useEffect(() => {
-    if (loadedKeyRef.current !== storageKey) return;
     try {
       localStorage.setItem(storageKey, JSON.stringify(cart));
     } catch {
-      // optionally no-op or report
+      // no-op
     }
   }, [storageKey, cart]);
 
