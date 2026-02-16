@@ -32,7 +32,7 @@ export default {
     "<rootDir>/client/src/pages/Policy.test.js",
     "<rootDir>/client/src/context/cart.test.js",
     "<rootDir>/client/src/pages/CartPage.test.js",
-    "<rootDir>/client/src/pages/Homepage.test.js",
+    "<rootDir>/client/src/pages/HomePage.test.js",
   ],
 
   // jest code coverage

@@ -56,6 +56,10 @@
 // Add test cases as needed for each category or even add new category but enusure:
 // It does not make it britte and u inform me of what u added so I can check if it is necessary and if it is correct
 // After u write finish run test and ensures that it is passing, has decent coverage and does not spam console with error/warning messages
+//
+// Output 1: 
+// Almost complete test cases following my specification
+// Reported line 76 and 294 not covered
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Test cases summary:
