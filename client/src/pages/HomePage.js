@@ -42,9 +42,6 @@
 // Prompt 9(Sent to Github Copilot ChatGPT 5-mini as grok do not support images):
 // image + "the electonics label a bit off"
 
-
-
-
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Checkbox, Radio } from "antd";
@@ -132,6 +129,7 @@ const HomePage = () => {
   }, []);
 
   //get filtered product
+  // TODO: clothing filter does not always work. Probably on backend side error
   const filterProduct = useCallback(async () => {
     try {
       setLoading(true);
