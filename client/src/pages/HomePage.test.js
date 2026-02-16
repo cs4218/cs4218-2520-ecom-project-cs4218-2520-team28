@@ -635,6 +635,7 @@ describe("HomePage", () => {
         renderHomePage();
 
         // Assert - categories not rendered
+        // eslint-disable-next-line
         await waitFor(() =>
           expect(screen.getByText("Laptop")).toBeInTheDocument()
         );
@@ -660,6 +661,7 @@ describe("HomePage", () => {
         renderHomePage();
 
         // Assert - categories not rendered
+        // eslint-disable-next-line
         await waitFor(() =>
           expect(screen.getByText("Laptop")).toBeInTheDocument()
         );
