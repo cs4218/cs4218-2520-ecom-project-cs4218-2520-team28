@@ -60,6 +60,17 @@
 // Output 1: 
 // Almost complete test cases following my specification
 // Reported line 76 and 294 not covered
+//
+// Prompt 2 (Github Copilot Claude Sonnet 4.5) runs for negligible time:
+// Remove the dead code in line 294 and add additional test case for line 76, 
+// testing when data is undefined of success is undefined. 
+// add to correct category and update thew test case summary aferwards, 
+// run test to check if i reached 100%
+//
+// Output 2:
+// Removed dead code in line 294, added test case for line 76 testing undefined data and success, 
+// added to correct category (2b API error handling), 
+// updated test case summary, and test is now at 100% coverage with no console errors/warnings.
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Test cases summary:
