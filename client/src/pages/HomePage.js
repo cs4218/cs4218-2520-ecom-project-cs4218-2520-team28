@@ -1,4 +1,11 @@
-import React, { useState, useEffect } from "react";
+// Foo Chao, A0272024R
+// Changes made:
+// - Fix eslint warnings by adding missing dependencies to useEffect and useCallback hooks.
+// - Rearrange code for better readability
+
+// AI assistance: Github Copilot (Grok Code Fast 1) Agent Mode
+// Prompt: Multiple prompts but generally request to fix eslint warnings and to reaarange code in a more logical way with vscode regions
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Checkbox, Radio } from "antd";
 import { Prices } from "../components/Prices";
@@ -12,6 +19,8 @@ import "../styles/Homepages.css";
 const HomePage = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useCart();
+
+  //#region State
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [checked, setChecked] = useState([]);
@@ -19,9 +28,11 @@ const HomePage = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  //#endregion
 
+  //#region Functions
   //get all cat
-  const getAllCategory = async () => {
+  const getAllCategory = useCallback(async () => {
     try {
       const { data } = await axios.get("/api/v1/category/get-category");
       if (data?.success) {
@@ -30,14 +41,33 @@ const HomePage = () => {
     } catch (error) {
       console.log(error);
     }
-  };
-
-  useEffect(() => {
-    getAllCategory();
-    getTotal();
   }, []);
+
+  //getTOtal COunt
+  const getTotal = useCallback(async () => {
+    try {
+      const { data } = await axios.get("/api/v1/product/product-count");
+      setTotal(data?.total);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  //load more
+  const loadMore = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.get(`/api/v1/product/product-list/${page}`);
+      setLoading(false);
+      setProducts((prevProducts) => [...prevProducts, ...data?.products]);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  }, [page]);
+
   //get products
-  const getAllProducts = async () => {
+  const getAllProducts = useCallback(async () => {
     try {
       setLoading(true);
       const { data } = await axios.get(`/api/v1/product/product-list/${page}`);
@@ -47,55 +77,10 @@ const HomePage = () => {
       setLoading(false);
       console.log(error);
     }
-  };
-
-  //getTOtal COunt
-  const getTotal = async () => {
-    try {
-      const { data } = await axios.get("/api/v1/product/product-count");
-      setTotal(data?.total);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    if (page === 1) return;
-    loadMore();
   }, [page]);
-  //load more
-  const loadMore = async () => {
-    try {
-      setLoading(true);
-      const { data } = await axios.get(`/api/v1/product/product-list/${page}`);
-      setLoading(false);
-      setProducts([...products, ...data?.products]);
-    } catch (error) {
-      console.log(error);
-      setLoading(false);
-    }
-  };
-
-  // filter by cat
-  const handleFilter = (value, id) => {
-    let all = [...checked];
-    if (value) {
-      all.push(id);
-    } else {
-      all = all.filter((c) => c !== id);
-    }
-    setChecked(all);
-  };
-  useEffect(() => {
-    if (!checked.length || !radio.length) getAllProducts();
-  }, [checked.length, radio.length]);
-
-  useEffect(() => {
-    if (checked.length || radio.length) filterProduct();
-  }, [checked, radio]);
 
   //get filterd product
-  const filterProduct = async () => {
+  const filterProduct = useCallback(async () => {
     try {
       const { data } = await axios.post("/api/v1/product/product-filters", {
         checked,
@@ -105,7 +90,40 @@ const HomePage = () => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [checked, radio]);
+
+  // filter by cat
+  const handleFilter = useCallback((value, id) => {
+    let all = [...checked];
+    if (value) {
+      all.push(id);
+    } else {
+      all = all.filter((c) => c !== id);
+    }
+    setChecked(all);
+  }, [checked]);
+  //#endregion
+
+  //#region Effects
+  useEffect(() => {
+    getAllCategory();
+    getTotal();
+  }, [getAllCategory, getTotal]);
+
+  useEffect(() => {
+    if (page === 1) return;
+    loadMore();
+  }, [page, loadMore]);
+
+  useEffect(() => {
+    if (!checked.length || !radio.length) getAllProducts();
+  }, [checked.length, radio.length, getAllProducts]);
+
+  useEffect(() => {
+    if (checked.length || radio.length) filterProduct();
+  }, [checked, radio, filterProduct]);
+  //#endregion
+
   return (
     <Layout title={"ALL Products - Best offers "}>
       {/* banner image */}
