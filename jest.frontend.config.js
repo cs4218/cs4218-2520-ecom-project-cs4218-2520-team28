@@ -28,7 +28,11 @@ export default {
     "<rootDir>/client/src/pages/admin/Products.test.js",
     "<rootDir>/client/src/pages/admin/AdminOrders.test.js",
     "<rootDir>/client/src/pages/user/Orders.test.js",
-    
+    "<rootDir>/client/src/pages/Contact.test.js",
+    "<rootDir>/client/src/pages/Policy.test.js",
+    "<rootDir>/client/src/context/cart.test.js",
+    "<rootDir>/client/src/pages/CartPage.test.js",
+    "<rootDir>/client/src/pages/HomePage.test.js",
   ],
 
   // jest code coverage
@@ -41,6 +45,11 @@ export default {
     "client/src/pages/admin/Products.js",
     "client/src/pages/admin/AdminOrders.js",
     "client/src/pages/user/Orders.js",
+    "client/src/pages/Contact.js",
+    "client/src/pages/Policy.js",
+    "client/src/context/cart.js",
+    "client/src/pages/CartPage.js",
+    "client/src/pages/HomePage.js",
   ],
   coverageThreshold: {
     global: {

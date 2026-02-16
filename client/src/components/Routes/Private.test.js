@@ -1,3 +1,5 @@
+// Foo Chao, A0272024R
+
 // AI generated unit tests for PrivateRoute component by ChatGPT 5.2 Thinking
 // https://chatgpt.com/share/6982cdb6-3e80-8005-8bec-96cbb3bdafff
 // Modified with comments and some (non-trival amount of) logic cleaning

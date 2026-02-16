@@ -1,3 +1,6 @@
+// Foo Chao, A0272024R
+// Modified alt text for img to be more meaningful
+
 import React from "react";
 import Layout from "./../components/Layout";
 import { BiMailSend, BiPhoneCall, BiSupport } from "react-icons/bi";
@@ -8,7 +11,7 @@ const Contact = () => {
         <div className="col-md-6 ">
           <img
             src="/images/contactus.jpeg"
-            alt="contactus"
+            alt="Contact us illustration"
             style={{ width: "100%" }}
           />
         </div>
