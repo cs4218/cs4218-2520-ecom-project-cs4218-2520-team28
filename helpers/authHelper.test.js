@@ -1,3 +1,6 @@
+// Ho Jin Han, A0266275W
+// Generation of unit test are assisted with Gemini Pro 2.5
+
 import bcrypt from 'bcrypt';
 import { hashPassword, comparePassword } from './authHelper';
 
