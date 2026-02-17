@@ -17,6 +17,16 @@ var gateway = new braintree.BraintreeGateway({
   privateKey: process.env.BRAINTREE_PRIVATE_KEY,
 });
 
+// Foo Chao, A0272024R
+// Changes Made:
+// - Fix 2 typos in error messsages
+// - Specify the fields when creating products using ProductModel to prevent adding unwanted fields
+// - Check that req.field is provided before accessing its properties to prevent errors when req.field is undefined
+// - Check that req.files is provided before accessing photo to prevent errors when req.files is undefined
+// - Add validation to check that photo size is more than 0 bytes to prevent accepting zero or negative file sizes
+// - Initialise photo field in product schema before assigning data to it (did not cause error before but is better practice to avoid "Cannot set property of undefined" error)
+// - Modify error code to return 400 for bad requests (missing fields, invalid photo size) instead of 500 which is for server errors
+// create product
 export const createProductController = async (req, res) => {
   try {
     if (!req.fields) {
@@ -37,10 +47,10 @@ export const createProductController = async (req, res) => {
         return res.status(400).send({ error: "Category is Required" });
       case !quantity: // note quantity is still a string here so no need check for 0
         return res.status(400).send({ error: "Quantity is Required" });
-      case photo && photo.size > 1000000:
+      case photo && (photo.size > 1000000 || photo.size <= 0):
         return res
           .status(400)
-          .send({ error: "Photo should be less than 1mb" });
+          .send({ error: "Photo size must be between 1 and 1,000,000 bytes" });
     }
 
     const products = new productModel({ 
@@ -134,6 +144,10 @@ export const productPhotoController = async (req, res) => {
   }
 };
 
+// Foo Chao, A0272024R
+// Changes Made:
+// - Added validation to check if product ID is provided before attempting delete and return 400 error if not provided
+// - Added validation to check if product with given ID exists before attempting delete and return 404 error if not found
 //delete controller
 export const deleteProductController = async (req, res) => {
   try {
@@ -167,7 +181,18 @@ export const deleteProductController = async (req, res) => {
   }
 };
 
-//upate producta
+// Foo Chao, A0272024R
+// Changes Made:
+// - Added validation to check if product ID is provided before attempting update and return 400 error if not provided
+// - Added validation to check if product with given ID exists before attempting update and return 404 error if not found
+// - Fix 2 typos in error messsages
+// - Specify the fields when creating products using ProductModel to prevent adding unwanted fields
+// - Check that req.field is provided before accessing its properties to prevent errors when req.field is undefined
+// - Check that req.files is provided before accessing photo to prevent errors when req.files is undefined
+// - Add validation to check that photo size is more than 0 bytes to prevent accepting zero or negative file sizes
+// - Initialise photo field in product schema before assigning data to it (did not cause error before but is better practice to avoid "Cannot set property of undefined" error)
+// - Modify error code to return 400 for bad requests (missing fields, invalid photo size) instead of 500 which is for server errors
+// upate product
 export const updateProductController = async (req, res) => {
   try {
     const { pid } = req.params;
@@ -198,10 +223,10 @@ export const updateProductController = async (req, res) => {
         return res.status(400).send({ error: "Category is Required" });
       case !quantity:
         return res.status(400).send({ error: "Quantity is Required" });
-      case photo && photo.size > 1000000:
+      case photo && (photo.size > 1000000 || photo.size <= 0):
         return res
           .status(400)
-          .send({ error: "Photo should be less than 1mb" });
+          .send({ error: "Photo size must be between 1 and 1,000,000 bytes" });
     }
 
     const products = await productModel.findByIdAndUpdate(

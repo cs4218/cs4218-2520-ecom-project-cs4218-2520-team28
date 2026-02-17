@@ -1,3 +1,5 @@
+// Foo Chao, A0272024R
+
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import Dashboard from "./Dashboard";

@@ -1,3 +1,5 @@
+// Foo Chao, A0272024R
+
 // AI generated unit tests for Products.js using Github Copilot (Claude Sonnet 4.5) Agent Mode
 //
 // Prompt 1:

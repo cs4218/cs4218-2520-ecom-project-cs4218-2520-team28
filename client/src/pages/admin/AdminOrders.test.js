@@ -45,12 +45,19 @@ describe("AdminOrders Component", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    axios.get.mockResolvedValue({ data: [] });
   });
 
-  test("renders page title", () => {
+  test("renders page title", async () => {
+    axios.get.mockResolvedValue({ data: [] });
+
     render(<AdminOrders />);
-    expect(screen.getByText("All Orders")).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(screen.getByText("All Orders")).toBeInTheDocument()
+    );
   });
+
 
   test("fetches and displays orders", async () => {
     axios.get.mockResolvedValue({
