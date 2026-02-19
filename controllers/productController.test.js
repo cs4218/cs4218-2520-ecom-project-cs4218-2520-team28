@@ -2661,4 +2661,465 @@ describe("productCountController", () => {
     expect(productModel.find).toHaveBeenCalledWith({});
     expect(mockCount).toHaveBeenCalled();
   });
+
+
+// Jian Tao - A0273320R
+import { productListController, searchProductController, 
+  relatedProductController, productCategoryController
+ } from "./productController";
+import categoryModel from "../models/categoryModel";
+// import productModel from "../../models/productModel";
+
+// Jian Tao - A0273320R
+// AI-assisted unit tests generated with guidance from ChatGPT-5.2
+// Prompt: "How should I test the unit testing on this controller?"
+
+
+// mock the productModel to control its behavior in tests
+jest.mock("../models/productModel");
+jest.mock("../models/categoryModel");
+
+
+
+// Jian Tao - A0273320R
+describe("productListController", () => {
+  let req;
+  let res;
+
+  beforeEach(() => {
+    req = {
+      params: {},
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // Test 1: Should return products with default page = 1
+  test("should return products with default page = 1", async () => {
+    const mockProducts = [
+      { name: "Product 1" },
+      { name: "Product 2" },
+    ];
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockResolvedValue(mockProducts),
+    });
+
+    await productListController(req, res);
+
+    expect(productModel.find).toHaveBeenCalledWith({});
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      products: mockProducts,
+    });
+  });
+
+  test("should apply correct pagination when page param is provided", async () => {
+    req.params.page = 2;
+
+    const skipMock = jest.fn().mockReturnThis();
+    const limitMock = jest.fn().mockReturnThis();
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      skip: skipMock,
+      limit: limitMock,
+      sort: jest.fn().mockResolvedValue([]),
+    });
+
+    await productListController(req, res);
+
+    // perPage = 6, so skip = (2 - 1) * 6 = 6
+    expect(skipMock).toHaveBeenCalledWith(6);
+    expect(limitMock).toHaveBeenCalledWith(6);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  test("should sort by createdAt descending", async () => {
+    const sortMock = jest.fn().mockResolvedValue([]);
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: sortMock,
+    });
+
+    await productListController(req, res);
+
+    expect(sortMock).toHaveBeenCalledWith({ createdAt: -1 });
+  });
+
+  test("should handle errors and return 400 status", async () => {
+    productModel.find.mockImplementation(() => {
+      throw new Error("Database error");
+    });
+
+    await productListController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "error in per page ctrl",
+      error: expect.any(Error),
+    });
+  });
+
+
+  test("should use default page when page param is undefined", async () => {
+    req.params = {};
+
+    const skipMock = jest.fn().mockReturnThis();
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      skip: skipMock,
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockResolvedValue([]),
+    });
+
+    await productListController(req, res);
+
+    // default page = 1 -> skip = 0
+    expect(skipMock).toHaveBeenCalledWith(0);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+});
+
+
+
+// Jian Tao - A0273320R
+describe("searchProductController", () => {
+  let req;
+  let res;
+
+  beforeEach(() => {
+    req = {
+      params: {
+        keyword: "phone",
+      },
+    };
+
+    res = {
+      json: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("should search products using keyword with regex and return results", async () => {
+    const mockResults = [
+      { name: "iPhone", description: "Apple phone" },
+      { name: "Samsung Phone", description: "Android device" },
+    ];
+
+    const selectMock = jest.fn().mockResolvedValue(mockResults);
+
+    productModel.find.mockReturnValue({
+      select: selectMock,
+    });
+
+    await searchProductController(req, res);
+
+    expect(productModel.find).toHaveBeenCalledWith({
+      $or: [
+        { name: { $regex: "phone", $options: "i" } },
+        { description: { $regex: "phone", $options: "i" } },
+      ],
+    });
+
+    expect(selectMock).toHaveBeenCalledWith("-photo");
+    expect(res.json).toHaveBeenCalledWith(mockResults);
+  });
+
+  test("should handle different keyword values correctly", async () => {
+    req.params.keyword = "laptop";
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockResolvedValue([]),
+    });
+
+    await searchProductController(req, res);
+
+    expect(productModel.find).toHaveBeenCalledWith({
+      $or: [
+        { name: { $regex: "laptop", $options: "i" } },
+        { description: { $regex: "laptop", $options: "i" } },
+      ],
+    });
+
+    expect(res.json).toHaveBeenCalledWith([]);
+  });
+
+  test("should call select with -photo to exclude photo field", async () => {
+    const selectMock = jest.fn().mockResolvedValue([]);
+
+    productModel.find.mockReturnValue({
+      select: selectMock,
+    });
+
+    await searchProductController(req, res);
+
+    expect(selectMock).toHaveBeenCalledWith("-photo");
+  });
+
+  test("should handle errors and return 400 status", async () => {
+    productModel.find.mockImplementation(() => {
+      throw new Error("Database error");
+    });
+
+    await searchProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error In Search Product API",
+      error: expect.any(Error),
+    });
+  });
+});
+
+// Jian Tao - A0273320R
+
+describe("relatedProductController", () => {
+  let req;
+  let res;
+
+  beforeEach(() => {
+    req = {
+      params: {
+        pid: "product123",
+        cid: "category456",
+      },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("should return related products excluding current product", async () => {
+    const mockProducts = [
+      { name: "Product A", category: "category456" },
+      { name: "Product B", category: "category456" },
+    ];
+
+    const populateMock = jest.fn().mockResolvedValue(mockProducts);
+    const limitMock = jest.fn().mockReturnValue({ populate: populateMock });
+    const selectMock = jest.fn().mockReturnValue({ limit: limitMock });
+
+    productModel.find.mockReturnValue({
+      select: selectMock,
+    });
+
+    await relatedProductController(req, res);
+
+    expect(productModel.find).toHaveBeenCalledWith({
+      category: "category456",
+      _id: { $ne: "product123" },
+    });
+
+    expect(selectMock).toHaveBeenCalledWith("-photo");
+    expect(limitMock).toHaveBeenCalledWith(3);
+    expect(populateMock).toHaveBeenCalledWith("category");
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      products: mockProducts,
+    });
+  });
+
+  test("should limit the results to 3 products", async () => {
+    const limitMock = jest.fn().mockReturnValue({
+      populate: jest.fn().mockResolvedValue([]),
+    });
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        limit: limitMock,
+      }),
+    });
+
+    await relatedProductController(req, res);
+
+    expect(limitMock).toHaveBeenCalledWith(3);
+  });
+
+  test("should populate category field", async () => {
+    const populateMock = jest.fn().mockResolvedValue([]);
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        limit: jest.fn().mockReturnValue({
+          populate: populateMock,
+        }),
+      }),
+    });
+
+    await relatedProductController(req, res);
+
+    expect(populateMock).toHaveBeenCalledWith("category");
+  });
+
+  test("should return 400 if pid or cid is missing (validation branch)", async () => {
+    req.params = { pid: "", cid: "" };
+
+    await relatedProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Product ID and Category ID are required",
+    });
+  });
+
+  test("should handle database errors and return 400 status", async () => {
+    productModel.find.mockImplementation(() => {
+      throw new Error("Database error");
+    });
+
+    await relatedProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "error while getting related product",
+      error: expect.any(Error),
+    });
+  });
+});
+
+
+// Jian Tao - A0273320R
+
+describe("productCategoryController", () => {
+  let req;
+  let res;
+
+  beforeEach(() => {
+    req = {
+      params: {
+        slug: "electronics",
+      },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("should fetch category by slug and return products in that category", async () => {
+    const mockCategory = { _id: "cat123", slug: "electronics" };
+    const mockProducts = [
+      { name: "Laptop", category: mockCategory },
+      { name: "Phone", category: mockCategory },
+    ];
+
+    // Mock categoryModel.findOne()
+    categoryModel.findOne.mockResolvedValue(mockCategory);
+
+    // Mock productModel.find().populate()
+    const populateMock = jest.fn().mockResolvedValue(mockProducts);
+    productModel.find.mockReturnValue({
+      populate: populateMock,
+    });
+
+    await productCategoryController(req, res);
+
+    expect(categoryModel.findOne).toHaveBeenCalledWith({
+      slug: "electronics",
+    });
+
+    expect(productModel.find).toHaveBeenCalledWith({
+      category: mockCategory,
+    });
+
+    expect(populateMock).toHaveBeenCalledWith("category");
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      category: mockCategory,
+      products: mockProducts,
+    });
+  });
+
+  test("should return empty products if category exists but no products found", async () => {
+    const mockCategory = { _id: "cat123", slug: "electronics" };
+
+    categoryModel.findOne.mockResolvedValue(mockCategory);
+
+    productModel.find.mockReturnValue({
+      populate: jest.fn().mockResolvedValue([]),
+    });
+
+    await productCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      category: mockCategory,
+      products: [],
+    });
+  });
+
+  test("should handle case when category is null (slug not found)", async () => {
+    categoryModel.findOne.mockResolvedValue(null);
+
+    productModel.find.mockReturnValue({
+      populate: jest.fn().mockResolvedValue([]),
+    });
+
+    await productCategoryController(req, res);
+
+    expect(productModel.find).toHaveBeenCalledWith({
+      category: null,
+    });
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      category: null,
+      products: [],
+    });
+  });
+
+  test("should handle errors and return 400 status", async () => {
+    categoryModel.findOne.mockRejectedValue(new Error("Database error"));
+
+    await productCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      error: expect.any(Error),
+      message: "Error While Getting products",
+    });
+  });
 });

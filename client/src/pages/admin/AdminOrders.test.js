@@ -1,3 +1,28 @@
+// Jian Tao - A0273320R
+
+// AI-assisted unit tests generated with guidance from ChatGPT-5.2
+//
+// Prompt:
+// - generate unit tests for AdminOrders.js in a similar structure to existing test files.
+// - Mock axios, auth context, Layout, AdminMenu, and antd Select.
+// - Test API fetching, rendering of orders, status change handler, and re-fetch logic.
+// - Also explain and fix the React warning: "Each child in a list should have a unique key prop"
+// by adding key={o._id} to the root element inside orders.map().
+
+// Test Coverage:
+// 1. Component renders successfully with page title "All Orders".
+// 2. GET API is called on component mount to fetch orders.
+// 3. Orders returned from API are rendered correctly (buyer name, status, payment status).
+// 4. Payment success boolean is displayed correctly as "Success".
+// 5. Status dropdown (antd Select mock) is rendered for each order.
+// 6. Changing order status triggers PUT API call with correct endpoint and payload.
+// 7. After successful PUT request, GET API is called again to refresh order list.
+// 8. Mocks external dependencies properly (axios, auth context, Layout, AdminMenu, antd Select).
+// 9. Ensures async logic is handled correctly using waitFor and findBy queries.
+// 10. React key warning fixed by ensuring each mapped order uses key={o._id}.
+
+
+
 import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import AdminOrders from "./AdminOrders";
@@ -40,13 +65,15 @@ jest.mock("antd", () => {
   return { Select };
 });
 
-
+// Jian Tao - A0273320R
+// Test suite for AdminOrders component
 describe("AdminOrders Component", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
     axios.get.mockResolvedValue({ data: [] });
   });
+
 
   test("renders page title", async () => {
     axios.get.mockResolvedValue({ data: [] });

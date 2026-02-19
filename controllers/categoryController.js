@@ -1,3 +1,6 @@
+// Jian Tao - A0273320R
+
+
 import categoryModel from "../models/categoryModel.js";
 import slugify from "slugify";
 export const createCategoryController = async (req, res) => {
@@ -26,7 +29,7 @@ export const createCategoryController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      errro,
+      error,
       message: "Errro in Category",
     });
   }
@@ -37,11 +40,37 @@ export const updateCategoryController = async (req, res) => {
   try {
     const { name } = req.body;
     const { id } = req.params;
+    
+    // Validate category ID
+    if (!id) {
+      return res.status(400).send({
+        success: false,
+        message: "Category ID is required",
+      });
+    }
+    
+    // Validate name
+    if (!name) {
+      return res.status(400).send({
+        success: false,
+        message: "Name is required",
+      });
+    }
+    
     const category = await categoryModel.findByIdAndUpdate(
       id,
       { name, slug: slugify(name) },
       { new: true }
     );
+    
+    // Check if category was found
+    if (!category) {
+      return res.status(404).send({
+        success: false,
+        message: "Category not found",
+      });
+    }
+    
     res.status(200).send({
       success: true,
       messsage: "Category Updated Successfully",
@@ -57,8 +86,11 @@ export const updateCategoryController = async (req, res) => {
   }
 };
 
+// Jian Tao - A0273320R
 // get all cat
-export const categoryControlller = async (req, res) => {
+// fixed:
+// - change function name from 'categoryControlller' to 'categoryController'
+export const categoryController = async (req, res) => {
   try {
     const category = await categoryModel.find({});
     res.status(200).send({
@@ -76,13 +108,17 @@ export const categoryControlller = async (req, res) => {
   }
 };
 
+// Jian Tao - A0273320R
 // single category
+// fixed:
+// - change message from 'Get SIngle Category SUccessfully' to 'Get single category successfully'
+// - change error message from 'Error While getting Single Category' to 'Error while getting single category'
 export const singleCategoryController = async (req, res) => {
   try {
     const category = await categoryModel.findOne({ slug: req.params.slug });
     res.status(200).send({
       success: true,
-      message: "Get SIngle Category SUccessfully",
+      message: "Get single category successfully",
       category,
     });
   } catch (error) {
@@ -90,16 +126,34 @@ export const singleCategoryController = async (req, res) => {
     res.status(500).send({
       success: false,
       error,
-      message: "Error While getting Single Category",
+      message: "Error while getting single category",
     });
   }
 };
 
 //delete category
-export const deleteCategoryCOntroller = async (req, res) => {
+export const deleteCategoryController = async (req, res) => {
   try {
     const { id } = req.params;
-    await categoryModel.findByIdAndDelete(id);
+    
+    // Validate category ID
+    if (!id) {
+      return res.status(400).send({
+        success: false,
+        message: "Category ID is required",
+      });
+    }
+    
+    const category = await categoryModel.findByIdAndDelete(id);
+    
+    // Check if category was found
+    if (!category) {
+      return res.status(404).send({
+        success: false,
+        message: "Category not found",
+      });
+    }
+    
     res.status(200).send({
       success: true,
       message: "Categry Deleted Successfully",
