@@ -1,6 +1,9 @@
+// Jian Tao - A0273320R
+// fixes applied:
+
+
 import userModel from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
-
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
 
@@ -164,12 +167,19 @@ export const testController = (req, res) => {
   }
 };
 
+// Jian Tao - A0273320R
+// fixed applied:
+// - changed '//update prfole' to '//update profile'
+// - added res.status(400) to correctly return Bad Request for password validation error.
+// - change typo from message: "Profile Updated SUccessfully", to message: "Profile updated successfully", to maintain consistent capitalization and formatting in the response message.
+// - changed typo from message: "Error WHile Update profile", to message: "Error while updating profile", to maintain consistent capitalization and formatting in the response message.
 //update profile
 export const updateProfileController = async (req, res) => {
   try {
     const { name, email, password, address, phone } = req.body;
     const user = await userModel.findById(req.user._id);
     //password
+    // Fix Applied here: Added res.status(400) to return Bad Request status code for password validation error.
     if (password && password.length < 6) {
       return res.status(400).json({ error: "Password is required and 6 character long" });
     }
@@ -186,6 +196,7 @@ export const updateProfileController = async (req, res) => {
     );
     res.status(200).send({
       success: true,
+      // Fix Applied here: Changed "Profile Updated SUccessfully" to "Profile updated successfully".
       message: "Profile updated successfully",
       updatedUser,
     });
@@ -193,12 +204,17 @@ export const updateProfileController = async (req, res) => {
     console.log(error);
     res.status(400).send({
       success: false,
+      // Fix Applied here: Changed "Error WHile Update profile" to "Error while updating profile".
       message: "Error while updating profile",
       error,
     });
   }
 };
 
+// Jian Tao - A0273320R
+// fixed applied:
+// - changed typo on message: "Error WHile Geting Orders", to message: "Error while getting orders", 
+//   to maintain consistent capitalization and formatting in the response message.
 //orders
 export const getOrdersController = async (req, res) => {
   try {
@@ -211,11 +227,17 @@ export const getOrdersController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
+      // Fix Applied here: Changed "Error WHile Geting Orders" to "Error while getting orders".
       message: "Error while getting orders",
       error,
     });
   }
 };
+
+// Jian Tao - A0273320R
+// fixed applied:
+// - changed message: "Error WHile Geting Orders", to message: "Error while getting all orders", 
+//   to maintain consistent capitalization and formatting in the response message.
 //orders
 export const getAllOrdersController = async (req, res) => {
   try {
@@ -229,12 +251,18 @@ export const getAllOrdersController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
+      // Fix Applied here: Changed "Error WHile Geting Orders" to "Error while getting all orders".
       message: "Error while getting all orders",
       error,
     });
   }
 };
 
+// Jian Tao - A0273320R
+// fixed applied:
+// - added response status code res.status(200) for successful order status update.
+// - changed typo from message: "Error While Updateing Order", to message: "Error while updating order", 
+//   to maintain consistent capitalization and formatting in the response message.
 //order status
 export const orderStatusController = async (req, res) => {
   try {
@@ -245,11 +273,13 @@ export const orderStatusController = async (req, res) => {
       { status },
       { new: true }
     );
+    // Fix Applied here: Added res.status(200) to return OK status code for successful order status update.
     res.status(200).json(orders);
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
+      // Fix Applied here: Changed "Error While Updateing Order" to "Error while updating order".
       message: "Error while updating order status",
       error,
     });

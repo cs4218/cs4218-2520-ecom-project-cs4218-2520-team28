@@ -1,3 +1,7 @@
+// Jian Tao - A0273320R
+// fixed:
+// - Added missing React key prop to the root element inside orders.map()
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -52,6 +56,8 @@ const AdminOrders = () => {
           <h1 className="text-center">All Orders</h1>
           {orders?.map((o, i) => {
             return (
+              // - fix applied here: Added missing React key prop "key={o._id}" to the root element inside orders.map() to 
+              //   ensure each order has a unique identifier for efficient rendering and to avoid React warnings.
               <div key={o._id} className="border shadow">
                 <table className="table">
                   <thead>
