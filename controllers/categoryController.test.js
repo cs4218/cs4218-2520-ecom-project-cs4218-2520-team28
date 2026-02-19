@@ -4,11 +4,13 @@ import categoryModel from '../models/categoryModel.js';
 import slugify from 'slugify';
 import { mock } from 'node:test';
 
-// Mock env
+// Chi Thanh, A0276229W
+// Create mock environment variables for Braintree configuration
 process.env.BRAINTREE_MERCHANT_ID = "test_merchant_id";
 process.env.BRAINTREE_PUBLIC_KEY = "test_public_key";
 process.env.BRAINTREE_PRIVATE_KEY = "test_private_key";
 
+// Chi Thanh, A0276229W
 // Mock dependencies
 jest.mock('../models/categoryModel.js');
 jest.mock("fs")
@@ -20,13 +22,15 @@ jest.mock("braintree", () => ({
   },
 }));
 
+// Chi Thanh, A0276229W
 // Import controllers
 import {
     createCategoryController,
     updateCategoryController,
-    deleteCategoryCOntroller,
+    deleteCategoryController,
 } from "./categoryController.js";
 
+// Chi Thanh, A0276229W
 describe('createCategoryController', () => {
     // AI generated Unit tests using Github Copilot (Claude Sonnet 4.5) Agent Mode for the following:
     // Test Coverage 1: All possible validation errors for missing/invalid names
@@ -597,6 +601,7 @@ describe('createCategoryController', () => {
     });
 });
 
+// Chi Thanh, A0276229W
 describe('updateCategoryController', () => {
     // AI generated Unit tests using Github Copilot (Claude Sonnet 4.5) Agent Mode for the following:
     // Test Coverage 1: All possible validation errors for missing fields (name, id)
@@ -928,7 +933,8 @@ describe('updateCategoryController', () => {
     });
 });
 
-describe('deleteCategoryCOntroller', () => {
+// Chi Thanh, A0276229W
+describe('deleteCategoryController', () => {
     // AI generated Unit tests using Github Copilot (Claude Sonnet 4.5) Agent Mode for the following:
     // Test Coverage 1: Validation errors for missing/empty category ID
     // Test Coverage 2: 404 error when category not found
@@ -965,7 +971,7 @@ describe('deleteCategoryCOntroller', () => {
             req.params.id = undefined;
 
             // Act
-            await deleteCategoryCOntroller(req, res);
+            await deleteCategoryController(req, res);
 
             // Assert
             expect(res.status).toHaveBeenCalledWith(400);
@@ -980,7 +986,7 @@ describe('deleteCategoryCOntroller', () => {
             req.params.id = "";
 
             // Act
-            await deleteCategoryCOntroller(req, res);
+            await deleteCategoryController(req, res);
 
             // Assert
             expect(res.status).toHaveBeenCalledWith(400);
@@ -999,7 +1005,7 @@ describe('deleteCategoryCOntroller', () => {
             categoryModel.findByIdAndDelete.mockResolvedValue(null);
 
             // Act
-            await deleteCategoryCOntroller(req, res);
+            await deleteCategoryController(req, res);
 
             // Assert
             expect(categoryModel.findByIdAndDelete).toHaveBeenCalledWith("nonExistentId");
@@ -1025,14 +1031,14 @@ describe('deleteCategoryCOntroller', () => {
             categoryModel.findByIdAndDelete.mockResolvedValue(deletedCategory);
 
             // Act
-            await deleteCategoryCOntroller(req, res);
+            await deleteCategoryController(req, res);
 
             // Assert
             expect(categoryModel.findByIdAndDelete).toHaveBeenCalledWith("validId123");
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.send).toHaveBeenCalledWith({
                 success: true,
-                message: "Categry Deleted Successfully"
+                message: "Category Deleted Successfully"
             });
         });
 
@@ -1049,7 +1055,7 @@ describe('deleteCategoryCOntroller', () => {
             categoryModel.findByIdAndDelete.mockResolvedValue(deletedCategory);
 
             // Act
-            await deleteCategoryCOntroller(req, res);
+            await deleteCategoryController(req, res);
 
             // Assert
             expect(categoryModel.findByIdAndDelete).toHaveBeenCalledWith("specificCategoryId456");
@@ -1069,14 +1075,14 @@ describe('deleteCategoryCOntroller', () => {
             categoryModel.findByIdAndDelete.mockResolvedValue(deletedCategory);
 
             // Act
-            await deleteCategoryCOntroller(req, res);
+            await deleteCategoryController(req, res);
 
             // Assert
             const response = res.send.mock.calls[0][0];
             expect(response).not.toHaveProperty('category');
             expect(response).toEqual({
                 success: true,
-                message: "Categry Deleted Successfully"
+                message: "Category Deleted Successfully"
             });
         });
     });
@@ -1090,7 +1096,7 @@ describe('deleteCategoryCOntroller', () => {
             categoryModel.findByIdAndDelete.mockRejectedValue(dbError);
 
             // Act
-            await deleteCategoryCOntroller(req, res);
+            await deleteCategoryController(req, res);
 
             // Assert
             expect(res.status).toHaveBeenCalledWith(500);
@@ -1109,7 +1115,7 @@ describe('deleteCategoryCOntroller', () => {
             categoryModel.findByIdAndDelete.mockRejectedValue(castError);
 
             // Act
-            await deleteCategoryCOntroller(req, res);
+            await deleteCategoryController(req, res);
 
             // Assert
             expect(res.status).toHaveBeenCalledWith(500);

@@ -6,6 +6,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
+// Chi Thanh, A0276229W
 // Mock dependencies
 jest.mock('axios');
 jest.mock('react-hot-toast');
@@ -45,6 +46,7 @@ jest.mock('antd', () => {
 // Mock URL.createObjectURL
 global.URL.createObjectURL = jest.fn(() => 'mock-url');
 
+// Chi Thanh, A0276229W
 describe('CreateProduct Component', () => {
   let mockNavigate;
   let mockAxiosGet;

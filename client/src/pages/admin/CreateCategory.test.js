@@ -5,6 +5,7 @@ import CreateCategory from './CreateCategory';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+// Chi Thanh, A0276229W
 // Mock dependencies
 jest.mock('axios');
 jest.mock('react-hot-toast');
@@ -34,6 +35,7 @@ jest.mock('antd', () => ({
         ) : null
 }));
 
+// Chi Thanh, A0276229W
 describe('CreateCategory', () => {
     // AI generated Unit tests using Github Copilot (Claude Sonnet 4.5) Agent Mode for the following:
     // Test Coverage 1: Component rendering with all elements (layout, table, form, modal)
