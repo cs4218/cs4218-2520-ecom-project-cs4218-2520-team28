@@ -1,10 +1,9 @@
-import { updateProfileController } from "./authController.js";
+import { updateProfileController, getOrdersController, 
+  getAllOrdersController, orderStatusController } from "./authController.js";
 import userModel from "../models/userModel.js";
 import { hashPassword } from "../helpers/authHelper.js";
 import orderModel from "../models/orderModel.js";
-import { getOrdersController } from "./authController.js";
-import { getAllOrdersController } from "./authController.js";
-import { orderStatusController } from "./authController.js";
+
 
 jest.mock("../models/userModel.js");
 jest.mock("../helpers/authHelper.js", () => ({
@@ -13,6 +12,27 @@ jest.mock("../helpers/authHelper.js", () => ({
 jest.mock("../models/orderModel.js");
 
 describe("authController", () => {
+
+  // Jian Tao - A0273320R
+  // AI-assisted unit tests generated with guidance from ChatGPT-5.2
+  // Prompt:
+  // 1. "Generate Jest unit tests for Express controllers including
+  //     updateProfileController, getOrdersController,
+  //     getAllOrdersController, and orderStatusController.
+  //     Mock Mongoose models and helper functions.
+  //     Cover success cases, validation branches, and error handling."
+  //
+  // 2. "each response should have its HTTP code status right? should the controller return without status?"
+
+  // Jian Tao - A0273320R
+  // test coverage:
+  // - Successful full profile update
+  // - Successful partial update (name only)
+  // - Successful partial update (password only)
+  // - Password validation error (length < 6 returns 400)
+  // - Database error during findById
+  // - Error during password hashing
+  // - Database error during findByIdAndUpdate
   describe("updateProfileController", () => {
 
     let existingUser, res;
@@ -96,7 +116,7 @@ describe("authController", () => {
     });
 
 
-
+    
     test("should update user profile successfully with changing only name", async () => {
       // Arrange
       const req = {
@@ -303,7 +323,12 @@ describe("authController", () => {
   });
 
 
-describe("getOrderController", () => {    // Tests for getOrderController would go here
+  // Jian Tao - A0273320R
+  // test coverage:
+  // getOrdersController:
+  // - Successfully returns user orders
+  // - Handles database error and returns 500
+  describe("getOrderController", () => {    // Tests for getOrderController would go here
 
     let req, res;
 
@@ -361,8 +386,11 @@ describe("getOrderController", () => {    // Tests for getOrderController would 
   });
 
 
-
-
+  // Jian Tao - A0273320R
+  // test coverage:
+  // getAllOrdersController:
+  // - Successfully returns all orders
+  // - Handles database error and returns 500
   describe("getAllOrdersController", () => {
 
     let res;
@@ -423,6 +451,10 @@ describe("getOrderController", () => {    // Tests for getOrderController would 
   });
 
 
+  // Jian Tao - A0273320R
+  // test coverage:
+  // - Successfully updates order status
+  // - Handles database error and returns 500
   describe("orderStatusController", () => {
 
     let res;
@@ -484,13 +516,7 @@ describe("getOrderController", () => {    // Tests for getOrderController would 
         })
       );
     });
-    
-
-
   });
-
-
-
 });
   
 

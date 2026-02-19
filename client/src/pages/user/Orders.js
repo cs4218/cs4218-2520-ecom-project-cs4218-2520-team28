@@ -1,3 +1,16 @@
+// Jian Tao - A0273320R
+// Orders page for users to view their orders
+
+// Fix Applied:
+// - Added key={o._id} to the root element returned inside orders.map().
+//   React requires a unique key for list-rendered elements to properly
+//   perform reconciliation and efficiently update the DOM.
+//   Using MongoDB's stable _id ensures correct element tracking and
+//   prevents rendering inconsistencies.
+
+
+
+
 import React, { useState, useEffect } from "react";
 import UserMenu from "../../components/UserMenu";
 import Layout from "./../../components/Layout";
@@ -31,6 +44,7 @@ const Orders = () => {
             <h1 className="text-center">All Orders</h1>
             {orders?.map((o, i) => {
               return (
+                // Fix Applied here: Added key={o._id} to the root element returned inside orders.map().
                 <div key={o._id} className="border shadow">
                   <table className="table">
                     <thead>

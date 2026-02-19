@@ -325,6 +325,7 @@ export const productListController = async (req, res) => {
   }
 };
 
+// Jian Tao - A0273320R
 // search product
 export const searchProductController = async (req, res) => {
   try {
@@ -347,10 +348,23 @@ export const searchProductController = async (req, res) => {
   }
 };
 
+// Jian Tao - A0273320R
+// fixed: 
+// - typo in function name from 'realtedProductController' to 'relatedProductController'
+// - typo in error message from 'geting' to 'getting'
+// - added validation to check if product ID and category ID are provided before attempting to get related products and return 400 error if not provided
 // similar products
-export const realtedProductController = async (req, res) => {
+export const relatedProductController = async (req, res) => {
   try {
     const { pid, cid } = req.params;
+
+    if (!pid || !cid) {
+      return res.status(400).send({
+        success: false,
+        message: "Product ID and Category ID are required",
+      });
+    }
+
     const products = await productModel
       .find({
         category: cid,
@@ -366,13 +380,15 @@ export const realtedProductController = async (req, res) => {
   } catch (error) {
     res.status(400).send({
       success: false,
-      message: "error while geting related product",
+      message: "error while getting related product",
       error,
     });
   }
 };
 
-// get prdocyst by catgory
+// Jian Tao - A0273320R
+
+// get product by category
 export const productCategoryController = async (req, res) => {
   try {
     const category = await categoryModel.findOne({ slug: req.params.slug });

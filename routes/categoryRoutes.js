@@ -1,7 +1,9 @@
 import express from "express";
 import { isAdmin, requireSignIn } from "./../middlewares/authMiddleware.js";
+// Jian Tao - A0273320R
+// changed categoryControlller to categoryController to fix typo
 import {
-  categoryControlller,
+  categoryController,
   createCategoryController,
   deleteCategoryCOntroller,
   singleCategoryController,
@@ -27,8 +29,10 @@ router.put(
   updateCategoryController
 );
 
-//getALl category
-router.get("/get-category", categoryControlller);
+// Jian Tao - A0273320R
+// changed categoryControlller to categoryController to fix typo
+//getAll category
+router.get("/get-category", categoryController);
 
 //single category
 router.get("/single-category/:slug", singleCategoryController);
