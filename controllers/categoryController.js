@@ -1,3 +1,6 @@
+// Jian Tao - A0273320R
+
+
 import categoryModel from "../models/categoryModel.js";
 import slugify from "slugify";
 export const createCategoryController = async (req, res) => {
@@ -83,8 +86,11 @@ export const updateCategoryController = async (req, res) => {
   }
 };
 
+// Jian Tao - A0273320R
 // get all cat
-export const categoryControlller = async (req, res) => {
+// fixed:
+// - change function name from 'categoryControlller' to 'categoryController'
+export const categoryController = async (req, res) => {
   try {
     const category = await categoryModel.find({});
     res.status(200).send({
@@ -102,13 +108,17 @@ export const categoryControlller = async (req, res) => {
   }
 };
 
+// Jian Tao - A0273320R
 // single category
+// fixed:
+// - change message from 'Get SIngle Category SUccessfully' to 'Get single category successfully'
+// - change error message from 'Error While getting Single Category' to 'Error while getting single category'
 export const singleCategoryController = async (req, res) => {
   try {
     const category = await categoryModel.findOne({ slug: req.params.slug });
     res.status(200).send({
       success: true,
-      message: "Get SIngle Category SUccessfully",
+      message: "Get single category successfully",
       category,
     });
   } catch (error) {
@@ -116,7 +126,7 @@ export const singleCategoryController = async (req, res) => {
     res.status(500).send({
       success: false,
       error,
-      message: "Error While getting Single Category",
+      message: "Error while getting single category",
     });
   }
 };

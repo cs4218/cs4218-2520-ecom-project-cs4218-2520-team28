@@ -1,3 +1,6 @@
+// Foo Chao, A0272024R
+// Changes: Added trim to email, address, answer; Changed address type to String; Changed phone to Number to prevent random input
+
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(

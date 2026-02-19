@@ -1,13 +1,20 @@
+// Note to the grader: The productController is tested by multiple testers, with tests split by methods.
+// The tests are consolidated in a single file for better organization and to avoid circular dependencies with mocks.
+// Each describe block corresponds to a specific controller method.
+// Refer to the comments at the top for details on who handles what.
+
 import { jest } from "@jest/globals";
 import productModel from "../models/productModel.js";
 import fs from "fs";
 import slugify from "slugify";
 
+// Foo Chao, A0272024R
 // Mock environment variables before importing controller
 process.env.BRAINTREE_MERCHANT_ID = "test_merchant_id";
 process.env.BRAINTREE_PUBLIC_KEY = "test_public_key";
 process.env.BRAINTREE_PRIVATE_KEY = "test_private_key";
 
+// Foo Chao, A0272024R
 // Mock dependencies before importing controller
 jest.mock("../models/productModel.js");
 jest.mock("fs");
@@ -19,6 +26,7 @@ jest.mock("braintree", () => ({
   },
 }));
 
+// Foo Chao, A0272024R
 // Import controller after mocks are set up
 import {
   createProductController,
@@ -26,26 +34,33 @@ import {
   updateProductController,
 } from "./productController.js";
 
+// Foo Chao, A0272024R
 describe("createProductController", () => {
   // AI generated unit tests using Github Copilot (Claude Sonnet 4.5) Agent Mode for the following:
   // Test Coverage 1: All possible error messages are given correctly for missing fields
   // Test Coverage 2: Empty req.files does not cause error (graceful handling)
   // Test Coverage 3: Extra fields cannot be added to product (security validation)
-  // Test Coverage 4: Photo size validation (> 1MB rejection)
+  // Test Coverage 4: Photo size validation (> 1MB rejection and edge cases: 0, -1, 1, 999999 bytes)
   // Test Coverage 5: Successful product creation with and without photo
   // Test Coverage 6: Photo assignment bug fix verification (lines 57-60)
 
-  // Prompt: do unit test for the method createProductController notable test all possible error 
+  // Prompt 1: do unit test for the method createProductController notable test all possible error 
   // messages is given correctly, multiple errors can be handled as well, empty req.files does not 
   // cause error, extra fields cannot be added, additionally check line 56-59, I think it cause an 
   // error cause products.photo is not defined yet so make sure to have test case for it and fix 
   // code if necessary
+
+  // Prompt 2: for file size testing, prof say should test on below above so need test 1mb - 1 as well 
+  // moreover, we should test and handle case of -1 0 1 where we reject 0 and negative number 
+  // modify the code and test from product controller and test to show this 
+  // make sure to give AI credit and to update test number
 
   // Bug fixes in productController.js by Github Copilot (Claude Sonnet 4.5) Agent Mode:
   // Fixed 1: Changed photo assignment from products.photo.data/contentType to products.photo = {...}
   //          to avoid "Cannot set property of undefined" error
   // Fixed 2: Removed spread operator ...req.fields for security (prevents field injection)
   // Fixed 3: Use only explicitly validated fields (name, description, price, category, quantity, shipping)
+  // Fixed 4: Updated photo size validation to reject sizes <= 0 and > 1MB, with improved error message
 
   let req, res, mockProduct, mockSave;
 
@@ -167,7 +182,7 @@ describe("createProductController", () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Photo should be less than 1mb",
+      error: "Photo size must be between 1 and 1,000,000 bytes",
     });
   });
 
@@ -467,11 +482,82 @@ describe("createProductController", () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Photo should be less than 1mb",
+      error: "Photo size must be between 1 and 1,000,000 bytes",
     });
+  });
+
+  // Test 25: Should reject photo with size 0
+  it("should reject photo with size 0", async () => {
+    req.files = {
+      photo: {
+        size: 0,
+        path: "/fake/path",
+        type: "image/jpeg",
+      },
+    };
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Photo size must be between 1 and 1,000,000 bytes",
+    });
+  });
+
+  // Test 26: Should reject photo with negative size
+  it("should reject photo with negative size", async () => {
+    req.files = {
+      photo: {
+        size: -1,
+        path: "/fake/path",
+        type: "image/jpeg",
+      },
+    };
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Photo size must be between 1 and 1,000,000 bytes",
+    });
+  });
+
+  // Test 27: Should accept photo with size 1 byte
+  it("should accept photo with size 1 byte", async () => {
+    req.files = {
+      photo: {
+        size: 1,
+        path: "/fake/path",
+        type: "image/jpeg",
+      },
+    };
+    fs.readFileSync.mockReturnValue(Buffer.from("x"));
+
+    await createProductController(req, res);
+
+    expect(mockSave).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  // Test 28: Should accept photo with size 999999 bytes
+  it("should accept photo with size 999999 bytes", async () => {
+    req.files = {
+      photo: {
+        size: 999999,
+        path: "/fake/path",
+        type: "image/jpeg",
+      },
+    };
+    fs.readFileSync.mockReturnValue(Buffer.from("data"));
+
+    await createProductController(req, res);
+
+    expect(mockSave).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(201);
   });
 });
 
+// // Foo Chao, A0272024R
 describe("deleteProductController", () => {
   // AI generated unit tests using Github Copilot (Claude Sonnet 4.5) Agent Mode for the following:
   // Test Coverage 1: Successful product deletion by valid ID
@@ -663,18 +749,24 @@ describe("deleteProductController", () => {
   });
 });
 
+// // Foo Chao, A0272024R
 describe("updateProductController", () => {
   // AI generated unit tests using Github Copilot (Claude Sonnet 4.5) Agent Mode for the following:
   // Test Coverage 1: All possible error messages are given correctly for missing fields
   // Test Coverage 2: Empty req.files does not cause error (graceful handling)
   // Test Coverage 3: Extra fields cannot be added to product (security validation)
-  // Test Coverage 4: Photo size validation (> 1MB rejection)
+  // Test Coverage 4: Photo size validation (> 1MB rejection and edge cases: 0, -1, 1, 999999 bytes)
   // Test Coverage 5: Successful product update with and without photo
   // Test Coverage 6: Product ID validation (missing or not found)
   // Test Coverage 7: Photo assignment bug fix verification
 
-  // Prompt: do unit test including all parallel tests in createProductController as well as cases 
+  // Prompt 1: do unit test including all parallel tests in createProductController as well as cases 
   // when params id not provided or product not found. Make sure to give AI credits as well
+
+  // Prompt 2: for file size testing, prof say should test on below above so need test 1mb - 1 as well 
+  // moreover, we should test and handle case of -1 0 1 where we reject 0 and negative number 
+  // modify the code and test from product controller and test to show this 
+  // make sure to give AI credit and to update test number
 
   // Bug fixes in productController.js by Github Copilot (Claude Sonnet 4.5) Agent Mode:
   // Fixed 1: Added validation to check if pid is provided before attempting update
@@ -685,6 +777,7 @@ describe("updateProductController", () => {
   // Fixed 6: Removed spread operator ...req.fields for security (prevents field injection)
   // Fixed 7: Changed photo assignment from products.photo.data/contentType to products.photo = {...}
   // Fixed 8: Added req.fields validation check
+  // Fixed 9: Updated photo size validation to reject sizes <= 0 and > 1MB, with improved error message
 
   let req, res, mockProduct, mockSave, mockFindByIdAndUpdate;
 
@@ -932,7 +1025,7 @@ describe("updateProductController", () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
-      error: "Photo should be less than 1mb",
+      error: "Photo size must be between 1 and 1,000,000 bytes",
     });
   });
 
@@ -1133,5 +1226,540 @@ describe("updateProductController", () => {
       { new: true }
     );
     expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  // Test 25: Should reject photo with size 0
+  it("should reject photo with size 0", async () => {
+    req.files = {
+      photo: {
+        size: 0,
+        path: "/fake/path",
+        type: "image/jpeg",
+      },
+    };
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Photo size must be between 1 and 1,000,000 bytes",
+    });
+  });
+
+  // Test 26: Should reject photo with negative size
+  it("should reject photo with negative size", async () => {
+    req.files = {
+      photo: {
+        size: -1,
+        path: "/fake/path",
+        type: "image/jpeg",
+      },
+    };
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Photo size must be between 1 and 1,000,000 bytes",
+    });
+  });
+
+  // Test 27: Should accept photo with size 1 byte
+  it("should accept photo with size 1 byte", async () => {
+    req.files = {
+      photo: {
+        size: 1,
+        path: "/fake/path",
+        type: "image/jpeg",
+      },
+    };
+    fs.readFileSync.mockReturnValue(Buffer.from("x"));
+
+    await updateProductController(req, res);
+
+    expect(mockFindByIdAndUpdate).toHaveBeenCalled();
+    expect(mockSave).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  // Test 28: Should accept photo with size 999999 bytes
+  it("should accept photo with size 999999 bytes", async () => {
+    req.files = {
+      photo: {
+        size: 999999,
+        path: "/fake/path",
+        type: "image/jpeg",
+      },
+    };
+    fs.readFileSync.mockReturnValue(Buffer.from("data"));
+
+    await updateProductController(req, res);
+
+    expect(mockFindByIdAndUpdate).toHaveBeenCalled();
+    expect(mockSave).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+});
+
+
+
+// Jian Tao - A0273320R
+import { productListController, searchProductController, 
+  relatedProductController, productCategoryController
+ } from "./productController";
+import categoryModel from "../models/categoryModel";
+// import productModel from "../../models/productModel";
+
+// Jian Tao - A0273320R
+// AI-assisted unit tests generated with guidance from ChatGPT-5.2
+// Prompt: "How should I test the unit testing on this controller?"
+
+
+// mock the productModel to control its behavior in tests
+jest.mock("../models/productModel");
+jest.mock("../models/categoryModel");
+
+
+
+// Jian Tao - A0273320R
+describe("productListController", () => {
+  let req;
+  let res;
+
+  beforeEach(() => {
+    req = {
+      params: {},
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // Test 1: Should return products with default page = 1
+  test("should return products with default page = 1", async () => {
+    const mockProducts = [
+      { name: "Product 1" },
+      { name: "Product 2" },
+    ];
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockResolvedValue(mockProducts),
+    });
+
+    await productListController(req, res);
+
+    expect(productModel.find).toHaveBeenCalledWith({});
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      products: mockProducts,
+    });
+  });
+
+  test("should apply correct pagination when page param is provided", async () => {
+    req.params.page = 2;
+
+    const skipMock = jest.fn().mockReturnThis();
+    const limitMock = jest.fn().mockReturnThis();
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      skip: skipMock,
+      limit: limitMock,
+      sort: jest.fn().mockResolvedValue([]),
+    });
+
+    await productListController(req, res);
+
+    // perPage = 6, so skip = (2 - 1) * 6 = 6
+    expect(skipMock).toHaveBeenCalledWith(6);
+    expect(limitMock).toHaveBeenCalledWith(6);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  test("should sort by createdAt descending", async () => {
+    const sortMock = jest.fn().mockResolvedValue([]);
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: sortMock,
+    });
+
+    await productListController(req, res);
+
+    expect(sortMock).toHaveBeenCalledWith({ createdAt: -1 });
+  });
+
+  test("should handle errors and return 400 status", async () => {
+    productModel.find.mockImplementation(() => {
+      throw new Error("Database error");
+    });
+
+    await productListController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "error in per page ctrl",
+      error: expect.any(Error),
+    });
+  });
+
+
+  test("should use default page when page param is undefined", async () => {
+    req.params = {};
+
+    const skipMock = jest.fn().mockReturnThis();
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      skip: skipMock,
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockResolvedValue([]),
+    });
+
+    await productListController(req, res);
+
+    // default page = 1 -> skip = 0
+    expect(skipMock).toHaveBeenCalledWith(0);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+});
+
+
+
+// Jian Tao - A0273320R
+describe("searchProductController", () => {
+  let req;
+  let res;
+
+  beforeEach(() => {
+    req = {
+      params: {
+        keyword: "phone",
+      },
+    };
+
+    res = {
+      json: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("should search products using keyword with regex and return results", async () => {
+    const mockResults = [
+      { name: "iPhone", description: "Apple phone" },
+      { name: "Samsung Phone", description: "Android device" },
+    ];
+
+    const selectMock = jest.fn().mockResolvedValue(mockResults);
+
+    productModel.find.mockReturnValue({
+      select: selectMock,
+    });
+
+    await searchProductController(req, res);
+
+    expect(productModel.find).toHaveBeenCalledWith({
+      $or: [
+        { name: { $regex: "phone", $options: "i" } },
+        { description: { $regex: "phone", $options: "i" } },
+      ],
+    });
+
+    expect(selectMock).toHaveBeenCalledWith("-photo");
+    expect(res.json).toHaveBeenCalledWith(mockResults);
+  });
+
+  test("should handle different keyword values correctly", async () => {
+    req.params.keyword = "laptop";
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockResolvedValue([]),
+    });
+
+    await searchProductController(req, res);
+
+    expect(productModel.find).toHaveBeenCalledWith({
+      $or: [
+        { name: { $regex: "laptop", $options: "i" } },
+        { description: { $regex: "laptop", $options: "i" } },
+      ],
+    });
+
+    expect(res.json).toHaveBeenCalledWith([]);
+  });
+
+  test("should call select with -photo to exclude photo field", async () => {
+    const selectMock = jest.fn().mockResolvedValue([]);
+
+    productModel.find.mockReturnValue({
+      select: selectMock,
+    });
+
+    await searchProductController(req, res);
+
+    expect(selectMock).toHaveBeenCalledWith("-photo");
+  });
+
+  test("should handle errors and return 400 status", async () => {
+    productModel.find.mockImplementation(() => {
+      throw new Error("Database error");
+    });
+
+    await searchProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error In Search Product API",
+      error: expect.any(Error),
+    });
+  });
+});
+
+// Jian Tao - A0273320R
+
+describe("relatedProductController", () => {
+  let req;
+  let res;
+
+  beforeEach(() => {
+    req = {
+      params: {
+        pid: "product123",
+        cid: "category456",
+      },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("should return related products excluding current product", async () => {
+    const mockProducts = [
+      { name: "Product A", category: "category456" },
+      { name: "Product B", category: "category456" },
+    ];
+
+    const populateMock = jest.fn().mockResolvedValue(mockProducts);
+    const limitMock = jest.fn().mockReturnValue({ populate: populateMock });
+    const selectMock = jest.fn().mockReturnValue({ limit: limitMock });
+
+    productModel.find.mockReturnValue({
+      select: selectMock,
+    });
+
+    await relatedProductController(req, res);
+
+    expect(productModel.find).toHaveBeenCalledWith({
+      category: "category456",
+      _id: { $ne: "product123" },
+    });
+
+    expect(selectMock).toHaveBeenCalledWith("-photo");
+    expect(limitMock).toHaveBeenCalledWith(3);
+    expect(populateMock).toHaveBeenCalledWith("category");
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      products: mockProducts,
+    });
+  });
+
+  test("should limit the results to 3 products", async () => {
+    const limitMock = jest.fn().mockReturnValue({
+      populate: jest.fn().mockResolvedValue([]),
+    });
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        limit: limitMock,
+      }),
+    });
+
+    await relatedProductController(req, res);
+
+    expect(limitMock).toHaveBeenCalledWith(3);
+  });
+
+  test("should populate category field", async () => {
+    const populateMock = jest.fn().mockResolvedValue([]);
+
+    productModel.find.mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        limit: jest.fn().mockReturnValue({
+          populate: populateMock,
+        }),
+      }),
+    });
+
+    await relatedProductController(req, res);
+
+    expect(populateMock).toHaveBeenCalledWith("category");
+  });
+
+  test("should return 400 if pid or cid is missing (validation branch)", async () => {
+    req.params = { pid: "", cid: "" };
+
+    await relatedProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Product ID and Category ID are required",
+    });
+  });
+
+  test("should handle database errors and return 400 status", async () => {
+    productModel.find.mockImplementation(() => {
+      throw new Error("Database error");
+    });
+
+    await relatedProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "error while getting related product",
+      error: expect.any(Error),
+    });
+  });
+});
+
+
+// Jian Tao - A0273320R
+
+describe("productCategoryController", () => {
+  let req;
+  let res;
+
+  beforeEach(() => {
+    req = {
+      params: {
+        slug: "electronics",
+      },
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("should fetch category by slug and return products in that category", async () => {
+    const mockCategory = { _id: "cat123", slug: "electronics" };
+    const mockProducts = [
+      { name: "Laptop", category: mockCategory },
+      { name: "Phone", category: mockCategory },
+    ];
+
+    // Mock categoryModel.findOne()
+    categoryModel.findOne.mockResolvedValue(mockCategory);
+
+    // Mock productModel.find().populate()
+    const populateMock = jest.fn().mockResolvedValue(mockProducts);
+    productModel.find.mockReturnValue({
+      populate: populateMock,
+    });
+
+    await productCategoryController(req, res);
+
+    expect(categoryModel.findOne).toHaveBeenCalledWith({
+      slug: "electronics",
+    });
+
+    expect(productModel.find).toHaveBeenCalledWith({
+      category: mockCategory,
+    });
+
+    expect(populateMock).toHaveBeenCalledWith("category");
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      category: mockCategory,
+      products: mockProducts,
+    });
+  });
+
+  test("should return empty products if category exists but no products found", async () => {
+    const mockCategory = { _id: "cat123", slug: "electronics" };
+
+    categoryModel.findOne.mockResolvedValue(mockCategory);
+
+    productModel.find.mockReturnValue({
+      populate: jest.fn().mockResolvedValue([]),
+    });
+
+    await productCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      category: mockCategory,
+      products: [],
+    });
+  });
+
+  test("should handle case when category is null (slug not found)", async () => {
+    categoryModel.findOne.mockResolvedValue(null);
+
+    productModel.find.mockReturnValue({
+      populate: jest.fn().mockResolvedValue([]),
+    });
+
+    await productCategoryController(req, res);
+
+    expect(productModel.find).toHaveBeenCalledWith({
+      category: null,
+    });
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      category: null,
+      products: [],
+    });
+  });
+
+  test("should handle errors and return 400 status", async () => {
+    categoryModel.findOne.mockRejectedValue(new Error("Database error"));
+
+    await productCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      error: expect.any(Error),
+      message: "Error While Getting products",
+    });
   });
 });

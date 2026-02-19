@@ -11,7 +11,9 @@ import {
   productFiltersController,
   productListController,
   productPhotoController,
-  realtedProductController,
+  // Jian Tao - A0273320R
+  // changed realtedProductController to relatedProductController to fix typo
+  relatedProductController,
   searchProductController,
   updateProductController,
 } from "../controllers/productController.js";
@@ -61,8 +63,11 @@ router.get("/product-list/:page", productListController);
 //search product
 router.get("/search/:keyword", searchProductController);
 
+
+// Jian Tao - A0273320R
+// changed realtedProductController to relatedProductController to fix typo
 //similar product
-router.get("/related-product/:pid/:cid", realtedProductController);
+router.get("/related-product/:pid/:cid", relatedProductController);
 
 //category wise product
 router.get("/product-category/:slug", productCategoryController);

@@ -55,8 +55,9 @@
     border-bottom: 1px solid rgba(128, 128, 128, 0.337);
   }
   
+  /* Foo Chao, A0272024R, modified with assistance of Github Copilot ChatGPT 5-mini*/
   .ant-checkbox-wrapper:first-of-type {
-    margin-left: 8px;
+    margin-left: 0;
   }
   
   .ant-checkbox-wrapper {
@@ -79,5 +80,19 @@
     color: green;
     font-weight: bold;
     font-size: 20px !important;
+  }
+
+  /* Foo Chao, A0272024R, modified with assistance of Github Copilot ChatGPT 5-mini*/
+  /* filter item alignment */
+  .filter-item {
+    display: flex;
+    align-items: center;
+    margin: 0 0 0 10px;
+  }
+
+  /* Foo Chao, A0272024R, modified with assistance of Github Copilot ChatGPT 5-mini*/
+  /* ensure checkbox wrappers don't add extra left offset inside filters */
+  .filters .ant-checkbox-wrapper {
+    margin-left: 0;
   }
   

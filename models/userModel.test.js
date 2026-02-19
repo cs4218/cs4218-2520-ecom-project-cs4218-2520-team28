@@ -1,3 +1,5 @@
+// Foo Chao, A0272024R
+
 // AI generated unit tests using Github Copilot (Claude Sonnet 4.5) Agent Mode for the following:
 // Test Coverage 1: Schema structure validation (model name, field definitions, types)
 // Test Coverage 2: Required field enforcement with validation errors for missing fields
