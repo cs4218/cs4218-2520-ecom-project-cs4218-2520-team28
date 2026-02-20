@@ -144,3 +144,22 @@ To begin unit testing with Jest in your project, follow these steps:
      ```bash
      npm run test
      ```
+
+## 5. Milestone Progress
+
+### Milestone 1
+
+#### Member 1: FOO CHAO
+
+
+#### Member 2: FOO TZIE HUANG
+
+
+#### Member 3: HO CHI THANH
+
+
+#### Member 4: HO JIAN TAO
+
+
+#### Member 5: HO JIN HAN
+
