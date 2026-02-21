@@ -159,6 +159,26 @@ To begin unit testing with Jest in your project, follow these steps:
 
 
 #### Member 4: HO JIAN TAO
+##### - pages/admin/AdminOrders.js
+##### - pages/user/Orders.js 
+##### - controllers/authController.js 
+###### 1. updateProfileController 
+###### 2. getOrdersController 
+###### 3. getAllOrdersController 
+###### 4. orderStatusController 
+##### - models/orderModel.js 
+
+##### - pages/CategoryProduct.js
+##### - controllers/productController.js 
+###### 6. productListController 
+###### 7. searchProductController 
+###### 8. realtedProductController 
+###### 9. productCategoryController 
+##### - controllers/categoryController.js 
+###### 1. categoryControlller 
+###### 2. singleCategoryController 
+##### - models/categoryModel.js 
+
 
 
 #### Member 5: HO JIN HAN
