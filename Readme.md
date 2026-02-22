@@ -150,7 +150,19 @@ To begin unit testing with Jest in your project, follow these steps:
 ### Milestone 1
 
 #### Member 1: FOO CHAO
-
+##### - controllers/productController.js
+###### 1. createProductController
+###### 2. deleteProductController
+###### 3. updateProductController
+##### - models/userModel.js
+##### - client/src/components/Routes/Private.js
+##### - client/src/context/cart.js
+##### - client/src/pages/CartPage.js
+##### - client/src/pages/Contact.js
+##### - client/src/pages/HomePage.js
+##### - client/src/pages/Policy.js
+##### - client/src/pages/admin/Products.js
+##### - client/src/pages/user/Dashboard.js
 
 #### Member 2: FOO TZIE HUANG
 
@@ -167,7 +179,6 @@ To begin unit testing with Jest in your project, follow these steps:
 ###### 3. getAllOrdersController 
 ###### 4. orderStatusController 
 ##### - models/orderModel.js 
-
 ##### - pages/CategoryProduct.js
 ##### - controllers/productController.js 
 ###### 1. productListController 
@@ -178,8 +189,6 @@ To begin unit testing with Jest in your project, follow these steps:
 ###### 1. categoryController 
 ###### 2. singleCategoryController 
 ##### - models/categoryModel.js 
-
-
 
 #### Member 5: HO JIN HAN
 
