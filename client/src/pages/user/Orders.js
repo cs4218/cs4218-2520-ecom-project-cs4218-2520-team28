@@ -7,6 +7,7 @@
 //   perform reconciliation and efficiently update the DOM.
 //   Using MongoDB's stable _id ensures correct element tracking and
 //   prevents rendering inconsistencies.
+// - change 'createAt' to 'createdAt' to match Mongoose timestamps and prevent "Invalid date" rendering in the UI.
 
 
 
@@ -62,7 +63,8 @@ const Orders = () => {
                         <td>{i + 1}</td>
                         <td>{o?.status}</td>
                         <td>{o?.buyer?.name}</td>
-                        <td>{moment(o?.createAt).fromNow()}</td>
+                        {/* Fix Applied here: Changed 'createAt' to 'createdAt' to match Mongoose timestamps and prevent "Invalid date" rendering in the UI. */}
+                        <td>{moment(o?.createdAt).fromNow()}</td>
                         <td>{o?.payment.success ? "Success" : "Failed"}</td>
                         <td>{o?.products?.length}</td>
                       </tr>

@@ -71,7 +71,10 @@ describe("AdminOrders Component", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    axios.get.mockResolvedValue({ data: [] });
+  });
+
+  beforeAll(() => {
+    jest.spyOn(console, "error").mockImplementation(() => {});
   });
 
 
@@ -93,7 +96,7 @@ describe("AdminOrders Component", () => {
           _id: "1",
           status: "Processing",
           buyer: { name: "John" },
-          createAt: new Date(),
+          createdAt: new Date(),
           payment: { success: true },
           products: [],
         },
@@ -117,7 +120,7 @@ describe("AdminOrders Component", () => {
           _id: "1",
           status: "Processing",
           buyer: { name: "John" },
-          createAt: new Date(),
+          createdAt: new Date(),
           payment: { success: true },
           products: [],
         },
@@ -151,7 +154,7 @@ describe("AdminOrders Component", () => {
           _id: "1",
           status: "Processing",
           buyer: { name: "John" },
-          createAt: new Date(),
+          createdAt: new Date(),
           payment: { success: true },
           products: [],
         },
@@ -166,7 +169,7 @@ describe("AdminOrders Component", () => {
           _id: "1",
           status: "Shipped",
           buyer: { name: "John" },
-          createAt: new Date(),
+          createdAt: new Date(),
           payment: { success: true },
           products: [],
         },
@@ -187,5 +190,123 @@ describe("AdminOrders Component", () => {
     );
   });
 
+  test("handles API error when fetching orders", async () => {
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+    axios.get.mockRejectedValue(new Error("API Error"));
+
+    render(<AdminOrders />);
+
+    await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/all-orders");
+    });
+
+    consoleSpy.mockRestore();
+  });
+
+  test("handles API error when updating status", async () => {
+    axios.get.mockResolvedValue({
+      data: [
+        {
+          _id: "1",
+          status: "Processing",
+          buyer: { name: "John" },
+          createdAt: new Date(),
+          payment: { success: true },
+          products: [],
+        },
+      ],
+    });
+
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    axios.put.mockRejectedValue(new Error("PUT Error"));
+
+    render(<AdminOrders />);
+
+    await screen.findByText("John");
+
+    fireEvent.change(screen.getByTestId("status-select"), {
+      target: { value: "Shipped" },
+    });
+
+    await waitFor(() => {
+      expect(axios.put).toHaveBeenCalled();
+    });
+
+    consoleSpy.mockRestore();
+  });
+
+  test("renders product details when products exist", async () => {
+    axios.get.mockResolvedValue({
+      data: [
+        {
+          _id: "1",
+          status: "Processing",
+          buyer: { name: "John" },
+          createdAt: new Date(),
+          payment: { success: true },
+          products: [
+            {
+              _id: "p1",
+              name: "Product A",
+              description: "This is a test product description",
+              price: 100,
+            },
+          ],
+        },
+      ],
+    });
+
+    render(<AdminOrders />);
+
+    await screen.findByText("Product A");
+
+    expect(
+      screen.getByText("Price : 100")
+    ).toBeInTheDocument();
+  });
+
+  test("does not call GET API when auth token is null", async () => {
+    // Override auth mock just for this test
+    jest.spyOn(require("../../context/auth"), "useAuth").mockReturnValue([
+      { token: null },
+      jest.fn(),
+    ]);
+
+    axios.get.mockClear();
+
+    render(<AdminOrders />);
+
+    await waitFor(() => {
+      expect(axios.get).not.toHaveBeenCalled();
+    });
+  });
+
+  test("renders Failed when payment.success is false", async () => {
+    jest.spyOn(require("../../context/auth"), "useAuth").mockReturnValue([
+      { token: "fake-token" },
+      jest.fn(),
+    ]);
+
+    axios.get.mockResolvedValueOnce({
+      data: [
+        {
+          _id: "1",
+          status: "Processing",
+          buyer: { name: "John" },
+          createdAt: new Date(),
+          payment: { success: false },
+          products: [],
+        },
+      ],
+    });
+
+    render(<AdminOrders />);
+
+    await screen.findByText("John");
+    expect(screen.getByText("Failed")).toBeInTheDocument();
+  });
+
+  
 
 });
