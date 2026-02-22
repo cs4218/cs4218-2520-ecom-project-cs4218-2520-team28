@@ -2661,7 +2661,7 @@ describe("productCountController", () => {
     expect(productModel.find).toHaveBeenCalledWith({});
     expect(mockCount).toHaveBeenCalled();
   });
-
+});
 
 // Jian Tao - A0273320R
 import { productListController, searchProductController, 
