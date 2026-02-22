@@ -149,6 +149,9 @@ To begin unit testing with Jest in your project, follow these steps:
 
 ### Milestone 1
 
+#### MS1 CI URL
+- https://github.com/cs4218/cs4218-2520-ecom-project-cs4218-2520-team28/actions/runs/22261934272/job/64401522903
+
 #### Member 1: FOO CHAO
 ##### - controllers/productController.js
 ###### 1. createProductController
