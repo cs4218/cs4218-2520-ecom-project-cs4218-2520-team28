@@ -1,5 +1,5 @@
 import { updateProfileController, getOrdersController, 
-  getAllOrdersController, orderStatusController, registerController, loginController, forgotPasswordController } from "./authController.js";
+  getAllOrdersController, orderStatusController, registerController, loginController, forgotPasswordController, testController } from "./authController.js";
 import userModel from "../models/userModel.js";
 import { hashPassword, comparePassword } from "../helpers/authHelper.js";
 import orderModel from "../models/orderModel.js";
@@ -19,24 +19,9 @@ describe("authController", () => {
 
   // Jian Tao - A0273320R
   // AI-assisted unit tests generated with guidance from ChatGPT-5.2
-  // Prompt:
-  // 1. "Generate Jest unit tests for Express controllers including
-  //     updateProfileController, getOrdersController,
-  //     getAllOrdersController, and orderStatusController.
-  //     Mock Mongoose models and helper functions.
-  //     Cover success cases, validation branches, and error handling."
-  //
-  // 2. "each response should have its HTTP code status right? should the controller return without status?"
-
-  // Jian Tao - A0273320R
-  // test coverage:
-  // - Successful full profile update
-  // - Successful partial update (name only)
-  // - Successful partial update (password only)
-  // - Password validation error (length < 6 returns 400)
-  // - Database error during findById
-  // - Error during password hashing
-  // - Database error during findByIdAndUpdate
+  // Test Coverage: Successful full profile update, Successful partial update (name only),
+  // Successful partial update (password only), Password validation error (length < 6 returns 400),
+  // Database error during findById, Error during password hashing, Database error during findByIdAndUpdate
   describe("updateProfileController", () => {
 
     let existingUser, res;
@@ -328,10 +313,8 @@ describe("authController", () => {
 
 
   // Jian Tao - A0273320R
-  // test coverage:
-  // getOrdersController:
-  // - Successfully returns user orders
-  // - Handles database error and returns 500
+  // AI-assisted unit tests generated with guidance from ChatGPT-5.2
+  // Test Coverage: Successfully returns user orders, Handles database error and returns 500
   describe("getOrderController", () => {    // Tests for getOrderController would go here
 
     let req, res;
@@ -391,10 +374,8 @@ describe("authController", () => {
 
 
   // Jian Tao - A0273320R
-  // test coverage:
-  // getAllOrdersController:
-  // - Successfully returns all orders
-  // - Handles database error and returns 500
+  // AI-assisted unit tests generated with guidance from ChatGPT-5.2
+  // Test Coverage: Successfully returns all orders, Handles database error and returns 500
   describe("getAllOrdersController", () => {
 
     let res;
@@ -456,9 +437,8 @@ describe("authController", () => {
 
 
   // Jian Tao - A0273320R
-  // test coverage:
-  // - Successfully updates order status
-  // - Handles database error and returns 500
+  // AI-assisted unit tests generated with guidance from ChatGPT-5.2
+  // Test Coverage: Successfully updates order status, Handles database error and returns 500
   describe("orderStatusController", () => {
 
     let res;
@@ -524,12 +504,9 @@ describe("authController", () => {
 
 
   // Foo Tzie Huang - A0262376Y
-  /**
-   * registerController Tests
-   * * Validates the account creation process. 
-   * Ensures that users can only sign up if all required fields are provided 
-   * and that duplicate emails are caught before hashing passwords.
-   */
+  // AI-assisted unit tests generated with guidance from GitHub Copilot (Claude Haiku 4.5)
+  // Test Coverage 1: Register new user successfully
+  // Test Coverage 2: Return error if required fields are missing
   describe("registerController", () => {
     let res;
     beforeEach(() => {
@@ -578,13 +555,8 @@ describe("authController", () => {
   });
 
   // Foo Tzie Huang - A0262376Y
-  /**
-   * loginController Tests
-   * * Validates the sign-in process.
-   * Checks that the controller verifies the email existence, 
-   * compares the provided password with the stored hash, 
-   * and generates a valid JWT upon success.
-   */
+  // AI-assisted unit tests generated with guidance from GitHub Copilot (Claude Haiku 4.5)
+  // Test Coverage 1: Verify comparePassword logic correctly during login
   describe("loginController", () => {
     let res;
     beforeEach(() => {
@@ -614,12 +586,10 @@ describe("authController", () => {
   });
 
   // Foo Tzie Huang - A0262376Y
-  /**
-   * forgotPasswordController Tests
-   * * Validates the password reset mechanism.
-   * Covers cases where the user provides the correct email and secret answer
-   * to update their password, as well as failure cases for incorrect inputs.
-   */
+  // AI-assisted unit tests generated with guidance from GitHub Copilot (Claude Haiku 4.5)
+  // Test Coverage 1: Reset password successfully
+  // Test Coverage 2: Return 404 for wrong email or answer
+  // Test Coverage 3: Return 400 if email is missing
   describe("forgotPasswordController", () => {
     let res;
     beforeEach(() => {
@@ -684,5 +654,33 @@ describe("authController", () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith({ message: "Emai is required" });
     });
-  })
+  });
+
+  // Foo Tzie Huang - A0262376Y
+  // AI-assisted unit tests generated with guidance from GitHub Copilot (Claude Haiku 4.5)
+  // Test Coverage 1: Return 'Protected Routes' message
+  // Test Coverage 2: Not throw when called without errors
+  describe("testController", () => {
+    let req, res;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      req = {};
+      res = {
+        send: jest.fn(),
+      };
+    });
+
+    test("should return 'Protected Routes' message", () => {
+      testController(req, res);
+
+      expect(res.send).toHaveBeenCalledWith("Protected Routes");
+    });
+
+    test("should not throw when called without errors", () => {
+      // testController should execute without throwing
+      expect(() => testController(req, res)).not.toThrow();
+      expect(res.send).toHaveBeenCalledWith("Protected Routes");
+    });
+  });
 });
