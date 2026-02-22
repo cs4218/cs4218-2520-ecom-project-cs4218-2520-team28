@@ -194,4 +194,15 @@ To begin unit testing with Jest in your project, follow these steps:
 ##### - models/categoryModel.js 
 
 #### Member 5: HO JIN HAN
-
+##### - helpers/authHelper.test.js
+##### - middlewares/authMiddleware.test.js
+##### - client/src/components/AdminMenu.test.js
+##### - client/src/context/auth.test.js
+##### - client/src/pages/admin/AdminDashboard.test.js
+##### - client/src/pages/user/Profile.test.js
+##### - client/src/components/Footer.test.js
+##### - client/src/components/Header.test.js
+##### - client/src/components/Layout.test.js
+##### - client/src/pages/About.test.js
+##### - client/src/pages/Pagenotfound.test.js
+##### - config/db.test.js
