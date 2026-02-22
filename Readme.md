@@ -145,7 +145,7 @@ To begin unit testing with Jest in your project, follow these steps:
      npm run test
      ```
 
-## 5. Milestone Progress
+## 6. Milestone Progress
 
 ### Milestone 1
 
