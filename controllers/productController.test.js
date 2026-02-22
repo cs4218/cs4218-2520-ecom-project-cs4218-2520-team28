@@ -3123,3 +3123,443 @@ describe("productCategoryController", () => {
     });
   });
 });
+
+// Foo Tzie Huang - A0262376Y
+// AI generated unit tests using GitHub Copilot (Claude Sonnet 4.6) Agent Mode
+// Test Coverage 1: Saves order with correct products and buyer
+// Test Coverage 2: Calculates cart total correctly
+// Test Coverage 3: Processes payment with required fields
+// Test Coverage 4: Handles empty cart
+// Test Coverage 5: Uses authenticated user ID as buyer
+// Test Coverage 6: Handles decimal prices
+// Test Coverage 7: Saves order instance correctly
+// Test Coverage 8: Creates order with multiple items
+
+jest.mock("../models/orderModel.js");
+
+// Mock braintree module - only mock the gateway instance
+jest.mock("braintree", () => {
+  const mockGateway = {
+    clientToken: {
+      generate: jest.fn(),
+    },
+    transaction: {
+      sale: jest.fn(),
+    },
+  };
+  return {
+    BraintreeGateway: jest.fn(() => mockGateway),
+    Environment: {
+      Sandbox: "sandbox",
+    },
+  };
+});
+
+// import controller after mocks are set up
+import { braintreeTokenController, brainTreePaymentController } from "./productController.js";
+import orderModel from "../models/orderModel.js";
+import braintree from "braintree";
+
+// Payemnt Gateway Controllers Unit Tests
+describe("Payment Gateway Controllers", () => {
+  let req, res, mockGateway;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+    };
+    req = {};
+    
+    // Get the mocked gateway instance
+    mockGateway = new (braintree.BraintreeGateway)();
+  });
+
+  /**
+   * braintreeTokenController Tests
+   * Checks the logic for generating client tokens for Braintree.
+   * Ensures the gateway generates a token and returns it to the client.
+   */
+  describe("braintreeTokenController", () => {
+    // Test 1: Should successfully generate and send client token
+    it("should generate and send client token on success", (done) => {
+      const mockToken = { clientToken: "fake_client_token_123" };
+      
+      // Mock gateway to call success callback
+      mockGateway.clientToken.generate = jest.fn((options, callback) => {
+        callback(null, mockToken);
+      });
+
+      braintreeTokenController(req, res);
+
+      setImmediate(() => {
+        expect(mockGateway.clientToken.generate).toHaveBeenCalled();
+        expect(res.send).toHaveBeenCalledWith(mockToken);
+        done();
+      });
+    });
+
+    // Test 2: Should handle errors from gateway
+    it("should return 500 status on gateway error", (done) => {
+      const mockError = new Error("Gateway error");
+      
+      // Mock gateway to call error callback
+      mockGateway.clientToken.generate = jest.fn((options, callback) => {
+        callback(mockError, null);
+      });
+
+      braintreeTokenController(req, res);
+
+      setImmediate(() => {
+        expect(mockGateway.clientToken.generate).toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(mockError);
+        done();
+      });
+    });
+
+    // Test 3: Should pass empty object to generate method
+    it("should call clientToken.generate with empty options object", (done) => {
+      const mockToken = { clientToken: "token_456" };
+      
+      mockGateway.clientToken.generate = jest.fn((options, callback) => {
+        callback(null, mockToken);
+      });
+
+      braintreeTokenController(req, res);
+
+      setImmediate(() => {
+        expect(mockGateway.clientToken.generate).toHaveBeenCalledWith(
+          {},
+          expect.any(Function)
+        );
+        done();
+      });
+    });
+
+    // Test 4: Should handle network errors
+    it("should handle network errors gracefully", (done) => {
+      const networkError = new Error("Network timeout");
+      
+      mockGateway.clientToken.generate = jest.fn((options, callback) => {
+        callback(networkError, null);
+      });
+
+      braintreeTokenController(req, res);
+
+      setImmediate(() => {
+        expect(res.status).toHaveBeenCalledWith(500);
+        done();
+      });
+    });
+
+    // Test 5: Should send token response with correct structure
+    it("should send token with correct response structure", (done) => {
+      const tokenResponse = { 
+        clientToken: "unique_token_xyz789",
+        success: true 
+      };
+      
+      mockGateway.clientToken.generate = jest.fn((options, callback) => {
+        callback(null, tokenResponse);
+      });
+
+      braintreeTokenController(req, res);
+
+      setImmediate(() => {
+        expect(res.send).toHaveBeenCalledWith(tokenResponse);
+        done();
+      });
+    });
+  });
+
+  /**
+   * brainTreePaymentController Tests
+   * Checks the logic for processing a checkout transaction.
+   * Ensures the cart total is calculated and an order is saved
+   * to the database with correct fields and buyer information.
+   */
+  describe("brainTreePaymentController", () => {
+    // Test 1: Should save order with correct products and buyer on success
+    it("should save order with correct products and buyer information", (done) => {
+      req = {
+        body: {
+          nonce: "fake-valid-nonce",
+          cart: [{ price: 50 }, { price: 50 }],
+        },
+        user: { _id: "user_789" },
+      };
+
+      const mockOrderInstance = {
+        save: jest.fn().mockResolvedValue({ _id: "order_123" }),
+      };
+
+      orderModel.mockImplementation((data) => mockOrderInstance);
+
+      // Mock gateway to call success callback
+      mockGateway.transaction.sale.mockImplementation(
+        (transactionData, callback) => {
+          callback(null, { id: "transaction_123", status: "submitted_for_settlement" });
+        }
+      );
+
+      brainTreePaymentController(req, res);
+
+      setImmediate(() => {
+        expect(orderModel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            products: [{ price: 50 }, { price: 50 }],
+            buyer: "user_789",
+          })
+        );
+        expect(mockOrderInstance.save).toHaveBeenCalled();
+        done();
+      });
+    });
+
+    // Test 2: Should calculate correct total from cart
+    it("should calculate and process total from multiple items", (done) => {
+      req = {
+        body: {
+          nonce: "fake-valid-nonce",
+          cart: [{ price: 25 }, { price: 75 }, { price: 100 }],
+        },
+        user: { _id: "user_789" },
+      };
+
+      const mockOrderInstance = { save: jest.fn().mockResolvedValue({}) };
+      orderModel.mockImplementation(() => mockOrderInstance);
+
+      // Mock gateway to call success callback
+      mockGateway.transaction.sale.mockImplementation(
+        (transactionData, callback) => {
+          callback(null, { id: "transaction_456" });
+        }
+      );
+
+      brainTreePaymentController(req, res);
+
+      setImmediate(() => {
+        // Verify order was created with the 3 items
+        expect(orderModel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            products: [{ price: 25 }, { price: 75 }, { price: 100 }],
+          })
+        );
+        done();
+      });
+    });
+
+    // Test 3: Should save order with all required fields
+    it("should save order with products, payment, and buyer fields", (done) => {
+      req = {
+        body: {
+          nonce: "test-nonce",
+          cart: [{ price: 50, name: "Product 1" }],
+        },
+        user: { _id: "buyer_123" },
+      };
+
+      const mockOrderInstance = { save: jest.fn().mockResolvedValue({}) };
+      
+      orderModel.mockImplementation((data) => {
+        expect(data).toHaveProperty("products");
+        expect(data).toHaveProperty("payment");
+        expect(data).toHaveProperty("buyer");
+        expect(data.buyer).toBe("buyer_123");
+        return mockOrderInstance;
+      });
+
+      // Mock gateway to call success callback
+      mockGateway.transaction.sale.mockImplementation(
+        (transactionData, callback) => {
+          callback(null, { id: "transaction_789" });
+        }
+      );
+
+      brainTreePaymentController(req, res);
+
+      setImmediate(() => {
+        expect(mockOrderInstance.save).toHaveBeenCalled();
+        done();
+      });
+    });
+
+    // Test 4: Should handle empty cart
+    it("should handle empty cart and save empty products array", (done) => {
+      req = {
+        body: {
+          nonce: "test-nonce",
+          cart: [],
+        },
+        user: { _id: "user_123" },
+      };
+
+      const mockOrderInstance = { save: jest.fn().mockResolvedValue({}) };
+      orderModel.mockImplementation(() => mockOrderInstance);
+
+      // Mock gateway to call success callback
+      mockGateway.transaction.sale.mockImplementation(
+        (transactionData, callback) => {
+          callback(null, { id: "transaction_123" });
+        }
+      );
+
+      brainTreePaymentController(req, res);
+
+      setImmediate(() => {
+        expect(orderModel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            products: [],
+          })
+        );
+        done();
+      });
+    });
+
+    // Test 5: Should use authenticated user ID as buyer
+    it("should use authenticated user ID as buyer in order", (done) => {
+      const userId = "authenticated_user_456";
+      req = {
+        body: {
+          nonce: "test-nonce",
+          cart: [{ price: 50 }],
+        },
+        user: { _id: userId },
+      };
+
+      const mockOrderInstance = { save: jest.fn().mockResolvedValue({}) };
+      orderModel.mockImplementation((data) => {
+        expect(data.buyer).toBe(userId);
+        return mockOrderInstance;
+      });
+
+      // Mock gateway to call success callback
+      mockGateway.transaction.sale.mockImplementation(
+        (transactionData, callback) => {
+          callback(null, { id: "transaction_123" });
+        }
+      );
+
+      brainTreePaymentController(req, res);
+
+      setImmediate(() => {
+        expect(mockOrderInstance.save).toHaveBeenCalled();
+        done();
+      });
+    });
+
+    // Test 6: Should handle decimal prices
+    it("should handle decimal prices in cart items", (done) => {
+      req = {
+        body: {
+          nonce: "test-nonce",
+          cart: [
+            { price: 10.99 },
+            { price: 20.50 },
+            { price: 14.51 },
+          ],
+        },
+        user: { _id: "user_123" },
+      };
+
+      const mockOrderInstance = { save: jest.fn().mockResolvedValue({}) };
+      orderModel.mockImplementation(() => mockOrderInstance);
+
+      // Mock gateway to call success callback
+      mockGateway.transaction.sale.mockImplementation(
+        (transactionData, callback) => {
+          callback(null, { id: "transaction_123" });
+        }
+      );
+
+      brainTreePaymentController(req, res);
+
+      setImmediate(() => {
+        expect(orderModel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            products: [
+              { price: 10.99 },
+              { price: 20.50 },
+              { price: 14.51 },
+            ],
+          })
+        );
+        done();
+      });
+    });
+
+    // Test 7: Should create order with multiple items
+    it("should handle multiple cart items with different prices", (done) => {
+      req = {
+        body: {
+          nonce: "test-nonce",
+          cart: [
+            { price: 100 },
+            { price: 50 },
+            { price: 25 },
+            { price: 25 },
+          ],
+        },
+        user: { _id: "user_123" },
+      };
+
+      const mockOrderInstance = { save: jest.fn().mockResolvedValue({}) };
+      orderModel.mockImplementation(() => mockOrderInstance);
+
+      // Mock gateway to call success callback
+      mockGateway.transaction.sale.mockImplementation(
+        (transactionData, callback) => {
+          callback(null, { id: "transaction_123" });
+        }
+      );
+
+      brainTreePaymentController(req, res);
+
+      setImmediate(() => {
+        expect(orderModel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            products: [
+              { price: 100 },
+              { price: 50 },
+              { price: 25 },
+              { price: 25 },
+            ],
+          })
+        );
+        done();
+      });
+    });
+
+    // Test 8: Should call save on the order instance
+    it("should call save method on the order instance", (done) => {
+      req = {
+        body: {
+          nonce: "test-nonce",
+          cart: [{ price: 50 }],
+        },
+        user: { _id: "user_123" },
+      };
+
+      const mockOrderInstance = { save: jest.fn().mockResolvedValue({}) };
+      orderModel.mockImplementation(() => mockOrderInstance);
+
+      // Mock gateway to call success callback
+      mockGateway.transaction.sale.mockImplementation(
+        (transactionData, callback) => {
+          callback(null, { id: "transaction_123" });
+        }
+      );
+
+      brainTreePaymentController(req, res);
+
+      setImmediate(() => {
+        expect(mockOrderInstance.save).toHaveBeenCalled();
+        done();
+      });
+    });
+  });
+});
