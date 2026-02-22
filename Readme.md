@@ -170,12 +170,12 @@ To begin unit testing with Jest in your project, follow these steps:
 
 ##### - pages/CategoryProduct.js
 ##### - controllers/productController.js 
-###### 6. productListController 
-###### 7. searchProductController 
-###### 8. realtedProductController 
-###### 9. productCategoryController 
+###### 1. productListController 
+###### 2. searchProductController 
+###### 3. relatedProductController 
+###### 4. productCategoryController 
 ##### - controllers/categoryController.js 
-###### 1. categoryControlller 
+###### 1. categoryController 
 ###### 2. singleCategoryController 
 ##### - models/categoryModel.js 
 
