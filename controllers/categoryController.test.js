@@ -1038,7 +1038,7 @@ describe('deleteCategoryController', () => {
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.send).toHaveBeenCalledWith({
                 success: true,
-                message: "Category Deleted Successfully"
+                message: "Categry Deleted Successfully"
             });
         });
 
@@ -1082,7 +1082,7 @@ describe('deleteCategoryController', () => {
             expect(response).not.toHaveProperty('category');
             expect(response).toEqual({
                 success: true,
-                message: "Category Deleted Successfully"
+                message: "Categry Deleted Successfully"
             });
         });
     });
