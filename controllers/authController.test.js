@@ -1,15 +1,19 @@
 import { updateProfileController, getOrdersController, 
-  getAllOrdersController, orderStatusController } from "./authController.js";
+  getAllOrdersController, orderStatusController, registerController, loginController, forgotPasswordController } from "./authController.js";
 import userModel from "../models/userModel.js";
-import { hashPassword } from "../helpers/authHelper.js";
+import { hashPassword, comparePassword } from "../helpers/authHelper.js";
 import orderModel from "../models/orderModel.js";
 
 
 jest.mock("../models/userModel.js");
+jest.mock("../models/orderModel.js");
 jest.mock("../helpers/authHelper.js", () => ({
   hashPassword: jest.fn(),
+  comparePassword: jest.fn(),
 }));
-jest.mock("../models/orderModel.js");
+jest.mock("jsonwebtoken", () => ({
+  sign: jest.fn(),
+}));
 
 describe("authController", () => {
 
@@ -517,6 +521,168 @@ describe("authController", () => {
       );
     });
   });
-});
-  
 
+
+  // Foo Tzie Huang - A0262376Y
+  /**
+   * registerController Tests
+   * * Validates the account creation process. 
+   * Ensures that users can only sign up if all required fields are provided 
+   * and that duplicate emails are caught before hashing passwords.
+   */
+  describe("registerController", () => {
+    let res;
+    beforeEach(() => {
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+      };
+    });
+
+    test("should register a new user successfully", async () => {
+      const req = {
+        body: {
+          name: "Test User",
+          email: "test@example.com",
+          password: "password123",
+          phone: "12345678",
+          address: "123 AI Lane",
+          answer: "Blue",
+        },
+      };
+
+      userModel.findOne.mockResolvedValue(null); 
+      hashPassword.mockResolvedValue("hashedPassword123");
+      
+      const mockSave = jest.fn().mockResolvedValue(req.body);
+      userModel.mockImplementation(() => ({
+        save: mockSave,
+      }));
+
+      await registerController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "User Register Successfully",
+        })
+      );
+    });
+
+    test("should return error if name is missing", async () => {
+      const req = { body: { email: "test@example.com" } }; 
+      await registerController(req, res);
+      expect(res.send).toHaveBeenCalledWith({ error: "Name is Required" });
+    });
+  });
+
+  // Foo Tzie Huang - A0262376Y
+  /**
+   * loginController Tests
+   * * Validates the sign-in process.
+   * Checks that the controller verifies the email existence, 
+   * compares the provided password with the stored hash, 
+   * and generates a valid JWT upon success.
+   */
+  describe("loginController", () => {
+    let res;
+    beforeEach(() => {
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+      };
+    });
+
+    test("should verify comparePassword logic correctly during login", async () => {
+      const req = { body: { email: "test@example.com", password: "password123" } };
+      const mockUser = {
+        _id: "u123",
+        name: "Test User",
+        email: "test@example.com",
+        password: "hashedPassword",
+      };
+
+      userModel.findOne.mockResolvedValue(mockUser);
+      comparePassword.mockResolvedValue(true);
+      
+      await loginController(req, res);
+
+      expect(comparePassword).toHaveBeenCalledWith("password123", "hashedPassword");
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+  });
+
+  // Foo Tzie Huang - A0262376Y
+  /**
+   * forgotPasswordController Tests
+   * * Validates the password reset mechanism.
+   * Covers cases where the user provides the correct email and secret answer
+   * to update their password, as well as failure cases for incorrect inputs.
+   */
+  describe("forgotPasswordController", () => {
+    let res;
+    beforeEach(() => {
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+      };
+    });
+
+    test("should reset password successfully", async () => {
+      const req = {
+        body: {
+          email: "user@example.com",
+          answer: "Blue",
+          newPassword: "newSecurePassword",
+        },
+      };
+
+      userModel.findOne.mockResolvedValue({ _id: "user123" });
+      hashPassword.mockResolvedValue("hashedNewPassword");
+      userModel.findByIdAndUpdate.mockResolvedValue(true);
+
+      await forgotPasswordController(req, res);
+
+      expect(userModel.findOne).toHaveBeenCalledWith({
+        email: "user@example.com",
+        answer: "Blue",
+      });
+      expect(hashPassword).toHaveBeenCalledWith("newSecurePassword");
+      expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith("user123", {
+        password: "hashedNewPassword",
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Password Reset Successfully",
+        })
+      );
+    });
+
+    test("should return 404 for wrong email or answer", async () => {
+      const req = {
+        body: { email: "wrong@example.com", answer: "Wrong", newPassword: "123" },
+      };
+      userModel.findOne.mockResolvedValue(null);
+
+      await forgotPasswordController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Wrong Email Or Answer",
+        })
+      );
+    });
+
+    test("should return 400 if email is missing", async () => {
+      const req = { body: { answer: "Blue", newPassword: "123" } };
+      await forgotPasswordController(req, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({ message: "Emai is required" });
+    });
+  })
+});
