@@ -1,3 +1,11 @@
+// Jian Tao - A0273320R
+// fixed applied:
+// - Renamed function from "getPrductsByCat" to "getProductsByCat" to correct the typo and improve code readability/maintainability.
+// - Updated category state initialization from [] to {} to match actual usage as an object (e.g., category?.name).
+// - Added defensive handling for product description rendering to prevent runtime errors when description is null/undefined before substring() is called.
+// - Added defensive price rendering logic to validate price before applying toLocaleString(), and display "N/A" when price is missing/invalid.
+// - Improved robustness of category/product rendering by using optional chaining in UI-bound fields to reduce risk of runtime crashes from incomplete API data.
+
 import React, { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { useParams, useNavigate } from "react-router-dom";
@@ -7,12 +15,14 @@ const CategoryProduct = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
-  const [category, setCategory] = useState([]);
+  // Fix Applied here: Updated category state initialization from [] to {} to match actual usage as an object (e.g., category?.name).
+  const [category, setCategory] = useState({});
 
   useEffect(() => {
-    if (params?.slug) getPrductsByCat();
+    // Fix Applied here: Renamed function from "getPrductsByCat" to "getProductsByCat" to correct the typo and improve code readability/maintainability.
+    if (params?.slug) getProductsByCat();
   }, [params?.slug]);
-  const getPrductsByCat = async () => {
+  const getProductsByCat = async () => {
     try {
       const { data } = await axios.get(
         `/api/v1/product/product-category/${params.slug}`
@@ -43,14 +53,18 @@ const CategoryProduct = () => {
                     <div className="card-name-price">
                       <h5 className="card-title">{p.name}</h5>
                       <h5 className="card-title card-price">
-                        {p.price.toLocaleString("en-US", {
+                        {/* Fix Applied here: Added defensive price rendering logic to validate price before applying toLocaleString(), and display "N/A" when price is missing/invalid. */}
+                        {p?.price != null && !Number.isNaN(Number(p.price))
+                          ? Number(p.price).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
-                        })}
+                            })
+                          : "N/A"}
                       </h5>
                     </div>
                     <p className="card-text ">
-                      {p.description.substring(0, 60)}...
+                      {/* Fix Applied here: Added defensive handling for product description rendering to prevent runtime errors when description is null/undefined before substring() is called. */}
+                      {p?.description?.substring(0, 60) || ""}...
                     </p>
                     <div className="card-name-price">
                       <button

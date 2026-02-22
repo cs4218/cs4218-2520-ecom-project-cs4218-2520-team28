@@ -59,7 +59,7 @@ describe("Orders Component", () => {
           _id: "1",
           status: "Processing",
           buyer: { name: "John" },
-          createAt: new Date(),
+          createdAt: new Date(),
           payment: { success: true },
           products: [
             {
@@ -114,7 +114,7 @@ describe("Orders Component", () => {
           _id: "1",
           status: "Processing",
           buyer: { name: "John" },
-          createAt: new Date(),
+          createdAt: new Date(),
           payment: { success: true },
           products: [
             {
@@ -129,7 +129,7 @@ describe("Orders Component", () => {
           _id: "2",
           status: "Shipped",
           buyer: { name: "Jane" },
-          createAt: new Date(),
+          createdAt: new Date(),
           payment: { success: true },
           products: [
             {
@@ -153,8 +153,46 @@ describe("Orders Component", () => {
       expect(screen.getByText("Product 1")).toBeInTheDocument();
       expect(screen.getByText("Product 2")).toBeInTheDocument();
     });
+  });
 
+  test("does not call GET API when auth token is null", async () => {
+    jest.spyOn(require("../../context/auth"), "useAuth").mockReturnValue([
+      { token: null },
+      jest.fn(),
+    ]);
 
+    axios.get.mockClear();
+
+    render(<Orders />);
+
+    await waitFor(() => {
+      expect(axios.get).not.toHaveBeenCalled();
+    });
+  });
+
+  test("renders Failed when payment.success is false", async () => {
+    jest.spyOn(require("../../context/auth"), "useAuth").mockReturnValue([
+      { token: "fake-token" },
+      jest.fn(),
+    ]);
+
+    axios.get.mockResolvedValueOnce({
+      data: [
+        {
+          _id: "1",
+          status: "Processing",
+          buyer: { name: "John" },
+          createdAt: new Date(),
+          payment: { success: false },
+          products: [],
+        },
+      ],
+    });
+
+    render(<Orders />);
+
+    await screen.findByText("John");
+    expect(screen.getByText("Failed")).toBeInTheDocument();
   });
 
 });

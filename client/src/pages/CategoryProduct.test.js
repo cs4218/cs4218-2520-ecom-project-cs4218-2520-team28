@@ -63,6 +63,7 @@ describe("CategoryProduct Component", () => {
   // Reset mocks before each test to prevent cross-test interference
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSlug = "electronics";
   });
 
   // Test Coverage: Verify API is called with correct category slug on component mount
@@ -147,6 +148,52 @@ describe("CategoryProduct Component", () => {
     render(<CategoryProduct />);
 
     expect(axios.get).not.toHaveBeenCalled();
+  });
+
+  // Test Coverage: Verify component renders "N/A" when product price is missing or invalid
+  test("renders N/A when product price is missing", async () => {
+    axios.get.mockResolvedValueOnce({
+      data: {
+        products: [
+          {
+            _id: "1",
+            name: "Laptop",
+            price: null,
+            description: "High performance laptop",
+            slug: "laptop",
+          },
+        ],
+        category: { name: "Electronics" },
+      },
+    });
+
+    render(<CategoryProduct />);
+
+    expect(await screen.findByText("Laptop")).toBeInTheDocument();
+    expect(screen.getByText("N/A")).toBeInTheDocument();
+  });
+
+  // Test Coverage: Verify component safely handles missing product description without crashing
+  test("renders safely when product description is missing", async () => {
+    axios.get.mockResolvedValueOnce({
+      data: {
+        products: [
+          {
+            _id: "1",
+            name: "Laptop",
+            price: 1000,
+            description: undefined,
+            slug: "laptop",
+          },
+        ],
+        category: { name: "Electronics" },
+      },
+    });
+
+    render(<CategoryProduct />);
+
+    expect(await screen.findByText("Laptop")).toBeInTheDocument();
+    expect(screen.getByText("...")).toBeInTheDocument();
   });
 
 

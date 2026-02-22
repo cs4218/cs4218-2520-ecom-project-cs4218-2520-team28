@@ -1,6 +1,12 @@
 // Jian Tao - A0273320R
 // fixed:
 // - Added missing React key prop to the root element inside orders.map()
+// - Updated order status options to match backend Order model enum values 
+//   ("Pending", "Processing", "Shipped", "Delivered", "Cancelled") for consistency and to avoid enum validation errors.
+// - Corrected typos in status values ("deliverd" -> "Delivered", "cancel" -> "Cancelled", "Not Process" -> "Pending").
+// - Corrected timestamp field from "createAt" to "createdAt" to match Mongoose timestamps
+//   and prevent "Invalid date" rendering in the UI.
+
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -14,11 +20,11 @@ const { Option } = Select;
 
 const AdminOrders = () => {
   const [status, setStatus] = useState([
-    "Not Process",
+    "Pending",
     "Processing",
     "Shipped",
-    "deliverd",
-    "cancel",
+    "Delivered",
+    "Cancelled",
   ]);
   const [changeStatus, setCHangeStatus] = useState("");
   const [orders, setOrders] = useState([]);
@@ -87,7 +93,10 @@ const AdminOrders = () => {
                         </Select>
                       </td>
                       <td>{o?.buyer?.name}</td>
-                      <td>{moment(o?.createAt).fromNow()}</td>
+                      // fixed here:
+                      // - Corrected timestamp field from "createAt" to "createdAt" to match Mongoose timestamps
+                      //   and prevent "Invalid date" rendering in the UI.
+                      <td>{moment(o?.createdAt).fromNow()}</td>
                       <td>{o?.payment.success ? "Success" : "Failed"}</td>
                       <td>{o?.products?.length}</td>
                     </tr>
