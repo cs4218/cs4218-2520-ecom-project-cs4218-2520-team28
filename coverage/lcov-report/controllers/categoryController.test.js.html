@@ -2662,7 +2662,7 @@ import {
     });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    describe('validation', <span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        test('should return 401 when name is missing from request body', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        test('should return 400 when name is missing from request body', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
             // Arrange
 <span class="cstat-no" title="statement not covered" >            req.body = {};</span>
 &nbsp;
@@ -2670,13 +2670,13 @@ import {
 <span class="cstat-no" title="statement not covered" >            await createCategoryController(req, res);</span>
 &nbsp;
             // Assert
-<span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(401);</span>
+<span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(400);</span>
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 message: "Name is required"
             });
         });
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        test('should return 401 when name is undefined', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        test('should return 400 when name is undefined', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
             // Arrange
 <span class="cstat-no" title="statement not covered" >            req.body = { name: undefined };</span>
 &nbsp;
@@ -2684,13 +2684,13 @@ import {
 <span class="cstat-no" title="statement not covered" >            await createCategoryController(req, res);</span>
 &nbsp;
             // Assert
-<span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(401);</span>
+<span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(400);</span>
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 message: "Name is required"
             });
         });
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        test('should return 401 when name is null', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        test('should return 400 when name is null', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
             // Arrange
 <span class="cstat-no" title="statement not covered" >            req.body = { name: null };</span>
 &nbsp;
@@ -2698,13 +2698,13 @@ import {
 <span class="cstat-no" title="statement not covered" >            await createCategoryController(req, res);</span>
 &nbsp;
             // Assert
-<span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(401);</span>
+<span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(400);</span>
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 message: "Name is required"
             });
         });
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        test('should return 401 when name is empty string', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        test('should return 400 when name is empty string', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
             // Arrange
 <span class="cstat-no" title="statement not covered" >            req.body = { name: "" };</span>
 &nbsp;
@@ -2712,7 +2712,7 @@ import {
 <span class="cstat-no" title="statement not covered" >            await createCategoryController(req, res);</span>
 &nbsp;
             // Assert
-<span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(401);</span>
+<span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(400);</span>
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 message: "Name is required"
             });
@@ -2843,7 +2843,7 @@ import {
 <span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(200);</span>
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 success: true,
-                message: "Category Already Exisits"
+                message: "Category Already Exists"
             });
         });
 &nbsp;
@@ -2917,7 +2917,7 @@ import {
 <span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(201);</span>
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 success: true,
-                message: "new category created",
+                message: "New Category Created",
                 category: savedCategory
             });
         });
@@ -3058,7 +3058,7 @@ import {
             // Assert
             const response = <span class="cstat-no" title="statement not covered" >res.send.mock.calls[0][0];</span>
 <span class="cstat-no" title="statement not covered" >            expect(response).toHaveProperty('success', true);</span>
-<span class="cstat-no" title="statement not covered" >            expect(response).toHaveProperty('message', 'new category created');</span>
+<span class="cstat-no" title="statement not covered" >            expect(response).toHaveProperty('message', 'New Category Created');</span>
 <span class="cstat-no" title="statement not covered" >            expect(response).toHaveProperty('category');</span>
 <span class="cstat-no" title="statement not covered" >            expect(response.category).toHaveProperty('_id');</span>
 <span class="cstat-no" title="statement not covered" >            expect(response.category).toHaveProperty('name');</span>
@@ -3168,7 +3168,7 @@ import {
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 success: false,
                 error: dbError,
-                message: "Errro in Category"
+                message: "Error in Category"
             });
         });
 &nbsp;
@@ -3194,7 +3194,7 @@ import {
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 success: false,
                 error: saveError,
-                message: "Errro in Category"
+                message: "Error in Category"
             });
         });
     });
@@ -3384,7 +3384,7 @@ import {
 <span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(200);</span>
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 success: true,
-                messsage: "Category Updated Successfully",
+                message: "Category Updated Successfully",
                 category: updatedCategory
             });
         });
@@ -3481,7 +3481,7 @@ import {
             // Assert
             const response = <span class="cstat-no" title="statement not covered" >res.send.mock.calls[0][0];</span>
 <span class="cstat-no" title="statement not covered" >            expect(response).toHaveProperty('success', true);</span>
-<span class="cstat-no" title="statement not covered" >            expect(response).toHaveProperty('messsage', 'Category Updated Successfully'); </span>// Note: typo in code
+<span class="cstat-no" title="statement not covered" >            expect(response).toHaveProperty('message', 'Category Updated Successfully');</span>
 <span class="cstat-no" title="statement not covered" >            expect(response).toHaveProperty('category');</span>
 <span class="cstat-no" title="statement not covered" >            expect(response.category).toBe(updatedCategory);</span>
         });
@@ -3637,7 +3637,7 @@ import {
 <span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(200);</span>
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 success: true,
-                message: "Categry Deleted Successfully"
+                message: "Category Deleted Successfully"
             });
         });
 &nbsp;
@@ -3681,7 +3681,7 @@ import {
 <span class="cstat-no" title="statement not covered" >            expect(response).not.toHaveProperty('category');</span>
 <span class="cstat-no" title="statement not covered" >            expect(response).toEqual({</span>
                 success: true,
-                message: "Categry Deleted Successfully"
+                message: "Category Deleted Successfully"
             });
         });
     });
@@ -3701,7 +3701,7 @@ import {
 <span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(500);</span>
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 success: false,
-                message: "error while deleting category",
+                message: "Error while deleting category",
                 error: dbError
             });
         });
@@ -3720,7 +3720,7 @@ import {
 <span class="cstat-no" title="statement not covered" >            expect(res.status).toHaveBeenCalledWith(500);</span>
 <span class="cstat-no" title="statement not covered" >            expect(res.send).toHaveBeenCalledWith({</span>
                 success: false,
-                message: "error while deleting category",
+                message: "Error while deleting category",
                 error: castError
             });
         });
@@ -3871,7 +3871,7 @@ import {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-14T17:50:17.320Z
+                at 2026-03-14T18:35:36.383Z
             </div>
         <script src="../prettify.js"></script>
         <script>
