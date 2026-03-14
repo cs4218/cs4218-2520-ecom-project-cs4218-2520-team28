@@ -12,6 +12,10 @@ export const requireSignIn = async (req, res, next) => {
         next();
     } catch (error) {
         console.log(error);
+        // Foo Chao, A0272024R
+        // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+        // modifeid error handling to return 401 status code and error message instead of just logging the error
+        return res.status(401).send({ success: false, message: "Unauthorized: Invalid or missing token" });
     }
 };
 

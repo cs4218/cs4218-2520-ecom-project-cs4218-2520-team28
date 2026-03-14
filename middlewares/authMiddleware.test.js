@@ -65,6 +65,11 @@ describe('authMiddleware', () => {
       expect(mockReq.user).toBeNull();
       expect(mockNext).not.toHaveBeenCalled(); // Crucially, next() should not be called on error
       expect(consoleSpy).toHaveBeenCalledWith(verificationError);
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // modifed next 2 lines to check for correct error handling response instead of just logging the error
+      expect(mockRes.status).toHaveBeenCalledWith(401);
+      expect(mockRes.send).toHaveBeenCalledWith({ success: false, message: "Unauthorized: Invalid or missing token" });
       
       consoleSpy.mockRestore(); // Clean up the spy
     });
