@@ -104,10 +104,10 @@ describe('authMiddleware', () => {
       expect(userModel.findById).toHaveBeenCalledWith('regularUserId');
       expect(mockNext).not.toHaveBeenCalled();
       expect(mockRes.status).toHaveBeenCalledWith(401);
-      expect(mockRes.send).toHaveBeenCalledWith({
-        success: false,
-        message: 'UnAuthorized Access',
-      });
+        expect(mockRes.send).toHaveBeenCalledWith({
+          success: false,
+          message: 'Unauthorized Access',
+        });
     });
 
     it('should send 401 error if user is not found in the database', async () => {
