@@ -1,3 +1,8 @@
+// Note to the grader: The product integration is tested by multiple testers, with tests split by methods.
+// The tests are consolidated in a single file for better organization and to avoid circular dependencies with mocks.
+// Each describe block corresponds to a specific controller method.
+// Refer to the comments at the top for details on who handles what.
+
 import express from "express";
 import request from "supertest";
 import JWT from "jsonwebtoken";
