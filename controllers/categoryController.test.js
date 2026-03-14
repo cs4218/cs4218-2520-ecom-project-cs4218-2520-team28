@@ -63,7 +63,7 @@ describe('createCategoryController', () => {
     });
 
     describe('validation', () => {
-        test('should return 401 when name is missing from request body', async () => {
+        test('should return 400 when name is missing from request body', async () => {
             // Arrange
             req.body = {};
 
@@ -71,13 +71,13 @@ describe('createCategoryController', () => {
             await createCategoryController(req, res);
 
             // Assert
-            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({
                 message: "Name is required"
             });
         });
 
-        test('should return 401 when name is undefined', async () => {
+        test('should return 400 when name is undefined', async () => {
             // Arrange
             req.body = { name: undefined };
 
@@ -85,13 +85,13 @@ describe('createCategoryController', () => {
             await createCategoryController(req, res);
 
             // Assert
-            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({
                 message: "Name is required"
             });
         });
 
-        test('should return 401 when name is null', async () => {
+        test('should return 400 when name is null', async () => {
             // Arrange
             req.body = { name: null };
 
@@ -99,13 +99,13 @@ describe('createCategoryController', () => {
             await createCategoryController(req, res);
 
             // Assert
-            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({
                 message: "Name is required"
             });
         });
 
-        test('should return 401 when name is empty string', async () => {
+        test('should return 400 when name is empty string', async () => {
             // Arrange
             req.body = { name: "" };
 
@@ -113,7 +113,7 @@ describe('createCategoryController', () => {
             await createCategoryController(req, res);
 
             // Assert
-            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(res.send).toHaveBeenCalledWith({
                 message: "Name is required"
             });
@@ -244,7 +244,7 @@ describe('createCategoryController', () => {
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.send).toHaveBeenCalledWith({
                 success: true,
-                message: "Category Already Exisits"
+                message: "Category Already Exists"
             });
         });
 
@@ -318,7 +318,7 @@ describe('createCategoryController', () => {
             expect(res.status).toHaveBeenCalledWith(201);
             expect(res.send).toHaveBeenCalledWith({
                 success: true,
-                message: "new category created",
+                message: "New Category Created",
                 category: savedCategory
             });
         });
@@ -459,7 +459,7 @@ describe('createCategoryController', () => {
             // Assert
             const response = res.send.mock.calls[0][0];
             expect(response).toHaveProperty('success', true);
-            expect(response).toHaveProperty('message', 'new category created');
+            expect(response).toHaveProperty('message', 'New Category Created');
             expect(response).toHaveProperty('category');
             expect(response.category).toHaveProperty('_id');
             expect(response.category).toHaveProperty('name');
@@ -569,7 +569,7 @@ describe('createCategoryController', () => {
             expect(res.send).toHaveBeenCalledWith({
                 success: false,
                 error: dbError,
-                message: "Errro in Category"
+                message: "Error in Category"
             });
         });
 
@@ -595,7 +595,7 @@ describe('createCategoryController', () => {
             expect(res.send).toHaveBeenCalledWith({
                 success: false,
                 error: saveError,
-                message: "Errro in Category"
+                message: "Error in Category"
             });
         });
     });
@@ -785,7 +785,7 @@ describe('updateCategoryController', () => {
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.send).toHaveBeenCalledWith({
                 success: true,
-                messsage: "Category Updated Successfully",
+                message: "Category Updated Successfully",
                 category: updatedCategory
             });
         });
@@ -882,7 +882,7 @@ describe('updateCategoryController', () => {
             // Assert
             const response = res.send.mock.calls[0][0];
             expect(response).toHaveProperty('success', true);
-            expect(response).toHaveProperty('messsage', 'Category Updated Successfully'); // Note: typo in code
+            expect(response).toHaveProperty('message', 'Category Updated Successfully');
             expect(response).toHaveProperty('category');
             expect(response.category).toBe(updatedCategory);
         });
@@ -1038,7 +1038,7 @@ describe('deleteCategoryController', () => {
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.send).toHaveBeenCalledWith({
                 success: true,
-                message: "Categry Deleted Successfully"
+                message: "Category Deleted Successfully"
             });
         });
 
@@ -1082,7 +1082,7 @@ describe('deleteCategoryController', () => {
             expect(response).not.toHaveProperty('category');
             expect(response).toEqual({
                 success: true,
-                message: "Categry Deleted Successfully"
+                message: "Category Deleted Successfully"
             });
         });
     });
@@ -1102,7 +1102,7 @@ describe('deleteCategoryController', () => {
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.send).toHaveBeenCalledWith({
                 success: false,
-                message: "error while deleting category",
+                message: "Error while deleting category",
                 error: dbError
             });
         });
@@ -1121,7 +1121,7 @@ describe('deleteCategoryController', () => {
             expect(res.status).toHaveBeenCalledWith(500);
             expect(res.send).toHaveBeenCalledWith({
                 success: false,
-                message: "error while deleting category",
+                message: "Error while deleting category",
                 error: castError
             });
         });
