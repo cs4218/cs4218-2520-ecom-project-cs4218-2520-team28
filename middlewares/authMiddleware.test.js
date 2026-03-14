@@ -124,14 +124,16 @@ describe('authMiddleware', () => {
       // Assert
       expect(mockNext).not.toHaveBeenCalled();
       expect(mockRes.status).toHaveBeenCalledWith(401);
-      // This will fail because accessing .role of null throws an error, so the catch block is executed
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // modified next 3 lines to check for correct error handling response for user not found instead of generic Error in admin middleware
       expect(mockRes.send).toHaveBeenCalledWith(
         expect.objectContaining({
           success: false,
-          message: 'Error in admin middleware',
+          message: 'User not found',
         })
       );
-      expect(consoleSpy).toHaveBeenCalled(); // Error should be logged
+      expect(consoleSpy).not.toHaveBeenCalled(); // No error should be logged
       consoleSpy.mockRestore();
     });
 
@@ -149,11 +151,12 @@ describe('authMiddleware', () => {
 
         // Assert
         expect(mockNext).not.toHaveBeenCalled();
-        expect(mockRes.status).toHaveBeenCalledWith(401);
+        
+        expect(mockRes.status).toHaveBeenCalledWith(500);
         expect(mockRes.send).toHaveBeenCalledWith({
-            success: false,
-            error: dbError,
-            message: 'Error in admin middleware',
+          success: false,
+          error: dbError,
+          message: 'Error in admin middleware',
         });
         expect(consoleSpy).toHaveBeenCalledWith(dbError);
         consoleSpy.mockRestore();

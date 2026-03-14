@@ -23,17 +23,28 @@ export const requireSignIn = async (req, res, next) => {
 export const isAdmin = async (req, res, next) => {
     try {
         const user = await userModel.findById(req.user._id);
-        if(user.role !== 1) {
-            return res.status(401).send({
-                success: false,
-                message: "UnAuthorized Access",
-            });
-        } else {
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // added check for user not found and return 401 status code instead of generic Error in admin middleware
+            if (!user) {
+                return res.status(401).send({
+                    success: false,
+                    message: "User not found",
+                });
+            }
+            if (user.role !== 1) {
+                return res.status(401).send({
+                    success: false,
+                    message: "UnAuthorized Access",
+                });
+            }
             next();
-        }
     } catch (error) {
         console.log(error);
-        res.status(401).send({
+        // Foo Chao, A0272024R
+        // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+        // modified error handling to return 500 status code instead of 401
+        res.status(500).send({
             success: false,
             error,
             message: "Error in admin middleware",
