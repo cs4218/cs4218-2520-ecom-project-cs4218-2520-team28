@@ -221,7 +221,13 @@
 <a name='L156'></a><a href='#L156'>156</a>
 <a name='L157'></a><a href='#L157'>157</a>
 <a name='L158'></a><a href='#L158'>158</a>
-<a name='L159'></a><a href='#L159'>159</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -288,6 +294,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -345,6 +354,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -369,6 +380,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -446,6 +458,9 @@ import { requireSignIn, isAdmin } from './authMiddleware.js';
 <span class="cstat-no" title="statement not covered" >      expect(mockReq.user).toBeNull();</span>
 <span class="cstat-no" title="statement not covered" >      expect(mockNext).not.toHaveBeenCalled(); </span>// Crucially, next() should not be called on error
 <span class="cstat-no" title="statement not covered" >      expect(consoleSpy).toHaveBeenCalledWith(verificationError);</span>
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // modifed next 2 lines to check for correct error handling response instead of just logging the error
 <span class="cstat-no" title="statement not covered" >      expect(mockRes.status).toHaveBeenCalledWith(401);</span>
 <span class="cstat-no" title="statement not covered" >      expect(mockRes.send).toHaveBeenCalledWith({ success: false, message: "Unauthorized: Invalid or missing token" });</span>
       
@@ -482,10 +497,10 @@ import { requireSignIn, isAdmin } from './authMiddleware.js';
 <span class="cstat-no" title="statement not covered" >      expect(userModel.findById).toHaveBeenCalledWith('regularUserId');</span>
 <span class="cstat-no" title="statement not covered" >      expect(mockNext).not.toHaveBeenCalled();</span>
 <span class="cstat-no" title="statement not covered" >      expect(mockRes.status).toHaveBeenCalledWith(401);</span>
-<span class="cstat-no" title="statement not covered" >      expect(mockRes.send).toHaveBeenCalledWith({</span>
-        success: false,
-        message: 'UnAuthorized Access',
-      });
+<span class="cstat-no" title="statement not covered" >        expect(mockRes.send).toHaveBeenCalledWith({</span>
+          success: false,
+          message: 'Unauthorized Access',
+        });
     });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    it('should send 401 error if user is not found in the database', <span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
@@ -502,14 +517,16 @@ import { requireSignIn, isAdmin } from './authMiddleware.js';
       // Assert
 <span class="cstat-no" title="statement not covered" >      expect(mockNext).not.toHaveBeenCalled();</span>
 <span class="cstat-no" title="statement not covered" >      expect(mockRes.status).toHaveBeenCalledWith(401);</span>
-      // This will fail because accessing .role of null throws an error, so the catch block is executed
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // modified next 3 lines to check for correct error handling response for user not found instead of generic Error in admin middleware
 <span class="cstat-no" title="statement not covered" >      expect(mockRes.send).toHaveBeenCalledWith(</span>
         expect.objectContaining({
           success: false,
-          message: 'Error in admin middleware',
+          message: 'User not found',
         })
       );
-<span class="cstat-no" title="statement not covered" >      expect(consoleSpy).toHaveBeenCalled(); </span>// Error should be logged
+<span class="cstat-no" title="statement not covered" >      expect(consoleSpy).not.toHaveBeenCalled(); </span>// No error should be logged
 <span class="cstat-no" title="statement not covered" >      consoleSpy.mockRestore();</span>
     });
 &nbsp;
@@ -527,11 +544,12 @@ import { requireSignIn, isAdmin } from './authMiddleware.js';
 &nbsp;
         // Assert
 <span class="cstat-no" title="statement not covered" >        expect(mockNext).not.toHaveBeenCalled();</span>
-<span class="cstat-no" title="statement not covered" >        expect(mockRes.status).toHaveBeenCalledWith(401);</span>
+        
+<span class="cstat-no" title="statement not covered" >        expect(mockRes.status).toHaveBeenCalledWith(500);</span>
 <span class="cstat-no" title="statement not covered" >        expect(mockRes.send).toHaveBeenCalledWith({</span>
-            success: false,
-            error: dbError,
-            message: 'Error in admin middleware',
+          success: false,
+          error: dbError,
+          message: 'Error in admin middleware',
         });
 <span class="cstat-no" title="statement not covered" >        expect(consoleSpy).toHaveBeenCalledWith(dbError);</span>
 <span class="cstat-no" title="statement not covered" >        consoleSpy.mockRestore();</span>
@@ -544,7 +562,7 @@ import { requireSignIn, isAdmin } from './authMiddleware.js';
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-14T17:00:16.858Z
+                at 2026-03-14T17:50:17.320Z
             </div>
         <script src="../prettify.js"></script>
         <script>

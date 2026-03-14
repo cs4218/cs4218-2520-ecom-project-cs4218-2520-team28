@@ -6,7 +6,7 @@ import { writeFileSync, unlinkSync } from "fs";
 import { join } from "path";
 import os from "os";
 
-import { createProductController } from "../../controllers/productController.js";
+import { createProductController, updateProductController, deleteProductController } from "../../controllers/productController.js";
 import productRoutes from "../../routes/productRoutes.js";
 import app from "../../app.js";
 import userModel from "../../models/userModel.js";
@@ -15,12 +15,23 @@ import * as dbHelper from "./dbHelper.js";
 
 // Foo Chao, A0272024R
 // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+// Suppress console.log noise (e.g. JsonWebTokenError logged by authMiddleware on intentionally bad tokens)
+let consoleSpy;
+beforeAll(() => { consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {}); });
+afterAll(() => { consoleSpy.mockRestore(); });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// createProductController
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Foo Chao, A0272024R
+// AI Assistance: Github Copilot (Claude Sonnet 4.6)
 //
 // Prompt 1: refeering to how we are doing right now, how would u suggest we add our integraion test how we arrange or folder it?
 //
 // Response: Suggested the current file structure we are using
 //
-// Prtompt 2 (plan mode): I want implement integration test for createProductController. 
+// Prompt 2 (plan mode): I want implement integration test for createProductController. 
 //    it should be in the way u suggest me to folder my file. 
 //    It should use a bottom up approach. 
 //    first inegrate the controller with the productModel 
@@ -290,7 +301,7 @@ describe("createProductController integration tests", () => {
           .field("name", "Test");
 
         expect(res.status).toBe(401);
-        expect(res.body.message).toBe("UnAuthorized Access");
+        expect(res.body.message).toBe("Unauthorized Access");
       });
     });
 
@@ -399,7 +410,7 @@ describe("createProductController integration tests", () => {
           .field("name", "Test");
 
         expect(res.status).toBe(401);
-        expect(res.body.message).toBe("UnAuthorized Access");
+        expect(res.body.message).toBe("Unauthorized Access");
       });
     });
 
@@ -481,6 +492,677 @@ describe("createProductController integration tests", () => {
 
         expect(res.status).toBe(201);
         expect(res.body.products.slug).toBe("Hello-World-Product");
+      });
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// updateProductController
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Foo Chao, A0272024R
+// AI Assistance: Github Copilot (Claude Sonnet 4.6)
+// Prompt : following the way integration tests is doen for createProductController 
+//    do it for updateProductController and deleteProductConttolerr
+describe("updateProductController integration tests", () => {
+  /**
+   * Bottom-up approach — three levels of integration, each as a nested describe:
+   *
+   *  Level 1 — Controller + Model
+   *    Real Mongoose operations against in-memory MongoDB.
+   *    req/res constructed manually; no HTTP layer involved.
+   *
+   *  Level 2 — Controller + Model + Route + Middleware
+   *    Same DB. Product router mounted on a minimal Express app.
+   *    Real JWT signing/verification; formidable parses multipart fields.
+   *
+   *  Level 3 — Full App (app.js)
+   *    Same DB. Full Express application imported from app.js.
+   *    Tests the complete stack at the real /api/v1/product/... endpoint.
+   */
+
+  // ─── shared constants ──────────────────────────────────────────────────────
+
+  const JWT_SECRET = "test-integration-secret";
+  const validCategoryId = new mongoose.Types.ObjectId().toString();
+
+  const validFields = {
+    name: "Updated Product",
+    description: "Updated description",
+    price: "59.99",
+    category: validCategoryId,
+    quantity: "20",
+    shipping: "true",
+  };
+
+  // ─── minimal Level-2 app (product router only) ────────────────────────────
+
+  const routerApp = express();
+  routerApp.use(express.json());
+  routerApp.use("/api/v1/product", productRoutes);
+
+  // ─── helpers ──────────────────────────────────────────────────────────────
+
+  const makeRes = () => ({
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+  });
+
+  // helper: seed one product and return its _id as string
+  const seedProduct = async (overrides = {}) => {
+    const p = await productModel.create({
+      name: "Original Product",
+      slug: "Original-Product",
+      description: "Original description",
+      price: 9.99,
+      category: new mongoose.Types.ObjectId(),
+      quantity: 5,
+      ...overrides,
+    });
+    return p._id.toString();
+  };
+
+  // ─── shared suite-level setup ─────────────────────────────────────────────
+
+  let adminToken;
+
+  beforeAll(async () => {
+    process.env.JWT_SECRET = JWT_SECRET;
+    await dbHelper.connect();
+
+    const adminUser = await userModel.create({
+      name: "Update Admin",
+      email: "updateadmin@test.com",
+      password: "hashedpassword",
+      phone: 1111111111,
+      address: "1 Update St",
+      answer: "test",
+      role: 1,
+    });
+
+    adminToken = JWT.sign({ _id: adminUser._id }, JWT_SECRET);
+  });
+
+  afterEach(async () => {
+    await productModel.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await dbHelper.closeDB();
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 1 — Controller + Model
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 1 — Controller + Model Integration (no HTTP)", () => {
+    describe("Validation failures", () => {
+      it("should return 400 when req.fields is missing", async () => {
+        const pid = await seedProduct();
+        const req = { params: { pid } };
+        const res = makeRes();
+
+        await updateProductController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ message: "Please provide all fields" });
+      });
+
+      it.each([
+        ["name",        { ...validFields, name: "" },        "Name is Required"],
+        ["description", { ...validFields, description: "" }, "Description is Required"],
+        ["price",       { ...validFields, price: "" },       "Price is Required"],
+        ["category",    { ...validFields, category: "" },    "Category is Required"],
+        ["quantity",    { ...validFields, quantity: "" },    "Quantity is Required"],
+      ])("should return 400 when %s is missing", async (_field, fields, errorMsg) => {
+        const pid = await seedProduct();
+        const req = { params: { pid }, fields, files: {} };
+        const res = makeRes();
+
+        await updateProductController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({ error: errorMsg });
+      });
+
+      it("should return 400 when photo exceeds 1,000,000 bytes", async () => {
+        const pid = await seedProduct();
+        const req = {
+          params: { pid },
+          fields: { ...validFields },
+          files: { photo: { size: 1000001, path: "", type: "image/jpeg" } },
+        };
+        const res = makeRes();
+
+        await updateProductController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+          error: "Photo size must be between 1 and 1,000,000 bytes",
+        });
+      });
+
+      it("should return 404 when product does not exist", async () => {
+        const nonExistentId = new mongoose.Types.ObjectId().toString();
+        const req = {
+          params: { pid: nonExistentId },
+          fields: { ...validFields },
+          files: {},
+        };
+        const res = makeRes();
+
+        await updateProductController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.send).toHaveBeenCalledWith(
+          expect.objectContaining({ success: false, message: "Product not found" })
+        );
+      });
+    });
+
+    describe("Successful update — DB reflects changes", () => {
+      it("should update a product (no photo) and persist changes in the DB", async () => {
+        const pid = await seedProduct();
+        const req = {
+          params: { pid },
+          fields: { ...validFields },
+          files: {},
+        };
+        const res = makeRes();
+
+        await updateProductController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(201);
+        expect(res.send).toHaveBeenCalledWith(
+          expect.objectContaining({ success: true, message: "Product Updated Successfully" })
+        );
+
+        const updated = await productModel.findById(pid);
+        expect(updated.name).toBe("Updated Product");
+        expect(updated.price).toBe(59.99);
+        expect(updated.slug).toBe("Updated-Product");
+      });
+
+      it("should update a product with a new photo and persist photo data in the DB", async () => {
+        const pid = await seedProduct();
+        const tempPath = join(os.tmpdir(), "update-test-photo.jpg");
+        const photoBuffer = Buffer.alloc(512, 0xcc);
+        writeFileSync(tempPath, photoBuffer);
+
+        const req = {
+          params: { pid },
+          fields: { ...validFields },
+          files: { photo: { size: 512, path: tempPath, type: "image/png" } },
+        };
+        const res = makeRes();
+
+        await updateProductController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(201);
+
+        const updated = await productModel.findById(pid);
+        expect(updated.photo.contentType).toBe("image/png");
+        expect(Buffer.from(updated.photo.data).equals(photoBuffer)).toBe(true);
+
+        unlinkSync(tempPath);
+      });
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 2 — Controller + Model + Route + Middleware
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 2 — Route + Middleware + Controller Integration (minimal Express)", () => {
+    describe("Auth middleware", () => {
+      it("should return 401 when Authorization header is missing", async () => {
+        const pid = await seedProduct();
+        const res = await request(routerApp)
+          .put(`/api/v1/product/update-product/${pid}`)
+          .field("name", "Test");
+
+        expect(res.status).toBe(401);
+        expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
+      });
+
+      it("should return 401 when JWT is invalid", async () => {
+        const pid = await seedProduct();
+        const res = await request(routerApp)
+          .put(`/api/v1/product/update-product/${pid}`)
+          .set("Authorization", "bad.token.here")
+          .field("name", "Test");
+
+        expect(res.status).toBe(401);
+        expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
+      });
+
+      it("should return 401 when user is not admin", async () => {
+        const pid = await seedProduct();
+        const normalUser = await userModel.create({
+          name: "Normal User",
+          email: "updateroute_normal@test.com",
+          password: "hashedpassword",
+          phone: 2222222222,
+          address: "2 Normal St",
+          answer: "test",
+          role: 0,
+        });
+        const userToken = JWT.sign({ _id: normalUser._id }, JWT_SECRET);
+
+        const res = await request(routerApp)
+          .put(`/api/v1/product/update-product/${pid}`)
+          .set("Authorization", userToken)
+          .field("name", "Test");
+
+        expect(res.status).toBe(401);
+        expect(res.body.message).toBe("Unauthorized Access");
+      });
+    });
+
+    describe("Validation (authenticated admin)", () => {
+      it("should return 404 when product does not exist", async () => {
+        const nonExistentId = new mongoose.Types.ObjectId().toString();
+        const res = await request(routerApp)
+          .put(`/api/v1/product/update-product/${nonExistentId}`)
+          .set("Authorization", adminToken)
+          .field("name", "Updated")
+          .field("description", "Desc")
+          .field("price", "10")
+          .field("category", validCategoryId)
+          .field("quantity", "5");
+
+        expect(res.status).toBe(404);
+        expect(res.body.message).toBe("Product not found");
+      });
+    });
+
+    describe("Successful update (authenticated admin)", () => {
+      it("should update a product and return 201 when all fields are valid", async () => {
+        const pid = await seedProduct();
+        const res = await request(routerApp)
+          .put(`/api/v1/product/update-product/${pid}`)
+          .set("Authorization", adminToken)
+          .field("name", "Route Updated Product")
+          .field("description", "Route update test")
+          .field("price", "75.00")
+          .field("category", validCategoryId)
+          .field("quantity", "15")
+          .field("shipping", "true");
+
+        expect(res.status).toBe(201);
+        expect(res.body.success).toBe(true);
+        expect(res.body.message).toBe("Product Updated Successfully");
+        expect(res.body.products.name).toBe("Route Updated Product");
+
+        const updated = await productModel.findById(pid);
+        expect(updated.name).toBe("Route Updated Product");
+      });
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 3 — Full App Integration (app.js)
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 3 — Full App Integration (app.js, server level)", () => {
+    describe("Auth guard", () => {
+      it("should return 401 with no Authorization header", async () => {
+        const pid = await seedProduct();
+        const res = await request(app)
+          .put(`/api/v1/product/update-product/${pid}`)
+          .field("name", "Test");
+
+        expect(res.status).toBe(401);
+        expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
+      });
+
+      it("should return 401 when a valid JWT belongs to a non-admin user", async () => {
+        const pid = await seedProduct();
+        const normalUser = await userModel.create({
+          name: "Normal User",
+          email: "updateserver_normal@test.com",
+          password: "hashedpassword",
+          phone: 3333333333,
+          address: "3 Normal St",
+          answer: "test",
+          role: 0,
+        });
+        const normalToken = JWT.sign({ _id: normalUser._id }, JWT_SECRET);
+
+        const res = await request(app)
+          .put(`/api/v1/product/update-product/${pid}`)
+          .set("Authorization", normalToken)
+          .field("name", "Test");
+
+        expect(res.status).toBe(401);
+        expect(res.body.message).toBe("Unauthorized Access");
+      });
+    });
+
+    describe("Successful end-to-end update", () => {
+      it("should update a product and persist changes in the DB", async () => {
+        const pid = await seedProduct();
+        const res = await request(app)
+          .put(`/api/v1/product/update-product/${pid}`)
+          .set("Authorization", adminToken)
+          .field("name", "Server Updated Product")
+          .field("description", "Full stack update test")
+          .field("price", "149.99")
+          .field("category", validCategoryId)
+          .field("quantity", "30")
+          .field("shipping", "false");
+
+        expect(res.status).toBe(201);
+        expect(res.body).toMatchObject({ success: true, message: "Product Updated Successfully" });
+        expect(res.body.products.slug).toBe("Server-Updated-Product");
+
+        const updated = await productModel.findById(pid);
+        expect(updated.price).toBe(149.99);
+        expect(updated.name).toBe("Server Updated Product");
+      });
+
+      it("should return 404 when product does not exist", async () => {
+        const nonExistentId = new mongoose.Types.ObjectId().toString();
+        const res = await request(app)
+          .put(`/api/v1/product/update-product/${nonExistentId}`)
+          .set("Authorization", adminToken)
+          .field("name", "Ghost")
+          .field("description", "Does not exist")
+          .field("price", "1")
+          .field("category", validCategoryId)
+          .field("quantity", "1");
+
+        expect(res.status).toBe(404);
+        expect(res.body.message).toBe("Product not found");
+      });
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// deleteProductController
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Foo Chao, A0272024R
+// AI Assistance: Github Copilot (Claude Sonnet 4.6)
+// Prompt 1: following the way integration tests is doen for createProductController
+//    do it for updateProductController and deleteProductConttolerr
+// Prompt 2: can u check the frontend logic , 
+//    ithink delete product should only be doable by admin if it is fix it 
+//    and update relevatn test case. 
+//    i think the integrastio test got some error message spam please fix. thx
+describe("deleteProductController integration tests", () => {
+  /**
+   * Bottom-up approach — three levels of integration, each as a nested describe:
+   *
+   *  Level 1 — Controller + Model
+   *    Real Mongoose operations against in-memory MongoDB.
+   *    req/res constructed manually; no HTTP layer involved.
+   *    Auth is enforced by middleware which is bypassed at this level.
+   *
+   *  Level 2 — Controller + Model + Route + Middleware
+   *    Same DB. Product router mounted on a minimal Express app.
+   *    Real JWT signing/verification; route is auth-protected (requireSignIn + isAdmin).
+   *
+   *  Level 3 — Full App (app.js)
+   *    Same DB. Full Express application imported from app.js.
+   *    Tests the complete stack at the real /api/v1/product/... endpoint.
+   */
+
+  const JWT_SECRET = "test-integration-secret";
+
+  // ─── minimal Level-2 app (product router only) ────────────────────────────
+
+  const routerApp = express();
+  routerApp.use(express.json());
+  routerApp.use("/api/v1/product", productRoutes);
+
+  // ─── helpers ──────────────────────────────────────────────────────────────
+
+  const makeRes = () => ({
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+  });
+
+  const seedProduct = async (overrides = {}) => {
+    const p = await productModel.create({
+      name: "Product To Delete",
+      slug: "Product-To-Delete",
+      description: "Will be deleted",
+      price: 9.99,
+      category: new mongoose.Types.ObjectId(),
+      quantity: 1,
+      ...overrides,
+    });
+    return p._id.toString();
+  };
+
+  // ─── shared suite-level setup ─────────────────────────────────────────────
+
+  let adminToken;
+
+  beforeAll(async () => {
+    process.env.JWT_SECRET = JWT_SECRET;
+    await dbHelper.connect();
+
+    const adminUser = await userModel.create({
+      name: "Delete Admin",
+      email: "deleteadmin@test.com",
+      password: "hashedpassword",
+      phone: 4444444444,
+      address: "4 Delete St",
+      answer: "test",
+      role: 1,
+    });
+
+    adminToken = JWT.sign({ _id: adminUser._id }, JWT_SECRET);
+  });
+
+  afterEach(async () => {
+    await productModel.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await dbHelper.closeDB();
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 1 — Controller + Model
+  // Auth is enforced by middleware; at this level the controller is called
+  // directly, so auth tests belong to Level 2 and above.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 1 — Controller + Model Integration (no HTTP)", () => {
+    it("should return 404 when product does not exist", async () => {
+      const nonExistentId = new mongoose.Types.ObjectId().toString();
+      const req = { params: { pid: nonExistentId } };
+      const res = makeRes();
+
+      await deleteProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ success: false, message: "Product not found" })
+      );
+    });
+
+    it("should delete an existing product and return 200", async () => {
+      const pid = await seedProduct();
+      const req = { params: { pid } };
+      const res = makeRes();
+
+      await deleteProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ success: true, message: "Product Deleted successfully" })
+      );
+
+      const deleted = await productModel.findById(pid);
+      expect(deleted).toBeNull();
+    });
+
+    it("should not affect other products when deleting one", async () => {
+      const pidToDelete = await seedProduct({ name: "Delete Me", slug: "Delete-Me" });
+      await seedProduct({ name: "Keep Me", slug: "Keep-Me" });
+
+      const req = { params: { pid: pidToDelete } };
+      const res = makeRes();
+
+      await deleteProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(await productModel.countDocuments()).toBe(1);
+      expect(await productModel.findOne({ name: "Keep Me" })).not.toBeNull();
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 2 — Controller + Model + Route + Middleware
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 2 — Route + Middleware + Controller Integration (minimal Express)", () => {
+    describe("Auth middleware", () => {
+      it("should return 401 when Authorization header is missing", async () => {
+        const pid = await seedProduct();
+        const res = await request(routerApp)
+          .delete(`/api/v1/product/delete-product/${pid}`);
+
+        expect(res.status).toBe(401);
+        expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
+      });
+
+      it("should return 401 when JWT is invalid", async () => {
+        const pid = await seedProduct();
+        const res = await request(routerApp)
+          .delete(`/api/v1/product/delete-product/${pid}`)
+          .set("Authorization", "bad.token.here");
+
+        expect(res.status).toBe(401);
+        expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
+      });
+
+      it("should return 401 when user is not admin", async () => {
+        const pid = await seedProduct();
+        const normalUser = await userModel.create({
+          name: "Normal User",
+          email: "deleteroute_normal@test.com",
+          password: "hashedpassword",
+          phone: 5555555555,
+          address: "5 Normal St",
+          answer: "test",
+          role: 0,
+        });
+        const userToken = JWT.sign({ _id: normalUser._id }, JWT_SECRET);
+
+        const res = await request(routerApp)
+          .delete(`/api/v1/product/delete-product/${pid}`)
+          .set("Authorization", userToken);
+
+        expect(res.status).toBe(401);
+        expect(res.body.message).toBe("Unauthorized Access");
+      });
+    });
+
+    describe("Authorized admin", () => {
+      it("should return 404 when product does not exist", async () => {
+        const nonExistentId = new mongoose.Types.ObjectId().toString();
+        const res = await request(routerApp)
+          .delete(`/api/v1/product/delete-product/${nonExistentId}`)
+          .set("Authorization", adminToken);
+
+        expect(res.status).toBe(404);
+        expect(res.body.message).toBe("Product not found");
+      });
+
+      it("should delete an existing product and return 200", async () => {
+        const pid = await seedProduct();
+        const res = await request(routerApp)
+          .delete(`/api/v1/product/delete-product/${pid}`)
+          .set("Authorization", adminToken);
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.message).toBe("Product Deleted successfully");
+
+        expect(await productModel.findById(pid)).toBeNull();
+      });
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 3 — Full App Integration (app.js)
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 3 — Full App Integration (app.js, server level)", () => {
+    describe("Auth guard", () => {
+      it("should return 401 with no Authorization header", async () => {
+        const pid = await seedProduct();
+        const res = await request(app)
+          .delete(`/api/v1/product/delete-product/${pid}`);
+
+        expect(res.status).toBe(401);
+        expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
+      });
+
+      it("should return 401 when a valid JWT belongs to a non-admin user", async () => {
+        const pid = await seedProduct();
+        const normalUser = await userModel.create({
+          name: "Normal User",
+          email: "deleteserver_normal@test.com",
+          password: "hashedpassword",
+          phone: 6666666666,
+          address: "6 Normal St",
+          answer: "test",
+          role: 0,
+        });
+        const normalToken = JWT.sign({ _id: normalUser._id }, JWT_SECRET);
+
+        const res = await request(app)
+          .delete(`/api/v1/product/delete-product/${pid}`)
+          .set("Authorization", normalToken);
+
+        expect(res.status).toBe(401);
+        expect(res.body.message).toBe("Unauthorized Access");
+      });
+    });
+
+    describe("Authorized admin", () => {
+      it("should return 404 when product does not exist", async () => {
+        const nonExistentId = new mongoose.Types.ObjectId().toString();
+        const res = await request(app)
+          .delete(`/api/v1/product/delete-product/${nonExistentId}`)
+          .set("Authorization", adminToken);
+
+        expect(res.status).toBe(404);
+        expect(res.body.message).toBe("Product not found");
+      });
+
+      it("should delete an existing product and return 200", async () => {
+        const pid = await seedProduct();
+        const res = await request(app)
+          .delete(`/api/v1/product/delete-product/${pid}`)
+          .set("Authorization", adminToken);
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.message).toBe("Product Deleted successfully");
+
+        expect(await productModel.findById(pid)).toBeNull();
+      });
+
+      it("should not affect other products when deleting one", async () => {
+        const pidToDelete = await seedProduct({ name: "Server Delete Me", slug: "Server-Delete-Me" });
+        await seedProduct({ name: "Server Keep Me", slug: "Server-Keep-Me" });
+
+        const res = await request(app)
+          .delete(`/api/v1/product/delete-product/${pidToDelete}`)
+          .set("Authorization", adminToken);
+
+        expect(res.status).toBe(200);
+        expect(await productModel.countDocuments()).toBe(1);
+        expect(await productModel.findOne({ name: "Server Keep Me" })).not.toBeNull();
       });
     });
   });
