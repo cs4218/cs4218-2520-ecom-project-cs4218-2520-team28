@@ -4,9 +4,8 @@
 // Note: The file will be split into 4 parts due to too many tests in one file taking forever to run.
 // - editProductAndCategory1.spec.ts -> Suite A to C focusing on product creation/update/delete tests (1 edit action each test)
 // - editProductAndCategory2.spec.ts -> Suite D to F focusing on category creation/update/delete tests (1 edit action each test)
-// - editProductAndCategory3.spec.ts -> Suite G focusing on more complex scenarios involving multiple edit actions in sequence 
-// - editProductAndCategory4.spec.ts -> Suite H focusing on multiple edit actions in sequence 
-//      and Suite I focusing on normal users unable to access admin edit pages and actions
+// - editProductAndCategory4.spec.ts -> Suite G focusing on multiple edit actions in sequence 
+//      and Suite H focusing on normal users unable to access admin edit pages and actions
 
 // Instructions for AI
 // Plan for testing of ui test involving create product/ category
@@ -66,6 +65,66 @@
 // 5) log in as admin -> go to update product page for existing product ->
 //      delete product -> assert confirmation modal appears and product is not deleted if deletion is cancelled 
 //          + check one other location to confirm not deleted
+//
+// ─── editProductAndCategory2.spec.ts ─────────────────────────────────────────
+//
+// Suite D: Create Category (13 tests)
+// 1) log in as admin -> go to manage category page ->
+//      create category with valid name -> assert success toast ("<name> is created")
+// 2) log in as admin -> go to manage category page ->
+//      create category with valid name -> assert category saved in database with correct name and slug
+// 3) log in as admin -> go to manage category page ->
+//      create category with valid name ->
+//      assert category is visible in all relevant locations:
+//        - admin manage category table (D-3)
+//        - nav category dropdown link (D-4)
+//        - all-categories page /categories (D-5)
+//        - category browse page /category/:slug heading (D-6)
+//        - product creation form category dropdown (D-9)
+// 4) log in as admin -> create category -> log out -> log in as normal user ->
+//      assert category visible on all-categories page (D-7) and browse page (D-8)
+// 5) log in as admin -> create two categories -> assert both appear in admin table (D-13)
+// 6) log in as admin -> submit category form with empty name -> assert error message (D-10)
+//      [Known Bug: catch block shows "something went wrong in input form" not "Name is required"]
+// 7) log in as admin -> create category -> create same name again ->
+//      assert "Category Already Exists" message (D-11)
+//      [Known Bug: frontend shows success toast for duplicates due to backend returning success:true]
+// 8) log in as admin -> create category with very long name -> assert success (D-12)
+//
+// Suite E: Update Category (11 tests)
+// 1) log in as admin -> go to manage category page -> click Edit for existing category ->
+//      fill new name -> submit -> assert success toast ("<newName> is updated") (E-1)
+// 2) log in as admin -> update category -> assert database has new name and new slug (E-2)
+// 3) log in as admin -> update category ->
+//      assert visible in all relevant locations with new name / old name gone:
+//        - admin table (E-3)
+//        - all-categories page (E-4)
+//        - category browse page via new slug (E-5)
+//        - product creation form (E-6)
+// 4) log in as admin -> update category -> log out -> log in as regular user ->
+//      assert updated name visible in /categories (E-7)
+// 5) log in as admin -> click Edit -> assert modal pre-fills current category name (E-8)
+// 6) log in as admin -> click Edit -> clear name -> submit -> assert error message (E-9)
+//      [Known Bug: catch block shows "Something went wrong" not "Name is required"]
+// 7) log in as admin -> update category with very long name -> assert success (E-10)
+// 8) log in as admin -> update category that has products ->
+//      assert products accessible via new category slug after update (E-11)
+//
+// Suite F: Delete Category (8 tests)
+// 1) log in as admin -> go to manage category page -> click Delete -> confirm Yes ->
+//      assert success toast (F-1)
+// 2) log in as admin -> delete category -> assert category removed from database (F-2)
+// 3) log in as admin -> delete category ->
+//      assert not visible in all relevant locations:
+//        - admin table (F-3)
+//        - all-categories page (F-4)
+//        - nav dropdown link (F-5)
+// 4) log in as admin -> delete category -> log out -> log in as regular user ->
+//      assert category not visible in /categories (F-5 covers nav; regular user covered separately)
+// 5) log in as admin -> delete category that has products ->
+//      assert products still exist in database after category deletion (F-6)
+// 6) log in as admin -> click Delete -> assert confirmation modal appears with Yes/No (F-7)
+// 7) log in as admin -> click Delete -> click No -> assert category NOT deleted (F-8)
 
 
 import { test, expect, clearDB } from './fixtures';

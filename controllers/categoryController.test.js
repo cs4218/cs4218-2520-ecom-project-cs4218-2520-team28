@@ -223,7 +223,7 @@ describe('createCategoryController', () => {
     });
 
     describe('existing category', () => {
-        test('should return 200 when category already exists', async () => {
+        test('should return 409 when category already exists', async () => {
             // Arrange
             const categoryName = "Electronics";
             req.body = { name: categoryName };
@@ -241,9 +241,13 @@ describe('createCategoryController', () => {
 
             // Assert
             expect(categoryModel.findOne).toHaveBeenCalledWith({ name: categoryName });
-            expect(res.status).toHaveBeenCalledWith(200);
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // Updated: Bug fix changed duplicate response from 200/success:true to 409/success:false
+            // so the frontend catch block can display the proper error message
+            expect(res.status).toHaveBeenCalledWith(409);
             expect(res.send).toHaveBeenCalledWith({
-                success: true,
+                success: false,
                 message: "Category Already Exists"
             });
         });

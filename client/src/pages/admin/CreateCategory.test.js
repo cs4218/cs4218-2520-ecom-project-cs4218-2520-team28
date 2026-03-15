@@ -375,6 +375,62 @@ describe('CreateCategory', () => {
             });
         });
 
+        test('should show backend error message when creation fails with HTTP error', async () => {
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // Test: catch block now propagates error.response?.data?.message (Bug fix 1)
+            // Arrange
+            mockAxiosGet.mockResolvedValue({
+                data: { success: true, category: [] }
+            });
+            const axiosError = new Error('Request failed with status code 400');
+            axiosError.response = { data: { message: 'Name is required' } };
+            mockAxiosPost.mockRejectedValue(axiosError);
+
+            render(<CreateCategory />);
+            await waitFor(() => {
+                expect(screen.getByTestId('category-input')).toBeInTheDocument();
+            });
+            const form = screen.getByTestId('category-form');
+
+            // Act
+            fireEvent.submit(form);
+
+            // Assert
+            await waitFor(() => {
+                expect(mockToastError).toHaveBeenCalledWith('Name is required');
+            });
+        });
+
+        test('should show "Category Already Exists" when creating duplicate category (409)', async () => {
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // Test: 409 from backend propagates to toast (Bug fixes 1 + 2)
+            // Arrange
+            mockAxiosGet.mockResolvedValue({
+                data: { success: true, category: [] }
+            });
+            const axiosError = new Error('Request failed with status code 409');
+            axiosError.response = { data: { message: 'Category Already Exists' } };
+            mockAxiosPost.mockRejectedValue(axiosError);
+
+            render(<CreateCategory />);
+            await waitFor(() => {
+                expect(screen.getByTestId('category-input')).toBeInTheDocument();
+            });
+            const input = screen.getByTestId('category-input');
+            const form = screen.getByTestId('category-form');
+
+            // Act
+            fireEvent.change(input, { target: { value: 'Electronics' } });
+            fireEvent.submit(form);
+
+            // Assert
+            await waitFor(() => {
+                expect(mockToastError).toHaveBeenCalledWith('Category Already Exists');
+            });
+        });
+
         test('should handle network error during creation', async () => {
             // Arrange
             mockAxiosGet.mockResolvedValue({
@@ -703,6 +759,36 @@ describe('CreateCategory', () => {
             // Assert
             await waitFor(() => {
                 expect(mockToastError).toHaveBeenCalledWith('Something went wrong');
+            });
+        });
+
+        test('should show backend error message when update fails with HTTP error', async () => {
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // Test: handleUpdate catch block now propagates error.response?.data?.message (Bug fix 1)
+            // Arrange
+            const mockCategories = [{ _id: '1', name: 'Electronics' }];
+            mockAxiosGet.mockResolvedValue({ data: { success: true, category: mockCategories } });
+            const axiosError = new Error('Request failed with status code 400');
+            axiosError.response = { data: { message: 'Name is required' } };
+            mockAxiosPut.mockRejectedValue(axiosError);
+
+            render(<CreateCategory />);
+            await waitFor(() => expect(screen.getByText('Electronics')).toBeInTheDocument());
+
+            const editButton = screen.getByText('Edit');
+            fireEvent.click(editButton);
+            await waitFor(() => expect(screen.getByTestId('modal')).toBeInTheDocument());
+
+            const forms = screen.getAllByTestId('category-form');
+            const modalForm = forms[forms.length - 1];
+
+            // Act
+            fireEvent.submit(modalForm);
+
+            // Assert
+            await waitFor(() => {
+                expect(mockToastError).toHaveBeenCalledWith('Name is required');
             });
         });
     });

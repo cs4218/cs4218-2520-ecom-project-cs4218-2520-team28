@@ -16,6 +16,12 @@ export default function useCategory() {
 
   useEffect(() => {
     getCategories();
+    // Foo Chao, A0272024R
+    // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+    // Bug fix: re-fetch categories whenever CreateCategory dispatches this event so the
+    // Header nav dropdown updates immediately without requiring a full page reload
+    window.addEventListener("categoryUpdated", getCategories);
+    return () => window.removeEventListener("categoryUpdated", getCategories);
   }, []);
 
   return categories;

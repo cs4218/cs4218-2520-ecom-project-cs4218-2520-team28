@@ -22,12 +22,19 @@ const CreateCategory = () => {
         toast.success(`${name} is created`);
         setName("");
         getAllCategory();
+        // Foo Chao, A0272024R
+        // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+        // Bug fix: notify Header's useCategory hook to re-fetch so the nav dropdown updates immediately
+        window.dispatchEvent(new Event("categoryUpdated"));
       } else {
         toast.error(data.message);
       }
     } catch (error) {
       console.log(error);
-      toast.error("something went wrong in input form");
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Bug fix: propagate backend error message (e.g. "Name is required", "Category Already Exists")
+      toast.error(error.response?.data?.message || "something went wrong in input form");
     }
   };
 
@@ -65,11 +72,18 @@ const CreateCategory = () => {
         setUpdatedName("");
         setVisible(false);
         getAllCategory();
+        // Foo Chao, A0272024R
+        // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+        // Bug fix: notify Header's useCategory hook to re-fetch so the nav dropdown updates immediately
+        window.dispatchEvent(new Event("categoryUpdated"));
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error("Something went wrong");
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Bug fix: propagate backend error message (e.g. "Name is required")
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   //delete category
@@ -89,6 +103,10 @@ const CreateCategory = () => {
           if (data.success) {
             toast.success("Category deleted successfully");
             getAllCategory();
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // Bug fix: notify Header's useCategory hook to re-fetch so the nav dropdown updates immediately
+            window.dispatchEvent(new Event("categoryUpdated"));
           } else {
             toast.error(data.message);
           }
