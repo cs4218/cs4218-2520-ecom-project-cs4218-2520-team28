@@ -25,5 +25,6 @@ export default {
   collectCoverageFrom: [
     "<rootDir>/client/src/pages/Contact.js",
     "<rootDir>/client/src/pages/Policy.js",
+    "<rootDir>/client/src/pages/user/Dashboard.js",
   ],
 };
