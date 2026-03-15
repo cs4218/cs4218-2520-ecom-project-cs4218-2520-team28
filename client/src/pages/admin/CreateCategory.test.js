@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import CreateCategory from './CreateCategory';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { Modal } from 'antd';
 
 // Chi Thanh, A0276229W
 // Mock dependencies
@@ -25,15 +26,17 @@ jest.mock('../../components/Form/CategoryForm', () => ({ handleSubmit, value, se
         <button type="submit">Submit</button>
     </form>
 ));
-jest.mock('antd', () => ({
-    Modal: ({ visible, onCancel, children }) => 
+jest.mock('antd', () => {
+    const ModalComponent = ({ visible, onCancel, children }) =>
         visible ? (
             <div data-testid="modal">
                 <button data-testid="modal-cancel" onClick={onCancel}>Cancel</button>
                 {children}
             </div>
-        ) : null
-}));
+        ) : null;
+    ModalComponent.confirm = jest.fn();
+    return { Modal: ModalComponent };
+});
 
 // Chi Thanh, A0276229W
 describe('CreateCategory', () => {
@@ -73,6 +76,9 @@ describe('CreateCategory', () => {
         
         toast.success = mockToastSuccess;
         toast.error = mockToastError;
+
+        // Auto-confirm Modal.confirm dialogs (simulates clicking Yes)
+        Modal.confirm.mockImplementation(({ onOk }) => onOk && onOk());
 
         // Clear all mocks
         jest.clearAllMocks();
@@ -254,7 +260,7 @@ describe('CreateCategory', () => {
 
             // Assert
             await waitFor(() => {
-                expect(mockToastError).toHaveBeenCalledWith('Something went wrong in getting catgeory');
+                expect(mockToastError).toHaveBeenCalledWith('Something went wrong in getting category');
             });
         });
 
@@ -366,6 +372,62 @@ describe('CreateCategory', () => {
             // Assert
             await waitFor(() => {
                 expect(mockToastError).toHaveBeenCalledWith('Category already exists');
+            });
+        });
+
+        test('should show backend error message when creation fails with HTTP error', async () => {
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // Test: catch block now propagates error.response?.data?.message (Bug fix 1)
+            // Arrange
+            mockAxiosGet.mockResolvedValue({
+                data: { success: true, category: [] }
+            });
+            const axiosError = new Error('Request failed with status code 400');
+            axiosError.response = { data: { message: 'Name is required' } };
+            mockAxiosPost.mockRejectedValue(axiosError);
+
+            render(<CreateCategory />);
+            await waitFor(() => {
+                expect(screen.getByTestId('category-input')).toBeInTheDocument();
+            });
+            const form = screen.getByTestId('category-form');
+
+            // Act
+            fireEvent.submit(form);
+
+            // Assert
+            await waitFor(() => {
+                expect(mockToastError).toHaveBeenCalledWith('Name is required');
+            });
+        });
+
+        test('should show "Category Already Exists" when creating duplicate category (409)', async () => {
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // Test: 409 from backend propagates to toast (Bug fixes 1 + 2)
+            // Arrange
+            mockAxiosGet.mockResolvedValue({
+                data: { success: true, category: [] }
+            });
+            const axiosError = new Error('Request failed with status code 409');
+            axiosError.response = { data: { message: 'Category Already Exists' } };
+            mockAxiosPost.mockRejectedValue(axiosError);
+
+            render(<CreateCategory />);
+            await waitFor(() => {
+                expect(screen.getByTestId('category-input')).toBeInTheDocument();
+            });
+            const input = screen.getByTestId('category-input');
+            const form = screen.getByTestId('category-form');
+
+            // Act
+            fireEvent.change(input, { target: { value: 'Electronics' } });
+            fireEvent.submit(form);
+
+            // Assert
+            await waitFor(() => {
+                expect(mockToastError).toHaveBeenCalledWith('Category Already Exists');
             });
         });
 
@@ -699,6 +761,36 @@ describe('CreateCategory', () => {
                 expect(mockToastError).toHaveBeenCalledWith('Something went wrong');
             });
         });
+
+        test('should show backend error message when update fails with HTTP error', async () => {
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // Test: handleUpdate catch block now propagates error.response?.data?.message (Bug fix 1)
+            // Arrange
+            const mockCategories = [{ _id: '1', name: 'Electronics' }];
+            mockAxiosGet.mockResolvedValue({ data: { success: true, category: mockCategories } });
+            const axiosError = new Error('Request failed with status code 400');
+            axiosError.response = { data: { message: 'Name is required' } };
+            mockAxiosPut.mockRejectedValue(axiosError);
+
+            render(<CreateCategory />);
+            await waitFor(() => expect(screen.getByText('Electronics')).toBeInTheDocument());
+
+            const editButton = screen.getByText('Edit');
+            fireEvent.click(editButton);
+            await waitFor(() => expect(screen.getByTestId('modal')).toBeInTheDocument());
+
+            const forms = screen.getAllByTestId('category-form');
+            const modalForm = forms[forms.length - 1];
+
+            // Act
+            fireEvent.submit(modalForm);
+
+            // Assert
+            await waitFor(() => {
+                expect(mockToastError).toHaveBeenCalledWith('Name is required');
+            });
+        });
     });
 
     describe('delete category functionality', () => {
@@ -727,7 +819,7 @@ describe('CreateCategory', () => {
             // Assert
             await waitFor(() => {
                 expect(mockAxiosDelete).toHaveBeenCalledWith('/api/v1/category/delete-category/1');
-                expect(mockToastSuccess).toHaveBeenCalledWith('category is deleted');
+                expect(mockToastSuccess).toHaveBeenCalledWith('Category deleted successfully');
             });
         });
 

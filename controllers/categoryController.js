@@ -14,11 +14,12 @@ export const createCategoryController = async (req, res) => {
     }
     const existingCategory = await categoryModel.findOne({ name });
     if (existingCategory) {
-      return res.status(200).send({
-        success: true,
-        // Foo Chao, A0272024R
-        // AI Assistance: Github Copilot (Claude Sonnet 4.6)
-        // fixed typos
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Bug fix: changed from 200/success:true to 409/success:false so the frontend
+      // catch block can properly display the "Category Already Exists" message
+      return res.status(409).send({
+        success: false,
         message: "Category Already Exists",
       });
     }

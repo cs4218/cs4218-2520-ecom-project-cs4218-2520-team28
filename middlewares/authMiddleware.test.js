@@ -103,7 +103,11 @@ describe('authMiddleware', () => {
       // Assert
       expect(userModel.findById).toHaveBeenCalledWith('regularUserId');
       expect(mockNext).not.toHaveBeenCalled();
-      expect(mockRes.status).toHaveBeenCalledWith(401);
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Updated: Bug fix changed non-admin response from 401 to 403 to distinguish
+      // "authenticated but not admin" from "not authenticated at all" (401).
+      expect(mockRes.status).toHaveBeenCalledWith(403);
         expect(mockRes.send).toHaveBeenCalledWith({
           success: false,
           message: 'Unauthorized Access',

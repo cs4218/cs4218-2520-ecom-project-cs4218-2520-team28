@@ -7,6 +7,11 @@ import Spinner from "../Spinner";
 
 export default function AdminRoute(){
     const [ok,setOk] = useState(false)
+    // Foo Chao, A0272024R
+    // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+    // Bug fix: track where to redirect so a non-admin (403) goes to /dashboard/user
+    // while an unauthenticated user (401/network error) goes to /login
+    const [redirectPath, setRedirectPath] = useState('login')
     const [auth,setAuth] = useAuth()
 
     useEffect(()=> {
@@ -21,20 +26,33 @@ export default function AdminRoute(){
                     setOk(false);
                 }
             } catch (error) {
-                // Token is expired, invalid, or user is no longer admin — clear stale auth
                 setOk(false);
-                setAuth({ user: null, token: "" });
-                localStorage.removeItem("auth");
-                toast.error("Session expired. Please login again.");
+                // Foo Chao, A0272024R
+                // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+                // Bug fix: 403 means "authenticated but not admin" — keep the user's session
+                // intact and redirect them to their own dashboard instead of logging them out.
+                // Any other status (401 invalid token, 500, network error) means the session
+                // is genuinely broken — clear auth and redirect to login as before.
+                if (error.response?.status === 403) {
+                    setRedirectPath('dashboard/user');
+                } else {
+                    setRedirectPath('login');
+                    setAuth({ user: null, token: "" });
+                    localStorage.removeItem("auth");
+                    toast.error("Session expired. Please login again.");
+                }
             }
         };
         // Foo Chao, A0272024R
         // modified to reset ok to false when no token, to prevent showing Outlet when user logs out and token is removed
         // ensuring security
         if (auth?.token) authCheck();
-        else setOk(false);
+        else {
+            setOk(false);
+            setRedirectPath('login'); // reset so a subsequent login always starts from /login
+        }
         // eslint-disable-next-line
     }, [auth?.token]);
     
-    return ok ? <Outlet /> : <Spinner/>;
+    return ok ? <Outlet /> : <Spinner path={redirectPath}/>;
 }

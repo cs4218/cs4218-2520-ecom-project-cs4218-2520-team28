@@ -5,6 +5,7 @@ import UpdateProduct from './UpdateProduct';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Modal } from 'antd';
 
 // Chi Thanh, A0276229W
 // Mock dependencies
@@ -33,8 +34,9 @@ jest.mock('antd', () => {
     );
     
     Select.Option = ({ children, value }) => <option value={value}>{children}</option>;
-    
-    return { Select };
+
+    const Modal = { confirm: jest.fn() };
+    return { Select, Modal };
 });
 
 // Mock URL.createObjectURL
@@ -83,9 +85,6 @@ describe('UpdateProduct', () => {
 
         useNavigate.mockReturnValue(mockNavigate);
         useParams.mockReturnValue(mockUseParams);
-
-        // Mock window.prompt
-        global.prompt = jest.fn();
 
         // Clear all mocks
         jest.clearAllMocks();
@@ -147,7 +146,7 @@ describe('UpdateProduct', () => {
             // Assert
             await waitFor(() => {
                 const layout = screen.getByTestId('layout');
-                expect(layout).toHaveAttribute('data-title', 'Dashboard - Create Product');
+                expect(layout).toHaveAttribute('data-title', 'Dashboard - Update Product');
             });
         });
 
@@ -597,7 +596,7 @@ describe('UpdateProduct', () => {
 
             // Assert
             await waitFor(() => {
-                expect(mockToastError).toHaveBeenCalledWith('Something wwent wrong in getting catgeory');
+                expect(mockToastError).toHaveBeenCalledWith('Something went wrong in getting category');
             });
         });
     });
@@ -1045,7 +1044,7 @@ describe('UpdateProduct', () => {
                 }
             });
             mockAxiosPut.mockResolvedValue({
-                data: { success: false }
+                data: { success: true }
             });
 
             render(<UpdateProduct />);
@@ -1058,7 +1057,7 @@ describe('UpdateProduct', () => {
 
             // Assert
             await waitFor(() => {
-                expect(mockToastSuccess).toHaveBeenCalledWith('Product Updated Successfully');
+                expect(mockToastSuccess).toHaveBeenCalledWith('Product updated successfully');
                 expect(mockNavigate).toHaveBeenCalledWith('/dashboard/admin/products');
             });
         });
@@ -1081,7 +1080,7 @@ describe('UpdateProduct', () => {
                 }
             });
             mockAxiosPut.mockResolvedValue({
-                data: { success: true, message: 'Error occurred' }
+                data: { success: false, message: 'Error occurred' }
             });
 
             render(<UpdateProduct />);
@@ -1129,7 +1128,7 @@ describe('UpdateProduct', () => {
 
             // Assert
             await waitFor(() => {
-                expect(mockToastError).toHaveBeenCalledWith('something went wrong');
+                expect(mockToastError).toHaveBeenCalledWith('Something went wrong');
                 expect(consoleLogSpy).toHaveBeenCalledWith(error);
             });
         });
@@ -1170,10 +1169,48 @@ describe('UpdateProduct', () => {
                 expect(mockAxiosPut).toHaveBeenCalled();
             });
         });
+
+        test('should show backend validation error message when update returns 400', async () => {
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // Test for Bug 1 fix: frontend should propagate backend validation errors
+            const axiosError = new Error('Request failed with status code 400');
+            axiosError.response = { data: { error: 'Name is Required' } };
+            const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+            mockAxiosGet.mockResolvedValue({
+                data: {
+                    product: {
+                        _id: 'prod123',
+                        name: 'Laptop',
+                        description: 'Gaming laptop',
+                        price: 1500,
+                        quantity: 5,
+                        shipping: true,
+                        category: { _id: 'cat1' }
+                    },
+                    success: true,
+                    category: []
+                }
+            });
+            mockAxiosPut.mockRejectedValue(axiosError);
+
+            render(<UpdateProduct />);
+            await waitFor(() => expect(screen.getByText('UPDATE PRODUCT')).toBeInTheDocument());
+
+            // Act
+            fireEvent.click(screen.getByText('UPDATE PRODUCT'));
+
+            // Assert
+            await waitFor(() => {
+                expect(mockToastError).toHaveBeenCalledWith('Name is Required');
+            });
+
+            consoleLogSpy.mockRestore();
+        });
     });
 
     describe('product deletion functionality', () => {
-        test('should prompt user for confirmation when DELETE button is clicked', async () => {
+        test('should show confirmation dialog when DELETE button is clicked', async () => {
             // Arrange
             mockAxiosGet.mockResolvedValue({
                 data: {
@@ -1190,10 +1227,6 @@ describe('UpdateProduct', () => {
                     category: []
                 }
             });
-            global.prompt.mockReturnValue('yes');
-            mockAxiosDelete.mockResolvedValue({
-                data: { success: true }
-            });
 
             render(<UpdateProduct />);
             await waitFor(() => expect(screen.getByText('DELETE PRODUCT')).toBeInTheDocument());
@@ -1204,12 +1237,12 @@ describe('UpdateProduct', () => {
             fireEvent.click(deleteButton);
 
             // Assert
-            await waitFor(() => {
-                expect(global.prompt).toHaveBeenCalledWith('Are You Sure want to delete this product ? ');
-            });
+            expect(Modal.confirm).toHaveBeenCalledWith(
+                expect.objectContaining({ title: 'Are you sure you want to delete this product?' })
+            );
         });
 
-        test('should not delete product when user cancels confirmation prompt', async () => {
+        test('should not delete product when user cancels confirmation dialog', async () => {
             // Arrange
             mockAxiosGet.mockResolvedValue({
                 data: {
@@ -1226,7 +1259,7 @@ describe('UpdateProduct', () => {
                     category: []
                 }
             });
-            global.prompt.mockReturnValue(null);
+            // Modal.confirm default mock does not invoke onOk (simulates clicking No)
 
             render(<UpdateProduct />);
             await waitFor(() => expect(screen.getByText('DELETE PRODUCT')).toBeInTheDocument());
@@ -1237,12 +1270,10 @@ describe('UpdateProduct', () => {
             fireEvent.click(deleteButton);
 
             // Assert
-            await waitFor(() => {
-                expect(mockAxiosDelete).not.toHaveBeenCalled();
-            });
+            expect(mockAxiosDelete).not.toHaveBeenCalled();
         });
 
-        test('should not delete product when user enters empty string in prompt', async () => {
+        test('should show correct Yes/No options in confirmation dialog', async () => {
             // Arrange
             mockAxiosGet.mockResolvedValue({
                 data: {
@@ -1259,7 +1290,6 @@ describe('UpdateProduct', () => {
                     category: []
                 }
             });
-            global.prompt.mockReturnValue('');
 
             render(<UpdateProduct />);
             await waitFor(() => expect(screen.getByText('DELETE PRODUCT')).toBeInTheDocument());
@@ -1270,9 +1300,9 @@ describe('UpdateProduct', () => {
             fireEvent.click(deleteButton);
 
             // Assert
-            await waitFor(() => {
-                expect(mockAxiosDelete).not.toHaveBeenCalled();
-            });
+            expect(Modal.confirm).toHaveBeenCalledWith(
+                expect.objectContaining({ okText: 'Yes', cancelText: 'No' })
+            );
         });
 
         test('should send DELETE request when user confirms deletion', async () => {
@@ -1297,13 +1327,13 @@ describe('UpdateProduct', () => {
                         category: []
                     }
                 });
-            global.prompt.mockReturnValue('yes');
+            Modal.confirm.mockImplementation(({ onOk }) => onOk && onOk());
             mockAxiosDelete.mockResolvedValue({
                 data: { success: true }
             });
 
             render(<UpdateProduct />);
-            
+
             // Wait for both data fetches to complete
             await waitFor(() => {
                 expect(screen.getByPlaceholderText('write a name')).toHaveValue('Laptop');
@@ -1337,7 +1367,7 @@ describe('UpdateProduct', () => {
                     category: []
                 }
             });
-            global.prompt.mockReturnValue('yes');
+            Modal.confirm.mockImplementation(({ onOk }) => onOk && onOk());
             mockAxiosDelete.mockResolvedValue({
                 data: { success: true }
             });
@@ -1352,7 +1382,7 @@ describe('UpdateProduct', () => {
 
             // Assert
             await waitFor(() => {
-                expect(mockToastSuccess).toHaveBeenCalledWith('Product DEleted Succfully');
+                expect(mockToastSuccess).toHaveBeenCalledWith('Product deleted successfully');
                 expect(mockNavigate).toHaveBeenCalledWith('/dashboard/admin/products');
             });
         });
@@ -1376,7 +1406,7 @@ describe('UpdateProduct', () => {
                     category: []
                 }
             });
-            global.prompt.mockReturnValue('yes');
+            Modal.confirm.mockImplementation(({ onOk }) => onOk && onOk());
             mockAxiosDelete.mockRejectedValue(error);
 
             render(<UpdateProduct />);

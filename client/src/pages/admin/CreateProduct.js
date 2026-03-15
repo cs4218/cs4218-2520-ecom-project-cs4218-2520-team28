@@ -26,7 +26,7 @@ const CreateProduct = () => {
         setCategories(data?.category);
       }
     } catch (error) {
-      console.log(error);;
+      console.log(error);
       toast.error("Something went wrong in getting category");
     }
   };
@@ -58,7 +58,10 @@ const CreateProduct = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("something went wrong");
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Bug fix: propagate backend validation error messages instead of generic fallback
+      toast.error(error.response?.data?.error || error.response?.data?.message || "Something went wrong");
     }
   };
 

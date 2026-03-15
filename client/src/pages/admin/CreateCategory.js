@@ -22,12 +22,19 @@ const CreateCategory = () => {
         toast.success(`${name} is created`);
         setName("");
         getAllCategory();
+        // Foo Chao, A0272024R
+        // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+        // Bug fix: notify Header's useCategory hook to re-fetch so the nav dropdown updates immediately
+        window.dispatchEvent(new Event("categoryUpdated"));
       } else {
         toast.error(data.message);
       }
     } catch (error) {
       console.log(error);
-      toast.error("something went wrong in input form");
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Bug fix: propagate backend error message (e.g. "Name is required", "Category Already Exists")
+      toast.error(error.response?.data?.message || "something went wrong in input form");
     }
   };
 
@@ -40,7 +47,10 @@ const CreateCategory = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong in getting catgeory");
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // fixed typo
+      toast.error("Something went wrong in getting category");
     }
   };
 
@@ -62,29 +72,49 @@ const CreateCategory = () => {
         setUpdatedName("");
         setVisible(false);
         getAllCategory();
+        // Foo Chao, A0272024R
+        // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+        // Bug fix: notify Header's useCategory hook to re-fetch so the nav dropdown updates immediately
+        window.dispatchEvent(new Event("categoryUpdated"));
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error("Something went wrong");
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Bug fix: propagate backend error message (e.g. "Name is required")
+      toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
   //delete category
-  const handleDelete = async (pId) => {
-    try {
-      const { data } = await axios.delete(
-        `/api/v1/category/delete-category/${pId}`
-      );
-      if (data.success) {
-        toast.success(`category is deleted`);
-
-        getAllCategory();
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    }
+  const handleDelete = (pId) => {
+    // Foo Chao, A0272024R
+    // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+    // added confirmation modal before deleting a category to prevent accidental deletions
+    Modal.confirm({
+      title: "Are you sure you want to delete this category?",
+      okText: "Yes",
+      cancelText: "No",
+      onOk: async () => {
+        try {
+          const { data } = await axios.delete(
+            `/api/v1/category/delete-category/${pId}`
+          );
+          if (data.success) {
+            toast.success("Category deleted successfully");
+            getAllCategory();
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // Bug fix: notify Header's useCategory hook to re-fetch so the nav dropdown updates immediately
+            window.dispatchEvent(new Event("categoryUpdated"));
+          } else {
+            toast.error(data.message);
+          }
+        } catch (error) {
+          toast.error("Something went wrong");
+        }
+      },
+    });
   };
   return (
     <Layout title={"Dashboard - Create Category"}>

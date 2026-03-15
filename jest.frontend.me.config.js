@@ -24,6 +24,7 @@ export default {
     "<rootDir>/client/src/context/auth.test.js",
 
     "<rootDir>/client/src/pages/admin/AdminDashboard.test.js",
+    "<rootDir>/client/src/pages/admin/CreateCategory.test.js",
     "<rootDir>/client/src/pages/user/Profile.test.js",
 
     "<rootDir>/client/src/pages/About.test.js",
@@ -42,6 +43,7 @@ export default {
     "<rootDir>/client/src/context/auth.js",
 
     "<rootDir>/client/src/pages/admin/AdminDashboard.js",
+    "<rootDir>/client/src/pages/admin/CreateCategory.js",
     "<rootDir>/client/src/pages/user/Profile.js",
 
     "<rootDir>/client/src/pages/About.js",

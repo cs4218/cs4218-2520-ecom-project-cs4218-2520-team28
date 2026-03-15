@@ -125,7 +125,7 @@ describe("createCategoryController integration tests", () => {
     });
 
     describe("Duplicate detection", () => {
-      it("should return 200 when category already exists", async () => {
+      it("should return 409 when category already exists", async () => {
         await categoryModel.create({ name: "Electronics", slug: "Electronics" });
 
         const req = { body: { name: "Electronics" } };
@@ -133,9 +133,9 @@ describe("createCategoryController integration tests", () => {
 
         await createCategoryController(req, res);
 
-        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.status).toHaveBeenCalledWith(409);
         expect(res.send).toHaveBeenCalledWith(
-          expect.objectContaining({ success: true, message: "Category Already Exists" })
+          expect.objectContaining({ success: false, message: "Category Already Exists" })
         );
       });
     });
@@ -194,7 +194,7 @@ describe("createCategoryController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when user is not admin", async () => {
+      it("should return 403 when user is not admin", async () => {
         const normalUser = await userModel.create({
           name: "Normal User",
           email: "catcreate_normal@test.com",
@@ -211,7 +211,7 @@ describe("createCategoryController integration tests", () => {
           .set("Authorization", userToken)
           .send({ name: "Sports" });
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
@@ -244,7 +244,7 @@ describe("createCategoryController integration tests", () => {
         expect(saved).not.toBeNull();
       });
 
-      it("should return 200 when category already exists", async () => {
+      it("should return 409 when category already exists", async () => {
         await categoryModel.create({ name: "Toys", slug: "Toys" });
 
         const res = await request(routerApp)
@@ -252,7 +252,7 @@ describe("createCategoryController integration tests", () => {
           .set("Authorization", adminToken)
           .send({ name: "Toys" });
 
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(409);
         expect(res.body.message).toBe("Category Already Exists");
       });
     });
@@ -273,7 +273,7 @@ describe("createCategoryController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when a valid JWT belongs to a non-admin user", async () => {
+      it("should return 403 when a valid JWT belongs to a non-admin user", async () => {
         const normalUser = await userModel.create({
           name: "Normal User",
           email: "catcreateserver_normal@test.com",
@@ -290,7 +290,7 @@ describe("createCategoryController integration tests", () => {
           .set("Authorization", normalToken)
           .send({ name: "Music" });
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
@@ -310,7 +310,7 @@ describe("createCategoryController integration tests", () => {
         expect(saved).not.toBeNull();
       });
 
-      it("should return 200 when category already exists", async () => {
+      it("should return 409 when category already exists", async () => {
         await categoryModel.create({ name: "Garden", slug: "Garden" });
 
         const res = await request(app)
@@ -318,7 +318,7 @@ describe("createCategoryController integration tests", () => {
           .set("Authorization", adminToken)
           .send({ name: "Garden" });
 
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(409);
         expect(res.body.message).toBe("Category Already Exists");
       });
     });
@@ -481,7 +481,7 @@ describe("updateCategoryController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when user is not admin", async () => {
+      it("should return 403 when user is not admin", async () => {
         const id = await seedCategory();
         const normalUser = await userModel.create({
           name: "Normal User",
@@ -499,7 +499,7 @@ describe("updateCategoryController integration tests", () => {
           .set("Authorization", userToken)
           .send({ name: "New Name" });
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
@@ -552,7 +552,7 @@ describe("updateCategoryController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when a valid JWT belongs to a non-admin user", async () => {
+      it("should return 403 when a valid JWT belongs to a non-admin user", async () => {
         const id = await seedCategory();
         const normalUser = await userModel.create({
           name: "Normal User",
@@ -570,7 +570,7 @@ describe("updateCategoryController integration tests", () => {
           .set("Authorization", normalToken)
           .send({ name: "New Name" });
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
@@ -757,7 +757,7 @@ describe("deleteCategoryController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when user is not admin", async () => {
+      it("should return 403 when user is not admin", async () => {
         const id = await seedCategory();
         const normalUser = await userModel.create({
           name: "Normal User",
@@ -774,7 +774,7 @@ describe("deleteCategoryController integration tests", () => {
           .delete(`/api/v1/category/delete-category/${id}`)
           .set("Authorization", userToken);
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
@@ -820,7 +820,7 @@ describe("deleteCategoryController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when a valid JWT belongs to a non-admin user", async () => {
+      it("should return 403 when a valid JWT belongs to a non-admin user", async () => {
         const id = await seedCategory();
         const normalUser = await userModel.create({
           name: "Normal User",
@@ -837,7 +837,7 @@ describe("deleteCategoryController integration tests", () => {
           .delete(`/api/v1/category/delete-category/${id}`)
           .set("Authorization", normalToken);
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
