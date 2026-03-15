@@ -12,6 +12,7 @@
  * Used by playwright.config.ts webServer.
  */
 import { spawn } from "child_process";
+import { writeFileSync, mkdirSync } from "fs";
 import { MongoMemoryServer } from "mongodb-memory-server";
 
 const mongod = await MongoMemoryServer.create();
@@ -24,6 +25,15 @@ console.log(`[test-server] In-memory MongoDB ready: ${uri}`);
 const clientPort  = process.env.CLIENT_PORT  ?? "3000";
 const backendPort = process.env.BACKEND_PORT ?? "6060";
 console.log(`[test-server] Backend on :${backendPort}, React client on :${clientPort}`);
+
+// Write connection details to a temp file so that Playwright test fixtures
+// can connect to the same in-memory MongoDB to seed/clear data between tests.
+mkdirSync(".tmp", { recursive: true });
+writeFileSync(
+  ".tmp/test-env.json",
+  JSON.stringify({ mongoUri: uri, backendPort }),
+  "utf-8"
+);
 
 // Start backend separately — server.js reads PORT for its listen address.
 const backend = spawn("node", ["server.js"], {
