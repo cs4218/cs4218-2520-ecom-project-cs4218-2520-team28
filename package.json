@@ -15,7 +15,8 @@
     "test:me": "npm run test:me:backend && npm run test:me:frontend",
     "test:me:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.me.config.js",
     "test:me:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.me.config.js",
-    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.integration.config.js"
+    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.integration.config.js",
+    "test:frontend:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.integration.config.js"
   },
   "keywords": [],
   "author": "RP",
