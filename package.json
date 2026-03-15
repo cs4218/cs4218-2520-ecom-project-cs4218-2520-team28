@@ -18,7 +18,11 @@
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.integration.config.js",
     "test:frontend:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.integration.config.js",
     "test:frontend:all": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.all.config.js",
-    "test:backend:all": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.all.config.js"
+    "test:backend:all": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.all.config.js",
+    "test:ui": "playwright test",
+    "test:ui:chromium": "playwright test --project=chromium",
+    "test:ui:firefox": "playwright test --project=firefox",
+    "test:ui:webkit": "playwright test --project=webkit"
   },
   "keywords": [],
   "author": "RP",
