@@ -28,5 +28,6 @@ export default {
     "<rootDir>/client/src/pages/user/Dashboard.js",
     "<rootDir>/client/src/pages/admin/Products.js",
     "<rootDir>/client/src/pages/CartPage.js",
+    "<rootDir>/client/src/pages/HomePage.js",
   ],
 };
