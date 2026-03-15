@@ -1,4 +1,23 @@
+// Foo Chao, A0272024R
+// AI Assistance: Github Copilot (Claude Sonnet 4.6)
+
+import { createServer } from 'net';
 import { defineConfig, devices } from '@playwright/test';
+
+/** Ask the OS for a free TCP port by binding to port 0. */
+const getFreePort = (): Promise<number> =>
+  new Promise((resolve) => {
+    const srv = createServer();
+    srv.listen(0, '127.0.0.1', () => {
+      const { port } = srv.address() as { port: number };
+      srv.close(() => resolve(port));
+    });
+  });
+
+// Pick free ports for both the React client and the Express backend so that
+// a developer who already has `npm run dev` running never causes a conflict.
+const clientPort = await getFreePort();
+const backendPort = await getFreePort();
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -34,8 +53,8 @@ export default defineConfig({
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 0,
 
-    /* Base URL for the running app. Start the app before running UI tests. */
-    baseURL: 'http://localhost:3000',
+    /* Base URL for the running app — port is chosen dynamically at startup. */
+    baseURL: `http://localhost:${clientPort}`,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -65,12 +84,18 @@ export default defineConfig({
     },
   ],
 
-  /* Start the full dev server (backend + React) before running tests.
-   * If the server is already running locally, it will be reused instead. */
+  /* Start the full stack before running tests.
+   * The script spins up an isolated in-memory MongoDB, then launches
+   * `npm run dev` (backend + React client) with MONGO_URL overridden so
+   * the real database is never touched.
+   * CLIENT_PORT is the OS-assigned free port for the React client.
+   * reuseExistingServer: false ensures a clean DB on every run.
+   */
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    command: 'node tests/ui/start-test-server.js',
+    url: `http://localhost:${clientPort}`,
+    reuseExistingServer: false,
     timeout: 120_000,
+    env: { CLIENT_PORT: String(clientPort), BACKEND_PORT: String(backendPort) },
   },
 });
