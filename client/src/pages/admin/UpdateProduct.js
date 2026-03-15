@@ -3,7 +3,7 @@ import Layout from "./../../components/Layout";
 import AdminMenu from "./../../components/AdminMenu";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { Select } from "antd";
+import { Select, Modal } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 const { Option } = Select;
 
@@ -51,7 +51,10 @@ const UpdateProduct = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something wwent wrong in getting catgeory");
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // fixed typo
+      toast.error("Something went wrong in getting category");
     }
   };
 
@@ -74,11 +77,17 @@ const UpdateProduct = () => {
         `/api/v1/product/update-product/${id}`,
         productData
       );
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // fix toast showing error logo on success
       if (data?.success) {
-        toast.error(data?.message);
-      } else {
-        toast.success("Product Updated Successfully");
+        // Foo Chao, A0272024R
+        // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+        // fix typo
+        toast.success("Product updated successfully");
         navigate("/dashboard/admin/products");
+      } else {
+        toast.error(data?.message);
       }
     } catch (error) {
       console.log(error);
@@ -87,22 +96,28 @@ const UpdateProduct = () => {
   };
 
   //delete a product
-  const handleDelete = async () => {
-    try {
-      let answer = window.prompt("Are You Sure want to delete this product ? ");
-      if (!answer) return;
-      const { data } = await axios.delete(
-        `/api/v1/product/delete-product/${id}`
-      );
-      toast.success("Product DEleted Succfully");
-      navigate("/dashboard/admin/products");
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong");
-    }
+  const handleDelete = () => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this product?",
+      okText: "Yes",
+      cancelText: "No",
+      onOk: async () => {
+        try {
+          await axios.delete(`/api/v1/product/delete-product/${id}`);
+          toast.success("Product deleted successfully");
+          navigate("/dashboard/admin/products");
+        } catch (error) {
+          console.log(error);
+          toast.error("Something went wrong");
+        }
+      },
+    });
   };
   return (
-    <Layout title={"Dashboard - Create Product"}>
+    // Foo Chao, A0272024R
+    // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+    // Fix wrong title on layout
+    <Layout title={"Dashboard - Update Product"}>
       <div className="container-fluid m-3 p-3">
         <div className="row">
           <div className="col-md-3">

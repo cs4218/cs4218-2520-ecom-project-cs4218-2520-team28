@@ -599,7 +599,7 @@ describe('CreateProduct Component', () => {
 
       // Assert
       await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('something went wrong');
+        expect(toast.error).toHaveBeenCalledWith('Something went wrong');
       });
 
       consoleSpy.mockRestore();

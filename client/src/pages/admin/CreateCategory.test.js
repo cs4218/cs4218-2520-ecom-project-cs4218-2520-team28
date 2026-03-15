@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import CreateCategory from './CreateCategory';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { Modal } from 'antd';
 
 // Chi Thanh, A0276229W
 // Mock dependencies
@@ -25,15 +26,17 @@ jest.mock('../../components/Form/CategoryForm', () => ({ handleSubmit, value, se
         <button type="submit">Submit</button>
     </form>
 ));
-jest.mock('antd', () => ({
-    Modal: ({ visible, onCancel, children }) => 
+jest.mock('antd', () => {
+    const ModalComponent = ({ visible, onCancel, children }) =>
         visible ? (
             <div data-testid="modal">
                 <button data-testid="modal-cancel" onClick={onCancel}>Cancel</button>
                 {children}
             </div>
-        ) : null
-}));
+        ) : null;
+    ModalComponent.confirm = jest.fn();
+    return { Modal: ModalComponent };
+});
 
 // Chi Thanh, A0276229W
 describe('CreateCategory', () => {
@@ -73,6 +76,9 @@ describe('CreateCategory', () => {
         
         toast.success = mockToastSuccess;
         toast.error = mockToastError;
+
+        // Auto-confirm Modal.confirm dialogs (simulates clicking Yes)
+        Modal.confirm.mockImplementation(({ onOk }) => onOk && onOk());
 
         // Clear all mocks
         jest.clearAllMocks();
@@ -254,7 +260,7 @@ describe('CreateCategory', () => {
 
             // Assert
             await waitFor(() => {
-                expect(mockToastError).toHaveBeenCalledWith('Something went wrong in getting catgeory');
+                expect(mockToastError).toHaveBeenCalledWith('Something went wrong in getting category');
             });
         });
 
@@ -727,7 +733,7 @@ describe('CreateCategory', () => {
             // Assert
             await waitFor(() => {
                 expect(mockAxiosDelete).toHaveBeenCalledWith('/api/v1/category/delete-category/1');
-                expect(mockToastSuccess).toHaveBeenCalledWith('category is deleted');
+                expect(mockToastSuccess).toHaveBeenCalledWith('Category deleted successfully');
             });
         });
 
