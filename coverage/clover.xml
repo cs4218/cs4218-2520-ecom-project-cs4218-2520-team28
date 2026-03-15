@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1773560069666" clover="3.2.0">
-  <project timestamp="1773560069666" name="All files">
+<coverage generated="1773560482770" clover="3.2.0">
+  <project timestamp="1773560482771" name="All files">
     <metrics statements="626" coveredstatements="606" conditionals="170" coveredconditionals="165" methods="171" coveredmethods="160" elements="967" coveredelements="931" complexity="0" loc="626" ncloc="626" packages="10" files="38" classes="38"/>
     <package name="src">
       <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
@@ -212,48 +212,48 @@
       <file name="CartPage.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\pages\CartPage.js">
         <metrics statements="48" coveredstatements="48" conditionals="26" coveredconditionals="26" methods="13" coveredmethods="13"/>
         <line num="29" count="7" type="stmt"/>
-        <line num="31" count="153" type="stmt"/>
-        <line num="32" count="152" type="stmt"/>
-        <line num="33" count="152" type="stmt"/>
-        <line num="34" count="151" type="stmt"/>
-        <line num="35" count="151" type="stmt"/>
-        <line num="36" count="151" type="stmt"/>
-        <line num="39" count="151" type="stmt"/>
-        <line num="40" count="151" type="stmt"/>
-        <line num="41" count="151" type="stmt"/>
-        <line num="43" count="151" type="stmt"/>
-        <line num="44" count="117" type="cond" truecount="2" falsecount="0"/>
-        <line num="45" count="117" type="stmt"/>
-        <line num="47" count="151" type="stmt"/>
+        <line num="31" count="154" type="stmt"/>
+        <line num="32" count="153" type="stmt"/>
+        <line num="33" count="153" type="stmt"/>
+        <line num="34" count="152" type="stmt"/>
+        <line num="35" count="152" type="stmt"/>
+        <line num="36" count="152" type="stmt"/>
+        <line num="39" count="152" type="stmt"/>
+        <line num="40" count="152" type="stmt"/>
+        <line num="41" count="152" type="stmt"/>
+        <line num="43" count="152" type="stmt"/>
+        <line num="44" count="118" type="cond" truecount="2" falsecount="0"/>
+        <line num="45" count="118" type="stmt"/>
+        <line num="47" count="152" type="stmt"/>
         <line num="52" count="1" type="stmt"/>
         <line num="53" count="1" type="stmt"/>
-        <line num="60" count="151" type="stmt"/>
+        <line num="60" count="152" type="stmt"/>
         <line num="61" count="11" type="stmt"/>
         <line num="62" count="11" type="stmt"/>
         <line num="63" count="11" type="stmt"/>
         <line num="64" count="11" type="stmt"/>
         <line num="66" count="1" type="stmt"/>
-        <line num="71" count="151" type="stmt"/>
+        <line num="71" count="152" type="stmt"/>
         <line num="72" count="99" type="stmt"/>
         <line num="74" count="99" type="stmt"/>
         <line num="75" count="98" type="stmt"/>
         <line num="77" count="1" type="stmt"/>
-        <line num="80" count="151" type="stmt"/>
+        <line num="80" count="152" type="stmt"/>
         <line num="81" count="99" type="stmt"/>
-        <line num="85" count="151" type="stmt"/>
-        <line num="86" count="4" type="stmt"/>
-        <line num="87" count="4" type="stmt"/>
-        <line num="88" count="4" type="stmt"/>
-        <line num="93" count="2" type="stmt"/>
-        <line num="97" count="2" type="stmt"/>
-        <line num="98" count="2" type="stmt"/>
-        <line num="99" count="2" type="stmt"/>
-        <line num="100" count="2" type="stmt"/>
+        <line num="85" count="152" type="stmt"/>
+        <line num="86" count="5" type="stmt"/>
+        <line num="87" count="5" type="stmt"/>
+        <line num="88" count="5" type="stmt"/>
+        <line num="93" count="3" type="stmt"/>
+        <line num="97" count="3" type="stmt"/>
+        <line num="98" count="3" type="stmt"/>
+        <line num="99" count="3" type="stmt"/>
+        <line num="100" count="3" type="stmt"/>
         <line num="102" count="1" type="stmt"/>
         <line num="103" count="1" type="stmt"/>
         <line num="106" count="1" type="stmt"/>
-        <line num="109" count="151" type="stmt"/>
-        <line num="132" count="117" type="stmt"/>
+        <line num="109" count="152" type="stmt"/>
+        <line num="132" count="118" type="stmt"/>
         <line num="150" count="11" type="stmt"/>
         <line num="170" count="1" type="stmt"/>
         <line num="181" count="2" type="stmt"/>
