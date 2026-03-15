@@ -1,6 +1,12 @@
 // Foo Chao, A0272024R
 // AI Assistance: Github Copilot (Claude Sonnet 4.6)
 
+// Note: The file will be split into 4 parts due to too many tests in one file taking forever to run.
+// - editProductAndCategory1.spec.ts -> Suite A to C focusing on product creation/update/delete tests (1 edit action each test)
+// - editProductAndCategory2.spec.ts -> Suite D to F focusing on category creation/update/delete tests (1 edit action each test)
+// - editProductAndCategory3.spec.ts -> Suite G focusing on more complex scenarios involving multiple edit actions in sequence 
+// - editProductAndCategory4.spec.ts -> Suite H focusing on multiple edit actions in sequence 
+//      and Suite I focusing on normal users unable to access admin edit pages and actions
 
 // Instructions for AI
 // Plan for testing of ui test involving create product/ category

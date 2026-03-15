@@ -15,6 +15,12 @@ export default defineConfig({
 
   testDir: './tests/ui',
 
+  // Uncomment to run only a specific spec file:
+  // testMatch: '**/editProductAndCategory1.spec.ts'
+  // testMatch: '**/editProductAndCategory2.spec.ts'
+  // testMatch: '**/editProductAndCategory3.spec.ts'
+  // testMatch: '**/editProductAndCategory4.spec.ts'
+
   /* Maximum time one test can run for. */
   timeout: 15_000,
 
