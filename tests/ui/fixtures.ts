@@ -8,25 +8,22 @@
  * Provides a `db` fixture that connects to the same in-memory MongoDB that
  * start-test-server.js started, so tests can seed or wipe data directly.
  *
+ * Tests run with workers: 1 (serial), so clearDB() in beforeEach is safe —
+ * there is only ever one test running at a time sharing the database.
+ *
  * Usage in a spec file:
  *
- *   import { test, expect } from './fixtures';
- *
- *   test('my test', async ({ page, db }) => {
- *     // seed before the test
- *     await db.collection('users').insertOne({ ... });
- *
- *     await page.goto('/');
- *     // ...assertions...
- *
- *     // db is disconnected automatically after the test
- *   });
- *
- * If you want a clean slate before every test, call clearDB() in beforeEach:
+ *   import { test, expect, clearDB } from './fixtures';
  *
  *   test.beforeEach(async ({ db }) => {
- *     await clearDB(db);
+ *     await clearDB(db);          // clean slate before every test
  *   });
+ *
+ *   test('my test', async ({ page, db }) => {
+ *     await db.collection('users').insertOne({ ... });  // seed
+ *     await page.goto('/');
+ *     // ...assertions...
+ *   });                            // db closed automatically
  */
 
 import { test as base } from '@playwright/test';
@@ -39,7 +36,7 @@ function readTestEnv(): { mongoUri: string; backendPort: string } {
   return JSON.parse(raw);
 }
 
-/** Drop every collection, giving each test a clean database state. */
+/** Drop every collection in the given db — safe to call in beforeEach. */
 export async function clearDB(db: Db): Promise<void> {
   const collections = await db.listCollections().toArray();
   await Promise.all(collections.map((c) => db.collection(c.name).deleteMany({})));
@@ -51,12 +48,11 @@ type Fixtures = {
 };
 
 export const test = base.extend<Fixtures>({
-  // eslint-disable-next-line no-empty-pattern
   db: async ({}, use) => {
     const { mongoUri } = readTestEnv();
     const client = new MongoClient(mongoUri);
     await client.connect();
-    const db = client.db(); // uses the default db from the URI
+    const db = client.db(); // single shared db — safe because workers: 1
 
     await use(db);
 

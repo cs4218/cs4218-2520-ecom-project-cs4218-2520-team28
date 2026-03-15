@@ -35,7 +35,7 @@ writeFileSync(
   "utf-8"
 );
 
-// Start backend separately — server.js reads PORT for its listen address.
+// Start the real backend so tests simulate actual production behaviour.
 const backend = spawn("node", ["server.js"], {
   shell: true,
   stdio: "inherit",
