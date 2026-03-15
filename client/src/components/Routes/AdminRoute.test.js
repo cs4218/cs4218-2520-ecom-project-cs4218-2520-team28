@@ -1,23 +1,23 @@
 // Foo Chao, A0272024R
+// AI Assistance: Github Copilot (Claude Sonnet 4.6)
+// refer to line 34-41 i previously fixed a bug there 
+// is there a parallel bug in admin route if it is fix it then do unit test for admin route similar to private route
 
-// AI generated unit tests for PrivateRoute component by ChatGPT 5.2 Thinking
-// https://chatgpt.com/share/6982cdb6-3e80-8005-8bec-96cbb3bdafff
-// Modified with comments and some (non-trival amount of) logic cleaning
-// notably use Promise.resolve to flush microtasks 
-// when we need useEffect to finish but it does not cause change in state
-// also added a test case for security scenario when token is removed
-// Prompt: Private.js Code + 
-// suggest unit test for this it should use studs/mocks for useAUth or others 
-// and should test true originially false originally change from true to false and false to truth
+// done in ms2 for completeness sake it is just 1 prompt anyway LOL
+
+// Unit tests for AdminRoute component, modelled after Private.test.js
+// Covers the same scenarios: initial spinner, API calls, ok state transitions,
+// no-token guard, token removal (security), and expired/invalid token handling.
+
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
-import PrivateRoute from "./Private";
+import AdminRoute from "./AdminRoute";
 import axios from "axios";
 
 // 1) Mock axios
 jest.mock("axios");
 
-// 2) Mock useAuth hook (module path must match Private.js)
+// 2) Mock useAuth hook (module path must match AdminRoute.js)
 let mockAuthValue = [{}, jest.fn()]; // Mutable value that can be changed between renders
 jest.mock("../../context/auth", () => ({
   useAuth: jest.fn(() => mockAuthValue),
@@ -39,7 +39,7 @@ jest.mock("react-hot-toast", () => ({
   __esModule: true,
 }));
 
-describe("Private Route Test", () => {
+describe("Admin Route Test", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -50,12 +50,12 @@ describe("Private Route Test", () => {
     axios.get.mockResolvedValueOnce({ data: { ok: true } });
 
     // Act -> Render
-    render(<PrivateRoute />);
+    render(<AdminRoute />);
 
     // Assert
     // Before useEffect finishes, should still be spinner
     expect(screen.getByTestId("spinner")).toBeInTheDocument();
-    
+
     // Wait for async state updates to complete
     await waitFor(() => {
       expect(screen.getByTestId("outlet")).toBeInTheDocument();
@@ -68,18 +68,18 @@ describe("Private Route Test", () => {
     axios.get.mockResolvedValueOnce({ data: { ok: true } });
 
     // Act -> Render
-    render(<PrivateRoute />);
+    render(<AdminRoute />);
 
     // Assert
     await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/user-auth");
+      expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/admin-auth");
     });
-    
+
     // Wait for state updates to complete
     await waitFor(() => {
       expect(screen.getByTestId("outlet")).toBeInTheDocument();
     });
-  })
+  });
 
   test("Spinner then Outlet when first API call returns ok=true", async () => {
     // Arrange -> Mock useAuth to return token
@@ -87,7 +87,7 @@ describe("Private Route Test", () => {
     axios.get.mockResolvedValueOnce({ data: { ok: true } });
 
     // Act -> Render
-    render(<PrivateRoute />);
+    render(<AdminRoute />);
 
     // Assert
     // Initially Spinner
@@ -99,7 +99,7 @@ describe("Private Route Test", () => {
     });
 
     // Check axios called with correct URL
-    expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/user-auth");
+    expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/admin-auth");
   });
 
   test("Stays Spinner when first API call returns ok=false", async () => {
@@ -108,7 +108,7 @@ describe("Private Route Test", () => {
     axios.get.mockResolvedValueOnce({ data: { ok: false } });
 
     // Act -> Render
-    render(<PrivateRoute />);
+    render(<AdminRoute />);
 
     // Assert
     // Initially Spinner
@@ -116,7 +116,7 @@ describe("Private Route Test", () => {
 
     // Still Spinner after API call on useEffect
     await waitFor(() => {
-      expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/user-auth");
+      expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/admin-auth");
     });
 
     // flush one microtask tick
@@ -132,7 +132,7 @@ describe("Private Route Test", () => {
     mockAuthValue = [{}, jest.fn()];
 
     // Act -> Render
-    render(<PrivateRoute />);
+    render(<AdminRoute />);
 
     // Assert
     // Initially Spinner
@@ -157,16 +157,16 @@ describe("Private Route Test", () => {
     mockAuthValue = [{ token: "t1" }, jest.fn()];
     axios.get.mockResolvedValueOnce({ data: { ok: true } });
 
-    const { rerender } = render(<PrivateRoute />);
+    const { rerender } = render(<AdminRoute />);
     await waitFor(() => {
       expect(screen.getByTestId("outlet")).toBeInTheDocument();
-    }); // ensures intial state is ready
+    }); // ensures initial state is ready
 
     // Act
     // Second render: change token and ok=false
     mockAuthValue = [{ token: "t2" }, jest.fn()];
     axios.get.mockResolvedValueOnce({ data: { ok: false } });
-    rerender(<PrivateRoute />);
+    rerender(<AdminRoute />);
 
     // Assert
     // useEffect runs again due to token change
@@ -183,7 +183,7 @@ describe("Private Route Test", () => {
     mockAuthValue = [{ token: "t1" }, jest.fn()];
     axios.get.mockResolvedValueOnce({ data: { ok: false } });
 
-    const { rerender } = render(<PrivateRoute />);
+    const { rerender } = render(<AdminRoute />);
 
     // First render: wait for first API call to complete
     await waitFor(() => {
@@ -196,7 +196,7 @@ describe("Private Route Test", () => {
     // Second render: change token and ok=true
     mockAuthValue = [{ token: "t2" }, jest.fn()];
     axios.get.mockResolvedValueOnce({ data: { ok: true } });
-    rerender(<PrivateRoute />);
+    rerender(<AdminRoute />);
 
     // Assert
     // Now wait for the outlet to appear (this also ensures API was called)
@@ -212,7 +212,7 @@ describe("Private Route Test", () => {
     // Arrange - First render with token
     mockAuthValue = [{ token: "t1" }, jest.fn()];
     axios.get.mockResolvedValueOnce({ data: { ok: true } });
-    const { rerender } = render(<PrivateRoute />);
+    const { rerender } = render(<AdminRoute />);
 
     // First render should show Outlet after API call
     await waitFor(() => {
@@ -222,7 +222,7 @@ describe("Private Route Test", () => {
 
     // Act - Second render: token removed (security scenario)
     mockAuthValue = [{}, jest.fn()];
-    rerender(<PrivateRoute />);
+    rerender(<AdminRoute />);
 
     // Assert - Should immediately show Spinner when token is removed
     // Wait for any potential state updates to settle
@@ -236,12 +236,12 @@ describe("Private Route Test", () => {
   test("expired/invalid token: clears auth state and shows Spinner", async () => {
     // Arrange
     const mockSetAuth = jest.fn();
-    mockAuthValue = [{ token: "expired-token", user: { name: "Test" } }, mockSetAuth];
+    mockAuthValue = [{ token: "expired-token", user: { name: "Admin" } }, mockSetAuth];
     // Simulate server returning 401 for an expired token
     axios.get.mockRejectedValueOnce(new Error("Request failed with status code 401"));
 
     // Act
-    render(<PrivateRoute />);
+    render(<AdminRoute />);
 
     // Assert — setAuth called to clear stale credentials
     await waitFor(() => {
@@ -249,6 +249,6 @@ describe("Private Route Test", () => {
     });
     expect(screen.getByTestId("spinner")).toBeInTheDocument();
     expect(screen.queryByTestId("outlet")).not.toBeInTheDocument();
-    expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/user-auth");
+    expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/admin-auth");
   });
 });
