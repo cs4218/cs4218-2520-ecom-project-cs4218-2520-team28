@@ -29,6 +29,7 @@ export default {
     "routes/**/*.js",
     "!**/*.test.js",
     "!server.js",
+    "!tests/**",
   ],
 
   coverageThreshold: {
