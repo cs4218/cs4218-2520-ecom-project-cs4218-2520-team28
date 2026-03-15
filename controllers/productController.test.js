@@ -560,6 +560,50 @@ describe("createProductController", () => {
     expect(mockSave).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
   });
+
+  // Foo Chao, A0272024R
+  // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+  // Tests 29-32: Validate that zero and negative price/quantity are rejected (Bug 2 fix)
+
+  // Test 29: Should reject negative price
+  it("should return 400 error when price is negative", async () => {
+    req.fields.price = "-1";
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ error: "Price must be a positive number" });
+  });
+
+  // Test 30: Should reject zero price
+  it("should return 400 error when price is zero", async () => {
+    req.fields.price = "0";
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ error: "Price must be a positive number" });
+  });
+
+  // Test 31: Should reject negative quantity
+  it("should return 400 error when quantity is negative", async () => {
+    req.fields.quantity = "-1";
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ error: "Quantity must be a positive number" });
+  });
+
+  // Test 32: Should reject zero quantity
+  it("should return 400 error when quantity is zero", async () => {
+    req.fields.quantity = "0";
+
+    await createProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ error: "Quantity must be a positive number" });
+  });
 });
 
 // // Foo Chao, A0272024R
@@ -1303,6 +1347,50 @@ describe("updateProductController", () => {
     expect(mockFindByIdAndUpdate).toHaveBeenCalled();
     expect(mockSave).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  // Foo Chao, A0272024R
+  // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+  // Tests 29-32: Validate that zero and negative price/quantity are rejected (Bug 2 fix)
+
+  // Test 29: Should reject negative price
+  it("should return 400 error when price is negative", async () => {
+    req.fields.price = "-1";
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ error: "Price must be a positive number" });
+  });
+
+  // Test 30: Should reject zero price
+  it("should return 400 error when price is zero", async () => {
+    req.fields.price = "0";
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ error: "Price must be a positive number" });
+  });
+
+  // Test 31: Should reject negative quantity
+  it("should return 400 error when quantity is negative", async () => {
+    req.fields.quantity = "-1";
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ error: "Quantity must be a positive number" });
+  });
+
+  // Test 32: Should reject zero quantity
+  it("should return 400 error when quantity is zero", async () => {
+    req.fields.quantity = "0";
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ error: "Quantity must be a positive number" });
   });
 });
 

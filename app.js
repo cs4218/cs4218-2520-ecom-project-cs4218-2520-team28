@@ -18,15 +18,6 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
-// When running Playwright UI tests, mount the test DB isolation middleware
-// so each worker is routed to its own database.  Never loaded in production.
-// Uses .then() instead of top-level await so Jest/Babel can parse this file.
-if (process.env.UI_TEST === "true") {
-  import("./tests/ui/testDbMiddleware.js").then(({ default: testDbMiddleware }) => {
-    app.use(testDbMiddleware);
-  });
-}
-
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/product", productRoutes);

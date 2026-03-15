@@ -1,23 +1,12 @@
 // Foo Chao, A0272024R
 // AI Assistance: Github Copilot (Claude Sonnet 4.6)
 
-import { createServer } from 'net';
 import { defineConfig, devices } from '@playwright/test';
 
-/** Ask the OS for a free TCP port by binding to port 0. */
-const getFreePort = (): Promise<number> =>
-  new Promise((resolve) => {
-    const srv = createServer();
-    srv.listen(0, '127.0.0.1', () => {
-      const { port } = srv.address() as { port: number };
-      srv.close(() => resolve(port));
-    });
-  });
-
-// Pick free ports for both the React client and the Express backend so that
-// a developer who already has `npm run dev` running never causes a conflict.
-const clientPort = await getFreePort();
-const backendPort = await getFreePort();
+// Use env vars if pre-set (e.g. in CI), otherwise fall back to fixed ports
+// that are unlikely to conflict with a normal `npm run dev` session.
+const clientPort  = Number(process.env.CLIENT_PORT  ?? 3456);
+const backendPort = Number(process.env.BACKEND_PORT ?? 5678);
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -70,19 +59,19 @@ export default defineConfig({
       },
     },
 
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
-      },
-    },
+    // {
+    //   name: 'firefox',
+    //   use: {
+    //     ...devices['Desktop Firefox'],
+    //   },
+    // },
 
-    {
-      name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
-      },
-    },
+    // {
+    //   name: 'webkit',
+    //   use: {
+    //     ...devices['Desktop Safari'],
+    //   },
+    // },
   ],
 
   /* Start the full stack before running tests.

@@ -35,11 +35,10 @@ writeFileSync(
   "utf-8"
 );
 
-// Start the real backend with UI_TEST=true so app.js mounts testDbMiddleware.
 const backend = spawn("node", ["server.js"], {
   shell: true,
   stdio: "inherit",
-  env: { ...process.env, MONGO_URL: uri, PORT: backendPort, UI_TEST: "true" },
+  env: { ...process.env, MONGO_URL: uri, PORT: backendPort },
 });
 
 // Start React client separately — react-scripts reads PORT; the proxy target

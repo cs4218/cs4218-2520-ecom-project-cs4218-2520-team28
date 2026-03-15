@@ -605,8 +605,36 @@ describe('CreateProduct Component', () => {
       consoleSpy.mockRestore();
     });
 
+    test('should show backend validation error message when API returns 400 with error field', async () => {
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Test for Bug 1 fix: frontend should propagate backend validation errors
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const axiosError = new Error('Request failed with status code 400');
+      axiosError.response = { data: { error: 'Price must be a positive number' } };
+      mockAxiosPost.mockRejectedValue(axiosError);
+
+      render(<CreateProduct />);
+      await waitFor(() => {
+        expect(screen.getByText('CREATE PRODUCT')).toBeInTheDocument();
+      });
+
+      fireEvent.change(screen.getByPlaceholderText('write a name'), {
+        target: { value: 'Product' },
+      });
+
+      // Act
+      fireEvent.click(screen.getByText('CREATE PRODUCT'));
+
+      // Assert
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('Price must be a positive number');
+      });
+
+      consoleSpy.mockRestore();
+    });
+
     test('should prevent default form submission when create button is clicked', async () => {
-      // Arrange
       mockAxiosPost.mockResolvedValue({
         data: { success: false },
       });

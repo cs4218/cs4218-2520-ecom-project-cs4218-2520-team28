@@ -1128,7 +1128,7 @@ describe('UpdateProduct', () => {
 
             // Assert
             await waitFor(() => {
-                expect(mockToastError).toHaveBeenCalledWith('something went wrong');
+                expect(mockToastError).toHaveBeenCalledWith('Something went wrong');
                 expect(consoleLogSpy).toHaveBeenCalledWith(error);
             });
         });
@@ -1168,6 +1168,44 @@ describe('UpdateProduct', () => {
             await waitFor(() => {
                 expect(mockAxiosPut).toHaveBeenCalled();
             });
+        });
+
+        test('should show backend validation error message when update returns 400', async () => {
+            // Foo Chao, A0272024R
+            // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+            // Test for Bug 1 fix: frontend should propagate backend validation errors
+            const axiosError = new Error('Request failed with status code 400');
+            axiosError.response = { data: { error: 'Name is Required' } };
+            const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+            mockAxiosGet.mockResolvedValue({
+                data: {
+                    product: {
+                        _id: 'prod123',
+                        name: 'Laptop',
+                        description: 'Gaming laptop',
+                        price: 1500,
+                        quantity: 5,
+                        shipping: true,
+                        category: { _id: 'cat1' }
+                    },
+                    success: true,
+                    category: []
+                }
+            });
+            mockAxiosPut.mockRejectedValue(axiosError);
+
+            render(<UpdateProduct />);
+            await waitFor(() => expect(screen.getByText('UPDATE PRODUCT')).toBeInTheDocument());
+
+            // Act
+            fireEvent.click(screen.getByText('UPDATE PRODUCT'));
+
+            // Assert
+            await waitFor(() => {
+                expect(mockToastError).toHaveBeenCalledWith('Name is Required');
+            });
+
+            consoleLogSpy.mockRestore();
         });
     });
 

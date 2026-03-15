@@ -43,10 +43,20 @@ export const createProductController = async (req, res) => {
         return res.status(400).send({ error: "Description is Required" });
       case !price: // note price is still a string here so no need check for 0
         return res.status(400).send({ error: "Price is Required" });
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Bug fix: reject zero and negative price values
+      case isNaN(Number(price)) || Number(price) <= 0:
+        return res.status(400).send({ error: "Price must be a positive number" });
       case !category:
         return res.status(400).send({ error: "Category is Required" });
       case !quantity: // note quantity is still a string here so no need check for 0
         return res.status(400).send({ error: "Quantity is Required" });
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Bug fix: reject zero and negative quantity values
+      case isNaN(Number(quantity)) || Number(quantity) <= 0:
+        return res.status(400).send({ error: "Quantity must be a positive number" });
       case photo && (photo.size > 1000000 || photo.size <= 0):
         return res
           .status(400)
@@ -219,10 +229,20 @@ export const updateProductController = async (req, res) => {
         return res.status(400).send({ error: "Description is Required" });
       case !price:
         return res.status(400).send({ error: "Price is Required" });
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Bug fix: reject zero and negative price values
+      case isNaN(Number(price)) || Number(price) <= 0:
+        return res.status(400).send({ error: "Price must be a positive number" });
       case !category:
         return res.status(400).send({ error: "Category is Required" });
       case !quantity:
         return res.status(400).send({ error: "Quantity is Required" });
+      // Foo Chao, A0272024R
+      // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+      // Bug fix: reject zero and negative quantity values
+      case isNaN(Number(quantity)) || Number(quantity) <= 0:
+        return res.status(400).send({ error: "Quantity must be a positive number" });
       case photo && (photo.size > 1000000 || photo.size <= 0):
         return res
           .status(400)
