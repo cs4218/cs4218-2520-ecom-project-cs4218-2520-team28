@@ -4,6 +4,7 @@ import React, { useState,useEffect } from "react";
 import { useAuth } from "../../context/auth";
 import { Outlet } from "react-router-dom";
 import axios from 'axios';
+import toast from "react-hot-toast";
 import Spinner from "../Spinner";
 
 export default function PrivateRoute(){
@@ -13,11 +14,21 @@ export default function PrivateRoute(){
 
     useEffect(()=> {
         const authCheck = async() => {
-            const res = await axios.get("/api/v1/auth/user-auth");
-            if(res.data.ok){
-                setOk(true);
-            } else {
+            // Foo Chao, A0272024R
+            // Added try catch to handle error
+            try {
+                const res = await axios.get("/api/v1/auth/user-auth");
+                if(res.data.ok){
+                    setOk(true);
+                } else {
+                    setOk(false);
+                }
+            } catch (error) {
+                // Token is expired or invalid — clear stale auth and notify user
                 setOk(false);
+                setAuth({ user: null, token: "" });
+                localStorage.removeItem("auth");
+                toast.error("Session expired. Please login again.");
             }
         };
         // Foo Chao, A0272024R
@@ -28,7 +39,8 @@ export default function PrivateRoute(){
         } else {
             setOk(false); // Reset to spinner when no token
         }
+        // eslint-disable-next-line
     }, [auth?.token]);
 
-    return ok ? <Outlet /> : <Spinner path=""/>;
+    return ok ? <Outlet /> : <Spinner path="login"/>;
 }

@@ -33,6 +33,12 @@ jest.mock("../Spinner", () => (props) => (
   <div data-testid="spinner">SPINNER path={props.path}</div>
 ));
 
+// 5) Mock toast so toast.error calls are silent in tests
+jest.mock("react-hot-toast", () => ({
+  default: { error: jest.fn(), success: jest.fn() },
+  __esModule: true,
+}));
+
 describe("Private Route Test", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -225,5 +231,24 @@ describe("Private Route Test", () => {
     });
     expect(screen.queryByTestId("outlet")).not.toBeInTheDocument();
     expect(axios.get).toHaveBeenCalledTimes(1); // Still only called once
+  });
+
+  test("expired/invalid token: clears auth state and shows Spinner", async () => {
+    // Arrange
+    const mockSetAuth = jest.fn();
+    mockAuthValue = [{ token: "expired-token", user: { name: "Test" } }, mockSetAuth];
+    // Simulate server returning 401 for an expired token
+    axios.get.mockRejectedValueOnce(new Error("Request failed with status code 401"));
+
+    // Act
+    render(<PrivateRoute />);
+
+    // Assert — setAuth called to clear stale credentials
+    await waitFor(() => {
+      expect(mockSetAuth).toHaveBeenCalledWith({ user: null, token: "" });
+    });
+    expect(screen.getByTestId("spinner")).toBeInTheDocument();
+    expect(screen.queryByTestId("outlet")).not.toBeInTheDocument();
+    expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/user-auth");
   });
 });

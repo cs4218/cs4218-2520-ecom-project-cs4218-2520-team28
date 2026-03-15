@@ -219,7 +219,10 @@ let mockDropInInstance = null;
 jest.mock("braintree-web-drop-in-react", () => {
   return function MockDropIn(props) {
     const React = require('react');
-    React.useEffect(() => {
+    // useLayoutEffect fires synchronously after DOM mutations, ensuring onInstance
+    // is called before the test proceeds past waitFor(dropin), preventing a race
+    // condition where fireEvent.click runs before instance is set in CartPage.
+    React.useLayoutEffect(() => {
       if (props.onInstance && mockDropInInstance) {
         props.onInstance(mockDropInInstance);
       }
