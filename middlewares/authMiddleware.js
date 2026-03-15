@@ -32,8 +32,14 @@ export const isAdmin = async (req, res, next) => {
                 message: "User not found",
             });
         }
+        // Foo Chao, A0272024R
+        // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+        // Bug fix: return 403 (Forbidden) when the token is valid but the user is not an admin.
+        // 401 (Unauthorized) is reserved for "not authenticated" (invalid/missing token).
+        // This lets AdminRoute distinguish the two cases and avoid unintentionally logging
+        // out a legitimately logged-in non-admin user who navigates to an admin URL.
         if (user.role !== 1) {
-            return res.status(401).send({
+            return res.status(403).send({
                 success: false,
                 message: "Unauthorized Access",
             });

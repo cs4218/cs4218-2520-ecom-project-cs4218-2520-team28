@@ -251,4 +251,57 @@ describe("Admin Route Test", () => {
     expect(screen.queryByTestId("outlet")).not.toBeInTheDocument();
     expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/admin-auth");
   });
+
+  // Foo Chao, A0272024R
+  // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+  // New test: 403 means "authenticated but not admin" — auth state must NOT be cleared
+  // and Spinner should redirect to /dashboard/user, not /login.
+  test("non-admin user (403): keeps auth state and shows Spinner redirecting to dashboard/user", async () => {
+    // Arrange
+    const mockSetAuth = jest.fn();
+    mockAuthValue = [{ token: "user-token", user: { name: "Regular User" } }, mockSetAuth];
+    const error403 = new Error("Request failed with status code 403");
+    error403.response = { status: 403 };
+    axios.get.mockRejectedValueOnce(error403);
+
+    // Act
+    render(<AdminRoute />);
+
+    // Assert — wait for the Spinner to reflect the 403 redirect path (requires both the
+    // axios call AND the catch-block state update to have settled)
+    await waitFor(() => {
+      expect(screen.getByTestId("spinner")).toHaveTextContent("dashboard/user");
+    });
+
+    // setAuth must NOT be called — the user's session should remain intact
+    expect(mockSetAuth).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("outlet")).not.toBeInTheDocument();
+    expect(axios.get).toHaveBeenCalledWith("/api/v1/auth/admin-auth");
+  });
+
+  // Foo Chao, A0272024R
+  // AI Assistance: Github Copilot (Claude Sonnet 4.6)
+  // New test: 401 means token invalid/expired — auth state MUST be cleared and
+  // Spinner should redirect to /login (not /dashboard/user).
+  test("invalid/expired token (explicit 401): clears auth state and Spinner redirects to login", async () => {
+    // Arrange
+    const mockSetAuth = jest.fn();
+    mockAuthValue = [{ token: "bad-token", user: { name: "Someone" } }, mockSetAuth];
+    const error401 = new Error("Request failed with status code 401");
+    error401.response = { status: 401 };
+    axios.get.mockRejectedValueOnce(error401);
+
+    // Act
+    render(<AdminRoute />);
+
+    // Assert — setAuth IS called to clear the expired session
+    await waitFor(() => {
+      expect(mockSetAuth).toHaveBeenCalledWith({ user: null, token: "" });
+    });
+
+    // Spinner redirects to login
+    expect(screen.getByTestId("spinner")).toBeInTheDocument();
+    expect(screen.getByTestId("spinner")).toHaveTextContent("login");
+    expect(screen.queryByTestId("outlet")).not.toBeInTheDocument();
+  });
 });

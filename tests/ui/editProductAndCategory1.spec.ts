@@ -1,10 +1,10 @@
 // Foo Chao, A0272024R
 // AI Assistance: Github Copilot (Claude Sonnet 4.6)
 
-// Note: The file will be split into 4 parts due to too many tests in one file taking forever to run.
+// Note: The file will be split into 3 parts due to too many tests in one file taking forever to run.
 // - editProductAndCategory1.spec.ts -> Suite A to C focusing on product creation/update/delete tests (1 edit action each test)
 // - editProductAndCategory2.spec.ts -> Suite D to F focusing on category creation/update/delete tests (1 edit action each test)
-// - editProductAndCategory4.spec.ts -> Suite G focusing on multiple edit actions in sequence 
+// - editProductAndCategory3.spec.ts -> Suite G focusing on multiple edit actions in sequence 
 //      and Suite H focusing on normal users unable to access admin edit pages and actions
 
 // Instructions for AI
@@ -125,6 +125,41 @@
 //      assert products still exist in database after category deletion (F-6)
 // 6) log in as admin -> click Delete -> assert confirmation modal appears with Yes/No (F-7)
 // 7) log in as admin -> click Delete -> click No -> assert category NOT deleted (F-8)
+//
+// ─── editProductAndCategory3.spec.ts ─────────────────────────────────────────
+//
+// Suite G: Multi-Sequence Operations (18 tests)
+// G-1:  Update product (same name) twice → product intact in DB and on home page
+// G-2:  Update product (two different names) in sequence → final name visible, previous names gone
+// G-3:  Update category (same name) twice → category still accessible via slug
+// G-4:  Update category (two different names) in sequence → final name visible, both previous names gone
+// G-5:  Create two products back-to-back → both appear on home page
+// G-6:  Create two categories back-to-back → both appear as nav dropdown links
+// G-7:  Create product → immediately delete it → not visible on home page
+// G-8:  Create category → immediately delete it → not in admin table and not in nav dropdown
+// G-9:  Create product → immediately update its name/price → updated details visible in admin products list
+// G-10: Create category → immediately update its name → updated name in table, original name gone
+// G-11: Update product → immediately delete it → not visible on home page
+// G-12: Update category → immediately delete it → not in admin table and not in nav dropdown
+// G-13: Delete category → recreate with same name → new category accessible in nav
+// G-14: Create new category → immediately create product under it → product visible on category browse page
+// G-15: Create new category → immediately reassign existing product to it → product on new category page only
+// G-16: Delete category with product → update product to new category → product accessible under new category
+// G-17: Move product from category A to B → product on B's browse page and absent from A's
+// G-18: Delete product → recreate with same name → new product visible on home page
+//
+// Suite H: Access Control (10 tests)
+// H-1:  Regular user logged in → Dashboard nav link points to /dashboard/user, not /dashboard/admin
+// H-2:  Regular user logged in → force navigate to /dashboard/admin → spinner → redirected to /dashboard/user
+//        (auth state preserved — user remains logged in)
+// H-3:  Regular user logged in → force navigate to /dashboard/admin/create-category → redirected to /dashboard/user
+// H-4:  Regular user logged in → force navigate to /dashboard/admin/create-product → redirected to /dashboard/user
+// H-5:  Regular user logged in → force navigate to /dashboard/admin/products → redirected to /dashboard/user
+// H-6:  Regular user logged in → force navigate to /dashboard/admin/product/:slug → redirected to /dashboard/user
+// H-7:  Not logged in → force navigate to /dashboard/admin → spinner → redirected to /login (correct)
+// H-8:  Not logged in → force navigate to /dashboard/admin/create-category → redirected to /login (correct)
+// H-9:  Not logged in → force navigate to /dashboard/admin/create-product → redirected to /login (correct)
+// H-10: Not logged in → force navigate to /dashboard/user (PrivateRoute) → redirected to /login (correct)
 
 
 import { test, expect, clearDB } from './fixtures';

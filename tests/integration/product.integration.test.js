@@ -288,7 +288,7 @@ describe("createProductController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when user is not admin", async () => {
+      it("should return 403 when user is not admin", async () => {
         const normalUser = await userModel.create({
           name: "Normal User",
           email: "user@routetest.com",
@@ -305,7 +305,7 @@ describe("createProductController integration tests", () => {
           .set("Authorization", userToken)
           .field("name", "Test");
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
@@ -397,7 +397,7 @@ describe("createProductController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when a valid JWT belongs to a non-admin user", async () => {
+      it("should return 403 when a valid JWT belongs to a non-admin user", async () => {
         const normalUser = await userModel.create({
           name: "Normal User",
           email: "normal@servertest.com",
@@ -414,7 +414,7 @@ describe("createProductController integration tests", () => {
           .set("Authorization", normalToken)
           .field("name", "Test");
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
@@ -742,7 +742,7 @@ describe("updateProductController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when user is not admin", async () => {
+      it("should return 403 when user is not admin", async () => {
         const pid = await seedProduct();
         const normalUser = await userModel.create({
           name: "Normal User",
@@ -760,7 +760,7 @@ describe("updateProductController integration tests", () => {
           .set("Authorization", userToken)
           .field("name", "Test");
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
@@ -822,7 +822,7 @@ describe("updateProductController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when a valid JWT belongs to a non-admin user", async () => {
+      it("should return 403 when a valid JWT belongs to a non-admin user", async () => {
         const pid = await seedProduct();
         const normalUser = await userModel.create({
           name: "Normal User",
@@ -840,7 +840,7 @@ describe("updateProductController integration tests", () => {
           .set("Authorization", normalToken)
           .field("name", "Test");
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
@@ -1048,7 +1048,7 @@ describe("deleteProductController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when user is not admin", async () => {
+      it("should return 403 when user is not admin", async () => {
         const pid = await seedProduct();
         const normalUser = await userModel.create({
           name: "Normal User",
@@ -1065,7 +1065,7 @@ describe("deleteProductController integration tests", () => {
           .delete(`/api/v1/product/delete-product/${pid}`)
           .set("Authorization", userToken);
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
@@ -1111,7 +1111,7 @@ describe("deleteProductController integration tests", () => {
         expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
       });
 
-      it("should return 401 when a valid JWT belongs to a non-admin user", async () => {
+      it("should return 403 when a valid JWT belongs to a non-admin user", async () => {
         const pid = await seedProduct();
         const normalUser = await userModel.create({
           name: "Normal User",
@@ -1128,7 +1128,7 @@ describe("deleteProductController integration tests", () => {
           .delete(`/api/v1/product/delete-product/${pid}`)
           .set("Authorization", normalToken);
 
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(403);
         expect(res.body.message).toBe("Unauthorized Access");
       });
     });
