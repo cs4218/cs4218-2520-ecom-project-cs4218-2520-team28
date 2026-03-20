@@ -157,19 +157,34 @@ export const getSingleProductController = async (req, res) => {
   }
 };
 
+// Chi Thanh, A0276229W.
+// AI generated tests using GitHub Copilot (GPT-5.3 Codex) Agent Mode.
 // get photo
 export const productPhotoController = async (req, res) => {
   try {
     const product = await productModel.findById(req.params.pid).select("photo");
-    if (product.photo.data) {
-      res.set("Content-type", product.photo.contentType);
-      return res.status(200).send(product.photo.data);
+
+    if (!product) {
+      return res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
     }
+
+    if (!product.photo || !product.photo.data) {
+      return res.status(404).send({
+        success: false,
+        message: "Product photo not found",
+      });
+    }
+
+    res.set("Content-Type", product.photo.contentType || "application/octet-stream");
+    return res.status(200).send(product.photo.data);
   } catch (error) {
     res.status(500).send({
       success: false,
-      message: "Erorr while getting photo",
-      error,
+      message: "Error while getting photo",
+      error: error.message,
     });
   }
 };

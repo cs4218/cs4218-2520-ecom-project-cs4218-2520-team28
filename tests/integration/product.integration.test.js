@@ -15,6 +15,7 @@ import {
   createProductController,
   getProductController,
   getSingleProductController,
+  productPhotoController,
   updateProductController,
   deleteProductController,
   productFiltersController,
@@ -919,6 +920,242 @@ describe("getSingleProductController integration tests", () => {
     it("should return 404 for non-existent valid product ID", async () => {
       const missingId = new mongoose.Types.ObjectId();
       const res = await request(app).get(`/api/v1/product/get-product/${missingId}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body).toMatchObject({
+        success: false,
+        message: "Product not found",
+      });
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// productPhotoController
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Chi Thanh, A0276229W.
+// AI generated tests using GitHub Copilot (GPT-5.3 Codex) Agent Mode.
+describe("productPhotoController integration tests", () => {
+  /**
+   * Bottom-up approach — three levels of integration, each as a nested describe:
+   *
+   *  Level 1 — Controller + Model
+   *    Real Mongoose operations against in-memory MongoDB.
+   *    req/res constructed manually; no HTTP layer involved.
+   *
+   *  Level 2 — Controller + Model + Route
+   *    Same DB. Product router mounted on a minimal Express app.
+   *    Verifies /product-photo/:pid parameter extraction and binary response.
+   *
+   *  Level 3 — Full App (app.js)
+   *    Same DB. Full Express application imported from app.js.
+   *    Tests complete stack at /api/v1/product/product-photo/:pid.
+   */
+
+  const ENDPOINT_BASE = "/api/v1/product/product-photo";
+
+  const routerApp = express();
+  routerApp.use(express.json());
+  routerApp.use("/api/v1/product", productRoutes);
+
+  const makeRes = () => ({
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+    set: jest.fn(),
+  });
+
+  const binaryParser = (res, callback) => {
+    res.setEncoding("binary");
+    let data = "";
+    res.on("data", (chunk) => {
+      data += chunk;
+    });
+    res.on("end", () => callback(null, Buffer.from(data, "binary")));
+  };
+
+  const seedCategory = async (name) => {
+    return categoryModel.create({
+      name,
+      slug: name.toLowerCase().replace(/\s+/g, "-"),
+    });
+  };
+
+  const seedProduct = async ({
+    name,
+    category,
+    withPhoto = true,
+  }) => {
+    const product = {
+      name,
+      slug: name.replace(/\s+/g, "-"),
+      description: "photo-controller-test",
+      price: 20,
+      category,
+      quantity: 2,
+      shipping: true,
+    };
+
+    if (withPhoto) {
+      product.photo = {
+        data: Buffer.from([0xde, 0xad, 0xbe, 0xef]),
+        contentType: "image/jpeg",
+      };
+    }
+
+    return productModel.create(product);
+  };
+
+  beforeAll(async () => {
+    await dbHelper.connect();
+  });
+
+  afterEach(async () => {
+    await productModel.deleteMany({});
+    await categoryModel.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await dbHelper.closeDB();
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 1 — Controller + Model
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 1 — Controller + Model Integration (no HTTP)", () => {
+    it("should retrieve photo buffer via productModel.findById and return raw binary data", async () => {
+      const category = await seedCategory("Cameras");
+      const product = await seedProduct({ name: "Nikon", category: category._id, withPhoto: true });
+
+      const req = { params: { pid: product._id.toString() } };
+      const res = makeRes();
+      const findByIdSpy = jest.spyOn(productModel, "findById");
+
+      await productPhotoController(req, res);
+
+      expect(findByIdSpy).toHaveBeenCalledWith(product._id.toString());
+      expect(res.set).toHaveBeenCalledWith("Content-Type", "image/jpeg");
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(Buffer.isBuffer(res.send.mock.calls[0][0])).toBe(true);
+      expect(Buffer.from(res.send.mock.calls[0][0]).equals(product.photo.data)).toBe(true);
+
+      findByIdSpy.mockRestore();
+    });
+
+    it("should return 404 when product ID does not exist", async () => {
+      const req = { params: { pid: new mongoose.Types.ObjectId().toString() } };
+      const res = makeRes();
+
+      await productPhotoController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Product not found",
+        })
+      );
+    });
+
+    it("should return 404 when product exists but photo field is missing", async () => {
+      const category = await seedCategory("Tablets");
+      const product = await seedProduct({ name: "Tab", category: category._id, withPhoto: false });
+
+      const req = { params: { pid: product._id.toString() } };
+      const res = makeRes();
+
+      await productPhotoController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Product photo not found",
+        })
+      );
+    });
+
+    it("should return 500 with error.message when database call throws", async () => {
+      const req = { params: { pid: new mongoose.Types.ObjectId().toString() } };
+      const res = makeRes();
+      const dbError = new Error("photo findById failure");
+      const findByIdSpy = jest.spyOn(productModel, "findById").mockImplementation(() => {
+        throw dbError;
+      });
+
+      await productPhotoController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Error while getting photo",
+          error: "photo findById failure",
+        })
+      );
+
+      findByIdSpy.mockRestore();
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 2 — Controller + Model + Route
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 2 — Route + Controller Integration (minimal Express)", () => {
+    it("should extract :pid from /product-photo/:pid and return image stream", async () => {
+      const category = await seedCategory("Audio");
+      const product = await seedProduct({ name: "Headphones", category: category._id, withPhoto: true });
+
+      const res = await request(routerApp)
+        .get(`${ENDPOINT_BASE}/${product._id}`)
+        .buffer(true)
+        .parse(binaryParser);
+
+      expect(res.status).toBe(200);
+      expect(res.headers["content-type"]).toContain("image/jpeg");
+      expect(Buffer.isBuffer(res.body)).toBe(true);
+      expect(Buffer.from(res.body).equals(product.photo.data)).toBe(true);
+    });
+
+    it("should return 404 from route when product exists but photo is missing", async () => {
+      const category = await seedCategory("Wearables");
+      const product = await seedProduct({ name: "Watch", category: category._id, withPhoto: false });
+
+      const res = await request(routerApp).get(`${ENDPOINT_BASE}/${product._id}`);
+
+      expect(res.status).toBe(404);
+      expect(res.body).toMatchObject({
+        success: false,
+        message: "Product photo not found",
+      });
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 3 — Full App Integration (app.js)
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 3 — Full App Integration (app.js, server level)", () => {
+    it("should return raw binary photo with correct Content-Type from /api/v1/product/product-photo/:pid", async () => {
+      const category = await seedCategory("Printers");
+      const product = await seedProduct({ name: "LaserJet", category: category._id, withPhoto: true });
+
+      const res = await request(app)
+        .get(`${ENDPOINT_BASE}/${product._id}`)
+        .buffer(true)
+        .parse(binaryParser);
+
+      expect(res.status).toBe(200);
+      expect(res.headers["content-type"]).toContain("image/jpeg");
+      expect(Buffer.isBuffer(res.body)).toBe(true);
+      expect(Buffer.from(res.body).equals(product.photo.data)).toBe(true);
+    });
+
+    it("should return 404 when product ID does not exist", async () => {
+      const missingId = new mongoose.Types.ObjectId();
+      const res = await request(app).get(`${ENDPOINT_BASE}/${missingId}`);
 
       expect(res.status).toBe(404);
       expect(res.body).toMatchObject({
