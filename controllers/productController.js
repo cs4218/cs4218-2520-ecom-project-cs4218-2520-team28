@@ -283,14 +283,84 @@ export const updateProductController = async (req, res) => {
   }
 };
 
+// Chi Thanh, A0276229W.
+// AI generated tests using GitHub Copilot (GPT-5.3 Codex) Agent Mode.
 // filters
 export const productFiltersController = async (req, res) => {
   try {
-    const { checked, radio } = req.body;
-    let args = {};
-    if (checked.length > 0) args.category = checked;
-    if (radio.length) args.price = { $gte: radio[0], $lte: radio[1] };
-    const products = await productModel.find(args);
+    const {
+      checked = [],
+      radio = [],
+      excludedCategories = [],
+      priceMin,
+      priceMax,
+      minRating,
+      maxRating,
+      page,
+      limit,
+    } = req.body || {};
+
+    const args = {};
+
+    if (Array.isArray(checked) && checked.length > 0) {
+      args.category = checked;
+    }
+
+    if (Array.isArray(excludedCategories) && excludedCategories.length > 0) {
+      args.category = {
+        ...(args.category ? { $in: args.category } : {}),
+        $nin: excludedCategories,
+      };
+    }
+
+    let minPrice;
+    let maxPrice;
+    if (Array.isArray(radio) && radio.length === 2) {
+      minPrice = Number(radio[0]);
+      maxPrice = Number(radio[1]);
+    } else if (priceMin !== undefined || priceMax !== undefined) {
+      minPrice = Number(priceMin);
+      maxPrice = Number(priceMax);
+    }
+
+    if ((minPrice !== undefined && Number.isNaN(minPrice)) || (maxPrice !== undefined && Number.isNaN(maxPrice))) {
+      return res.status(400).send({ success: false, message: "Invalid price filter values" });
+    }
+
+    if ((minPrice !== undefined && minPrice < 0) || (maxPrice !== undefined && maxPrice < 0)) {
+      return res.status(400).send({ success: false, message: "Price filter values cannot be negative" });
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      args.price = {};
+      if (minPrice !== undefined) args.price.$gte = minPrice;
+      if (maxPrice !== undefined) args.price.$lte = maxPrice;
+    }
+
+    const parsedMinRating = minRating !== undefined ? Number(minRating) : undefined;
+    const parsedMaxRating = maxRating !== undefined ? Number(maxRating) : undefined;
+    if ((parsedMinRating !== undefined && Number.isNaN(parsedMinRating)) || (parsedMaxRating !== undefined && Number.isNaN(parsedMaxRating))) {
+      return res.status(400).send({ success: false, message: "Invalid rating filter values" });
+    }
+
+    if (parsedMinRating !== undefined || parsedMaxRating !== undefined) {
+      args.rating = {};
+      if (parsedMinRating !== undefined) args.rating.$gte = parsedMinRating;
+      if (parsedMaxRating !== undefined) args.rating.$lte = parsedMaxRating;
+    }
+
+    let query = productModel.find(args);
+
+    if (page !== undefined || limit !== undefined) {
+      const pageNum = Number(page ?? 1);
+      const limitNum = Number(limit ?? 10);
+      if (!Number.isInteger(pageNum) || !Number.isInteger(limitNum) || pageNum <= 0 || limitNum <= 0) {
+        return res.status(400).send({ success: false, message: "Invalid pagination values" });
+      }
+      query = query.skip((pageNum - 1) * limitNum).limit(limitNum);
+    }
+
+    const products = await query;
     res.status(200).send({
       success: true,
       products,

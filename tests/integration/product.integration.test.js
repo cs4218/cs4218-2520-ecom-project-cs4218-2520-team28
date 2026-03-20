@@ -11,7 +11,12 @@ import { writeFileSync, unlinkSync } from "fs";
 import { join } from "path";
 import os from "os";
 
-import { createProductController, updateProductController, deleteProductController } from "../../controllers/productController.js";
+import {
+  createProductController,
+  updateProductController,
+  deleteProductController,
+  productFiltersController,
+} from "../../controllers/productController.js";
 import productRoutes from "../../routes/productRoutes.js";
 import app from "../../app.js";
 import userModel from "../../models/userModel.js";
@@ -1168,6 +1173,333 @@ describe("deleteProductController integration tests", () => {
         expect(res.status).toBe(200);
         expect(await productModel.countDocuments()).toBe(1);
         expect(await productModel.findOne({ name: "Server Keep Me" })).not.toBeNull();
+      });
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// productFiltersController
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Chi Thanh, A0276229W.
+// AI generated tests using GitHub Copilot (GPT-5.3 Codex) Agent Mode.
+
+describe("productFiltersController integration tests", () => {
+  /**
+   * Bottom-up approach — three levels of integration, each as a nested describe:
+   *
+   *  Level 1 — Controller + Model
+   *    Real Mongoose operations against in-memory MongoDB.
+   *    req/res constructed manually; no HTTP layer involved.
+   *
+   *  Level 2 — Controller + Model + Route
+   *    Same DB. Product router mounted on a minimal Express app.
+   *    Verifies request body parsing and response structure at /product-filters.
+   *
+   *  Level 3 — Full App (app.js)
+   *    Same DB. Full Express application imported from app.js.
+   *    Tests complete stack at /api/v1/product/product-filters.
+   */
+
+  const ENDPOINT = "/api/v1/product/product-filters";
+
+  const routerApp = express();
+  routerApp.use(express.json());
+  routerApp.use("/api/v1/product", productRoutes);
+
+  const makeRes = () => ({
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+  });
+
+  const seedProduct = async ({
+    name,
+    price,
+    category,
+    rating,
+    description = "filter-test",
+    quantity = 5,
+  }) => {
+    const created = await productModel.create({
+      name,
+      slug: name.replace(/\s+/g, "-"),
+      description,
+      price,
+      category,
+      quantity,
+      rating,
+    });
+    return created._id.toString();
+  };
+
+  beforeAll(async () => {
+    await dbHelper.connect();
+  });
+
+  afterEach(async () => {
+    await productModel.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await dbHelper.closeDB();
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 1 — Controller + Model
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 1 — Controller + Model Integration (no HTTP)", () => {
+    it("should filter by category exclusion using $nin", async () => {
+      const catA = new mongoose.Types.ObjectId();
+      const catB = new mongoose.Types.ObjectId();
+      const catC = new mongoose.Types.ObjectId();
+
+      await seedProduct({ name: "A-1", price: 10, category: catA, rating: 3.2 });
+      await seedProduct({ name: "B-1", price: 20, category: catB, rating: 3.8 });
+      await seedProduct({ name: "C-1", price: 30, category: catC, rating: 4.1 });
+
+      const req = { body: { excludedCategories: [catB.toString()] } };
+      const res = makeRes();
+
+      await productFiltersController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.success).toBe(true);
+      expect(payload.products).toHaveLength(2);
+      expect(payload.products.map((p) => p.name).sort()).toEqual(["A-1", "C-1"]);
+    });
+
+    it("should filter by price range using $gte and $lte", async () => {
+      const cat = new mongoose.Types.ObjectId();
+      await seedProduct({ name: "P-10", price: 10, category: cat, rating: 2.5 });
+      await seedProduct({ name: "P-50", price: 50, category: cat, rating: 3.0 });
+      await seedProduct({ name: "P-100", price: 100, category: cat, rating: 4.8 });
+
+      const req = { body: { priceMin: 20, priceMax: 80 } };
+      const res = makeRes();
+
+      await productFiltersController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.products).toHaveLength(1);
+      expect(payload.products[0].name).toBe("P-50");
+    });
+
+    it("should paginate filtered results using skip and limit with page", async () => {
+      const cat = new mongoose.Types.ObjectId();
+      await seedProduct({ name: "Page-1", price: 10, category: cat, rating: 3.0 });
+      await seedProduct({ name: "Page-2", price: 20, category: cat, rating: 3.0 });
+      await seedProduct({ name: "Page-3", price: 30, category: cat, rating: 3.0 });
+      await seedProduct({ name: "Page-4", price: 40, category: cat, rating: 3.0 });
+      await seedProduct({ name: "Page-5", price: 50, category: cat, rating: 3.0 });
+
+      const req = {
+        body: {
+          checked: [cat.toString()],
+          page: 2,
+          limit: 2,
+        },
+      };
+      const res = makeRes();
+
+      await productFiltersController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.success).toBe(true);
+      expect(payload.products).toHaveLength(2);
+      expect(payload.products.every((p) => p.category.toString() === cat.toString())).toBe(true);
+    });
+
+    it("should combine category, price and rating filters in a single query", async () => {
+      const targetCategory = new mongoose.Types.ObjectId();
+      const otherCategory = new mongoose.Types.ObjectId();
+
+      await seedProduct({ name: "Combo Match", price: 60, category: targetCategory, rating: 4.5 });
+      await seedProduct({ name: "Wrong Price", price: 90, category: targetCategory, rating: 4.6 });
+      await seedProduct({ name: "Wrong Rating", price: 60, category: targetCategory, rating: 2.9 });
+      await seedProduct({ name: "Wrong Category", price: 60, category: otherCategory, rating: 4.7 });
+
+      const req = {
+        body: {
+          checked: [targetCategory.toString()],
+          priceMin: 50,
+          priceMax: 80,
+          minRating: 4,
+        },
+      };
+      const res = makeRes();
+
+      await productFiltersController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.products).toHaveLength(1);
+      expect(payload.products[0].name).toBe("Combo Match");
+    });
+
+    it("should return all products when no filters are applied", async () => {
+      const cat = new mongoose.Types.ObjectId();
+      await seedProduct({ name: "All-1", price: 12, category: cat, rating: 3.1 });
+      await seedProduct({ name: "All-2", price: 22, category: cat, rating: 3.9 });
+
+      const req = { body: {} };
+      const res = makeRes();
+
+      await productFiltersController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.success).toBe(true);
+      expect(payload.products).toHaveLength(2);
+    });
+
+    it("should handle invalid filter values gracefully (negative prices)", async () => {
+      const req = { body: { priceMin: -1, priceMax: 10 } };
+      const res = makeRes();
+
+      await productFiltersController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Price filter values cannot be negative",
+      });
+    });
+
+    it("should handle invalid filter values gracefully (non-numeric ratings)", async () => {
+      const req = { body: { minRating: "bad-rating" } };
+      const res = makeRes();
+
+      await productFiltersController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Invalid rating filter values",
+      });
+    });
+
+    it("should return 400 with error message when DB query throws", async () => {
+      const req = { body: {} };
+      const res = makeRes();
+      const dbError = new Error("forced query failure");
+      const findSpy = jest.spyOn(productModel, "find").mockImplementation(() => {
+        throw dbError;
+      });
+
+      await productFiltersController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Error WHile Filtering Products",
+          error: dbError,
+        })
+      );
+
+      findSpy.mockRestore();
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 2 — Controller + Model + Route
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 2 — Route + Controller Integration (minimal Express)", () => {
+    it("should parse filter parameters from request body and return only matching products", async () => {
+      const catA = new mongoose.Types.ObjectId();
+      const catB = new mongoose.Types.ObjectId();
+
+      await seedProduct({ name: "Route Match", price: 45, category: catA, rating: 4.3 });
+      await seedProduct({ name: "Route Excluded Cat", price: 45, category: catB, rating: 4.5 });
+      await seedProduct({ name: "Route Low Rating", price: 45, category: catA, rating: 2.0 });
+
+      const res = await request(routerApp)
+        .post(ENDPOINT)
+        .send({
+          checked: [catA.toString()],
+          excludedCategories: [catB.toString()],
+          priceMin: 40,
+          priceMax: 50,
+          minRating: 4,
+          page: 1,
+          limit: 10,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("success", true);
+      expect(Array.isArray(res.body.products)).toBe(true);
+      expect(res.body.products).toHaveLength(1);
+      expect(res.body.products[0].name).toBe("Route Match");
+    });
+
+    it("should return all products when request body has no filters", async () => {
+      const cat = new mongoose.Types.ObjectId();
+      await seedProduct({ name: "Route All 1", price: 11, category: cat, rating: 3.2 });
+      await seedProduct({ name: "Route All 2", price: 21, category: cat, rating: 3.3 });
+
+      const res = await request(routerApp).post(ENDPOINT).send({});
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.products).toHaveLength(2);
+    });
+
+    it("should return 400 for invalid filters through route body parsing", async () => {
+      const res = await request(routerApp)
+        .post(ENDPOINT)
+        .send({ minRating: "not-a-number" });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toMatchObject({
+        success: false,
+        message: "Invalid rating filter values",
+      });
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 3 — Full App Integration (app.js)
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 3 — Full App Integration (app.js, server level)", () => {
+    it("should return success payload shape { success: true, products: [] } for matching query", async () => {
+      const cat = new mongoose.Types.ObjectId();
+      await seedProduct({ name: "App Match", price: 70, category: cat, rating: 4.9 });
+      await seedProduct({ name: "App Miss", price: 20, category: cat, rating: 2.0 });
+
+      const res = await request(app)
+        .post(ENDPOINT)
+        .send({
+          checked: [cat.toString()],
+          priceMin: 60,
+          priceMax: 100,
+          minRating: 4,
+          page: 1,
+          limit: 5,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(Array.isArray(res.body.products)).toBe(true);
+      expect(res.body.products).toHaveLength(1);
+      expect(res.body.products[0].name).toBe("App Match");
+    });
+
+    it("should return 400 with error message for invalid negative price filters", async () => {
+      const res = await request(app)
+        .post(ENDPOINT)
+        .send({ priceMin: -5, priceMax: 10 });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toMatchObject({
+        success: false,
+        message: "Price filter values cannot be negative",
       });
     });
   });
