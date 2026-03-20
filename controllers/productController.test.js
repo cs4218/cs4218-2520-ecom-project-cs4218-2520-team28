@@ -1602,7 +1602,7 @@ describe("getProductController", () => {
     await getProductController(req, res);
 
     // Assert
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(400);
   });
 
   // Test 14: error response uses error.message string
@@ -1655,7 +1655,7 @@ describe("getProductController", () => {
 
     // Assert
     expect(res.send).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Erorr in getting products" })
+      expect.objectContaining({ message: "Error in getting products" })
     );
   });
 
@@ -1690,55 +1690,35 @@ describe("getProductController", () => {
   });
 });
 
-// Chi Thanh, A0276229W
-// AI generated unit tests using GitHub Copilot (Claude Sonnet 4.6) Agent Mode
-// Test Coverage 1: Fetches product by slug with -photo selection and category populated
-// Test Coverage 2: Returns null product when slug does not match
-// Test Coverage 3: DB error returns 500 with error object
-// Test Coverage 4: findOne called exactly once with correct slug
-// Test Coverage 5: response success flag and message
 describe("getSingleProductController", () => {
   let req, res;
 
-  // Helper: builds the standard mongoose chain mock
   const buildChain = (resolvedValue) => {
     const mockPopulate = jest.fn().mockResolvedValue(resolvedValue);
     const mockSelect = jest.fn().mockReturnValue({ populate: mockPopulate });
-    productModel.findOne = jest.fn().mockReturnValue({ select: mockSelect });
+    productModel.findById = jest.fn().mockReturnValue({ select: mockSelect });
     return { mockPopulate, mockSelect };
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    req = { params: { slug: "test-product" } };
+    req = { params: { pid: "507f1f77bcf86cd799439011" } };
     res = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn().mockReturnThis(),
     };
   });
 
-  // Test 1: returns 200 on success
-  it("should return 200 when product is found", async () => {
-    // Arrange
-    buildChain({ _id: "p1", name: "Widget", slug: "test-product" });
+  it("should return 200 with product when valid ID exists", async () => {
+    const mockProduct = { _id: "507f1f77bcf86cd799439011", name: "Widget" };
+    const { mockSelect, mockPopulate } = buildChain(mockProduct);
 
-    // Act
     await getSingleProductController(req, res);
 
-    // Assert
+    expect(productModel.findById).toHaveBeenCalledWith("507f1f77bcf86cd799439011");
+    expect(mockSelect).toHaveBeenCalledWith("-photo");
+    expect(mockPopulate).toHaveBeenCalledWith("category");
     expect(res.status).toHaveBeenCalledWith(200);
-  });
-
-  // Test 2: full response shape on success
-  it("should return correct response body with success, message and product", async () => {
-    // Arrange
-    const mockProduct = { _id: "p1", name: "Widget", slug: "test-product" };
-    buildChain(mockProduct);
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
     expect(res.send).toHaveBeenCalledWith({
       success: true,
       message: "Single Product Fetched",
@@ -1746,232 +1726,51 @@ describe("getSingleProductController", () => {
     });
   });
 
-  // Test 3: queries findOne with correct slug object
-  it("should call findOne with the slug from req.params", async () => {
-    // Arrange
-    buildChain(null);
+  it("should return 400 when product ID format is invalid", async () => {
+    req.params.pid = "bad-id";
 
-    // Act
     await getSingleProductController(req, res);
 
-    // Assert
-    expect(productModel.findOne).toHaveBeenCalledWith({ slug: "test-product" });
-  });
-
-  // Test 4: uses a different slug correctly
-  it("should call findOne with any slug provided in params", async () => {
-    // Arrange
-    req.params.slug = "another-slug";
-    buildChain(null);
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    expect(productModel.findOne).toHaveBeenCalledWith({ slug: "another-slug" });
-  });
-
-  // Test 5: selects -photo to exclude photo field
-  it("should select -photo to exclude photo data", async () => {
-    // Arrange
-    const { mockSelect } = buildChain(null);
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    expect(mockSelect).toHaveBeenCalledWith("-photo");
-  });
-
-  // Test 6: populates category field
-  it("should populate the category field", async () => {
-    // Arrange
-    const { mockPopulate } = buildChain(null);
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    expect(mockPopulate).toHaveBeenCalledWith("category");
-  });
-
-  // Test 7: findOne called exactly once
-  it("should call findOne exactly once", async () => {
-    // Arrange
-    buildChain(null);
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    expect(productModel.findOne).toHaveBeenCalledTimes(1);
-  });
-
-  // Test 8: returns 200 with null when product not found
-  it("should return 200 with null product when slug does not match any product", async () => {
-    // Arrange
-    buildChain(null);
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.send).toHaveBeenCalledWith(
-      expect.objectContaining({ product: null })
-    );
-  });
-
-  // Test 9: success is true even when product is null
-  it("should include success: true even when product is null", async () => {
-    // Arrange
-    buildChain(null);
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    const sent = res.send.mock.calls[0][0];
-    expect(sent.success).toBe(true);
-  });
-
-  // Test 10: message is correct on success
-  it("should include the correct message on success", async () => {
-    // Arrange
-    buildChain({ _id: "p1" });
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    const sent = res.send.mock.calls[0][0];
-    expect(sent.message).toBe("Single Product Fetched");
-  });
-
-  // Test 11: product is the exact resolved value from DB
-  it("should return the exact product object resolved by the DB", async () => {
-    // Arrange
-    const mockProduct = { _id: "p99", name: "Exact", slug: "exact" };
-    buildChain(mockProduct);
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    const sent = res.send.mock.calls[0][0];
-    expect(sent.product).toBe(mockProduct);
-  });
-
-  // Test 12: returns 500 when DB throws
-  it("should return 500 when the DB query throws", async () => {
-    // Arrange
-    const dbError = new Error("DB failure");
-    const mockPopulate = jest.fn().mockRejectedValue(dbError);
-    const mockSelect = jest.fn().mockReturnValue({ populate: mockPopulate });
-    productModel.findOne = jest.fn().mockReturnValue({ select: mockSelect });
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    expect(res.status).toHaveBeenCalledWith(500);
-  });
-
-  // Test 13: 500 response includes correct error message string
-  it("should include the correct error message in the 500 response", async () => {
-    // Arrange
-    const dbError = new Error("timeout");
-    const mockPopulate = jest.fn().mockRejectedValue(dbError);
-    const mockSelect = jest.fn().mockReturnValue({ populate: mockPopulate });
-    productModel.findOne = jest.fn().mockReturnValue({ select: mockSelect });
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    expect(res.send).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Eror while getitng single product" })
-    );
-  });
-
-  // Test 14: 500 response includes error object
-  it("should include the error object in the 500 response", async () => {
-    // Arrange
-    const dbError = new Error("timeout");
-    const mockPopulate = jest.fn().mockRejectedValue(dbError);
-    const mockSelect = jest.fn().mockReturnValue({ populate: mockPopulate });
-    productModel.findOne = jest.fn().mockReturnValue({ select: mockSelect });
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    expect(res.send).toHaveBeenCalledWith(
-      expect.objectContaining({ error: dbError })
-    );
-  });
-
-  // Test 15: 500 response has success: false
-  it("should include success: false in the 500 error response", async () => {
-    // Arrange
-    const dbError = new Error("err");
-    const mockPopulate = jest.fn().mockRejectedValue(dbError);
-    const mockSelect = jest.fn().mockReturnValue({ populate: mockPopulate });
-    productModel.findOne = jest.fn().mockReturnValue({ select: mockSelect });
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    const sent = res.send.mock.calls[0][0];
-    expect(sent.success).toBe(false);
-  });
-
-  // Test 16: full query chain called in correct order
-  it("should complete the full query chain: findOne → select → populate", async () => {
-    // Arrange
-    const { mockPopulate, mockSelect } = buildChain(null);
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
-    expect(productModel.findOne).toHaveBeenCalled();
-    expect(mockSelect).toHaveBeenCalled();
-    expect(mockPopulate).toHaveBeenCalled();
-  });
-
-  // Test 17: full error response shape is correct
-  it("should return exact 500 response shape when DB throws", async () => {
-    // Arrange
-    const dbError = new Error("crash");
-    const mockPopulate = jest.fn().mockRejectedValue(dbError);
-    const mockSelect = jest.fn().mockReturnValue({ populate: mockPopulate });
-    productModel.findOne = jest.fn().mockReturnValue({ select: mockSelect });
-
-    // Act
-    await getSingleProductController(req, res);
-
-    // Assert
+    expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Eror while getitng single product",
-      error: dbError,
+      message: "Invalid product ID",
+    });
+    expect(productModel.findById).not.toHaveBeenCalled();
+  });
+
+  it("should return 404 when valid product ID does not exist", async () => {
+    buildChain(null);
+
+    await getSingleProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Product not found",
+    });
+  });
+
+  it("should return 400 with error.message when DB query throws", async () => {
+    const dbError = new Error("timeout");
+    const mockPopulate = jest.fn().mockRejectedValue(dbError);
+    const mockSelect = jest.fn().mockReturnValue({ populate: mockPopulate });
+    productModel.findById = jest.fn().mockReturnValue({ select: mockSelect });
+
+    await getSingleProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error while getting single product",
+      error: "timeout",
     });
   });
 });
 
-// Chi Thanh, A0276229W
-// AI generated unit tests using GitHub Copilot (Claude Sonnet 4.6) Agent Mode
-// Test Coverage 1: Sends photo binary data with correct Content-type header
-// Test Coverage 2: No response sent when photo.data is falsy
-// Test Coverage 3: DB error returns 500 with error object
-// Test Coverage 4: findById called with correct pid and selects only photo field
-// Test Coverage 5: Handles different image content types
 describe("productPhotoController", () => {
   let req, res;
 
-  // Helper: builds a findById → select chain mock
   const buildChain = (resolvedValue) => {
     const mockSelect = jest.fn().mockResolvedValue(resolvedValue);
     productModel.findById = jest.fn().mockReturnValue({ select: mockSelect });
@@ -1980,7 +1779,7 @@ describe("productPhotoController", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    req = { params: { pid: "prod-1" } };
+    req = { params: { pid: "507f1f77bcf86cd799439011" } };
     res = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn().mockReturnThis(),
@@ -1988,242 +1787,58 @@ describe("productPhotoController", () => {
     };
   });
 
-  // Test 1: returns 200 when photo.data exists
-  it("should return 200 when the product photo exists", async () => {
-    // Arrange
-    buildChain({ photo: { data: Buffer.from("img"), contentType: "image/jpeg" } });
+  it("should return binary photo with Content-Type when photo exists", async () => {
+    const photoBuffer = Buffer.from("img");
+    const { mockSelect } = buildChain({
+      photo: { data: photoBuffer, contentType: "image/jpeg" },
+    });
 
-    // Act
     await productPhotoController(req, res);
 
-    // Assert
+    expect(productModel.findById).toHaveBeenCalledWith("507f1f77bcf86cd799439011");
+    expect(mockSelect).toHaveBeenCalledWith("photo");
+    expect(res.set).toHaveBeenCalledWith("Content-Type", "image/jpeg");
     expect(res.status).toHaveBeenCalledWith(200);
-  });
-
-  // Test 2: sets Content-type header to the stored contentType
-  it("should set Content-type header matching the stored contentType", async () => {
-    // Arrange
-    buildChain({ photo: { data: Buffer.from("img"), contentType: "image/jpeg" } });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(res.set).toHaveBeenCalledWith("Content-type", "image/jpeg");
-  });
-
-  // Test 3: sends the photo buffer as the response body
-  it("should send the photo binary data as the response body", async () => {
-    // Arrange
-    const photoBuffer = Buffer.from("image bytes");
-    buildChain({ photo: { data: photoBuffer, contentType: "image/jpeg" } });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
     expect(res.send).toHaveBeenCalledWith(photoBuffer);
   });
 
-  // Test 4: handles PNG content type correctly
-  it("should set Content-type to image/png for PNG photos", async () => {
-    // Arrange
-    buildChain({ photo: { data: Buffer.from("png"), contentType: "image/png" } });
+  it("should return 404 when product does not exist", async () => {
+    buildChain(null);
 
-    // Act
     await productPhotoController(req, res);
 
-    // Assert
-    expect(res.set).toHaveBeenCalledWith("Content-type", "image/png");
-  });
-
-  // Test 5: handles WebP content type correctly
-  it("should set Content-type to image/webp for WebP photos", async () => {
-    // Arrange
-    buildChain({ photo: { data: Buffer.from("webp"), contentType: "image/webp" } });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(res.set).toHaveBeenCalledWith("Content-type", "image/webp");
-  });
-
-  // Test 6: calls findById with the correct pid from params
-  it("should call findById with the pid from req.params", async () => {
-    // Arrange
-    buildChain({ photo: { data: Buffer.from("x"), contentType: "image/jpeg" } });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(productModel.findById).toHaveBeenCalledWith("prod-1");
-  });
-
-  // Test 7: uses a different pid correctly
-  it("should call findById with any pid provided in params", async () => {
-    // Arrange
-    req.params.pid = "prod-999";
-    buildChain({ photo: { data: Buffer.from("x"), contentType: "image/jpeg" } });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(productModel.findById).toHaveBeenCalledWith("prod-999");
-  });
-
-  // Test 8: selects only the photo field
-  it("should select only the photo field from the product", async () => {
-    // Arrange
-    const { mockSelect } = buildChain({ photo: { data: Buffer.from("x"), contentType: "image/jpeg" } });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(mockSelect).toHaveBeenCalledWith("photo");
-  });
-
-  // Test 9: findById called exactly once
-  it("should call findById exactly once", async () => {
-    // Arrange
-    buildChain({ photo: { data: Buffer.from("x"), contentType: "image/jpeg" } });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(productModel.findById).toHaveBeenCalledTimes(1);
-  });
-
-  // Test 10: does not send a response when photo.data is null
-  it("should not call res.send when photo.data is null", async () => {
-    // Arrange
-    buildChain({ photo: { data: null, contentType: "image/jpeg" } });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(res.send).not.toHaveBeenCalled();
-  });
-
-  // Test 11: does not set Content-type header when photo.data is null
-  it("should not call res.set when photo.data is null", async () => {
-    // Arrange
-    buildChain({ photo: { data: null, contentType: "image/jpeg" } });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(res.set).not.toHaveBeenCalled();
-  });
-
-  // Test 12: does not send a response when photo.data is undefined
-  it("should not call res.send when photo.data is undefined", async () => {
-    // Arrange
-    buildChain({ photo: { data: undefined, contentType: "image/jpeg" } });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(res.send).not.toHaveBeenCalled();
-  });
-
-  // Test 13: returns 500 when DB throws
-  it("should return 500 when the DB query throws", async () => {
-    // Arrange
-    const dbError = new Error("DB failure");
-    const mockSelect = jest.fn().mockRejectedValue(dbError);
-    productModel.findById = jest.fn().mockReturnValue({ select: mockSelect });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(res.status).toHaveBeenCalledWith(500);
-  });
-
-  // Test 14: 500 response contains correct error message string
-  it("should include correct error message in the 500 response", async () => {
-    // Arrange
-    const dbError = new Error("crash");
-    const mockSelect = jest.fn().mockRejectedValue(dbError);
-    productModel.findById = jest.fn().mockReturnValue({ select: mockSelect });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(res.send).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Erorr while getting photo" })
-    );
-  });
-
-  // Test 15: 500 response has success: false
-  it("should include success: false in the 500 error response", async () => {
-    // Arrange
-    const dbError = new Error("crash");
-    const mockSelect = jest.fn().mockRejectedValue(dbError);
-    productModel.findById = jest.fn().mockReturnValue({ select: mockSelect });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    const sent = res.send.mock.calls[0][0];
-    expect(sent.success).toBe(false);
-  });
-
-  // Test 16: 500 response contains error object
-  it("should include the error object in the 500 response", async () => {
-    // Arrange
-    const dbError = new Error("crash");
-    const mockSelect = jest.fn().mockRejectedValue(dbError);
-    productModel.findById = jest.fn().mockReturnValue({ select: mockSelect });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
-    expect(res.send).toHaveBeenCalledWith(
-      expect.objectContaining({ error: dbError })
-    );
-  });
-
-  // Test 17: full 500 response shape is correct
-  it("should return exact 500 response shape when DB throws", async () => {
-    // Arrange
-    const dbError = new Error("DB failure");
-    const mockSelect = jest.fn().mockRejectedValue(dbError);
-    productModel.findById = jest.fn().mockReturnValue({ select: mockSelect });
-
-    // Act
-    await productPhotoController(req, res);
-
-    // Assert
+    expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Erorr while getting photo",
-      error: dbError,
+      message: "Product not found",
     });
   });
 
-  // Test 18: sends the exact binary buffer returned by DB
-  it("should send the exact Buffer instance stored in photo.data", async () => {
-    // Arrange
-    const exactBuffer = Buffer.from("exact bytes");
-    buildChain({ photo: { data: exactBuffer, contentType: "image/jpeg" } });
+  it("should return 404 when product exists but photo data is missing", async () => {
+    buildChain({ photo: { data: null, contentType: "image/jpeg" } });
 
-    // Act
     await productPhotoController(req, res);
 
-    // Assert
-    expect(res.send).toHaveBeenCalledWith(exactBuffer);
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Product photo not found",
+    });
+  });
+
+  it("should return 500 with error.message when DB query throws", async () => {
+    const dbError = new Error("DB failure");
+    const mockSelect = jest.fn().mockRejectedValue(dbError);
+    productModel.findById = jest.fn().mockReturnValue({ select: mockSelect });
+
+    await productPhotoController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: "Error while getting photo",
+      error: "DB failure",
+    });
   });
 });
 
