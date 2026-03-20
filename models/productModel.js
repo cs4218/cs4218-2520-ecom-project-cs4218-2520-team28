@@ -27,6 +27,13 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    // Chi Thanh, A0276229W.
+    // AI generated tests using GitHub Copilot (GPT-5.3 Codex) Agent Mode.
+    rating: {
+      type: Number,
+      min: 0,
+      max: 5,
+    },
     photo: {
       data: Buffer,
       contentType: String,
