@@ -15,6 +15,7 @@ import {
   createProductController,
   getProductController,
   getSingleProductController,
+  productCountController,
   productPhotoController,
   updateProductController,
   deleteProductController,
@@ -1161,6 +1162,222 @@ describe("productPhotoController integration tests", () => {
       expect(res.body).toMatchObject({
         success: false,
         message: "Product not found",
+      });
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// productCountController
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Chi Thanh, A0276229W.
+// AI generated tests using GitHub Copilot (GPT-5.3 Codex) Agent Mode.
+describe("productCountController integration tests", () => {
+  /**
+   * Bottom-up approach — three levels of integration, each as a nested describe:
+   *
+   *  Level 1 — Controller + Model
+   *    Real Mongoose operations against in-memory MongoDB.
+   *    req/res constructed manually; no HTTP layer involved.
+   *
+   *  Level 2 — Controller + Model + Route
+   *    Same DB. Product router mounted on a minimal Express app.
+   *    Verifies GET /product-count behavior.
+   *
+   *  Level 3 — Full App (app.js)
+   *    Same DB. Full Express application imported from app.js.
+   *    Tests complete stack at /api/v1/product/product-count.
+   */
+
+  const ENDPOINT = "/api/v1/product/product-count";
+
+  const routerApp = express();
+  routerApp.use(express.json());
+  routerApp.use("/api/v1/product", productRoutes);
+
+  const makeRes = () => ({
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+  });
+
+  const seedCategory = async (name) => {
+    return categoryModel.create({
+      name,
+      slug: name.toLowerCase().replace(/\s+/g, "-"),
+    });
+  };
+
+  const seedProduct = async ({ name, category }) => {
+    return productModel.create({
+      name,
+      slug: name.replace(/\s+/g, "-"),
+      description: "count-test",
+      price: 10,
+      quantity: 1,
+      shipping: false,
+      category,
+    });
+  };
+
+  beforeAll(async () => {
+    await dbHelper.connect();
+  });
+
+  afterEach(async () => {
+    await productModel.deleteMany({});
+    await categoryModel.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await dbHelper.closeDB();
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 1 — Controller + Model
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 1 — Controller + Model Integration (no HTTP)", () => {
+    it("should return zero count when database contains no products", async () => {
+      const req = {};
+      const res = makeRes();
+
+      await productCountController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        total: 0,
+      });
+    });
+
+    it("should return accurate total count and expected response shape", async () => {
+      const category = await seedCategory("Count-A");
+      await seedProduct({ name: "C1", category: category._id });
+      await seedProduct({ name: "C2", category: category._id });
+      await seedProduct({ name: "C3", category: category._id });
+
+      const req = {};
+      const res = makeRes();
+
+      await productCountController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload).toEqual({
+        success: true,
+        total: 3,
+      });
+      expect(typeof payload.total).toBe("number");
+    });
+
+    it("should reflect database state after product creation and deletion", async () => {
+      const category = await seedCategory("Count-B");
+      const req = {};
+      const res1 = makeRes();
+      const res2 = makeRes();
+      const res3 = makeRes();
+
+      await productCountController(req, res1);
+      expect(res1.send.mock.calls[0][0].total).toBe(0);
+
+      const p1 = await seedProduct({ name: "D1", category: category._id });
+      await seedProduct({ name: "D2", category: category._id });
+
+      await productCountController(req, res2);
+      expect(res2.send.mock.calls[0][0].total).toBe(2);
+
+      await productModel.findByIdAndDelete(p1._id);
+
+      await productCountController(req, res3);
+      expect(res3.send.mock.calls[0][0].total).toBe(1);
+    });
+
+    it("should handle large count values (thousands of products) correctly", async () => {
+      const category = await seedCategory("Count-Large");
+      const manyProducts = Array.from({ length: 1200 }, (_, i) => ({
+        name: `Bulk-${i}`,
+        slug: `bulk-${i}`,
+        description: "bulk-count-test",
+        price: 1,
+        quantity: 1,
+        shipping: false,
+        category: category._id,
+      }));
+      await productModel.insertMany(manyProducts);
+
+      const req = {};
+      const res = makeRes();
+
+      await productCountController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        total: 1200,
+      });
+    });
+
+    it("should return 400 with error message when database query throws", async () => {
+      const req = {};
+      const res = makeRes();
+      const dbError = new Error("count failure");
+      const findSpy = jest.spyOn(productModel, "find").mockImplementation(() => {
+        throw dbError;
+      });
+
+      await productCountController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Error in product count",
+        })
+      );
+
+      findSpy.mockRestore();
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 2 — Controller + Model + Route
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 2 — Route + Controller Integration (minimal Express)", () => {
+    it("should invoke count operation via GET /api/v1/product/product-count and return total", async () => {
+      const category = await seedCategory("Count-Route");
+      await seedProduct({ name: "R1", category: category._id });
+      await seedProduct({ name: "R2", category: category._id });
+
+      const res = await request(routerApp).get(ENDPOINT);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({
+        success: true,
+        total: 2,
+      });
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 3 — Full App Integration (app.js)
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 3 — Full App Integration (app.js, server level)", () => {
+    it("should return accurate count from /api/v1/product/product-count", async () => {
+      const category = await seedCategory("Count-App");
+      await seedProduct({ name: "A1", category: category._id });
+      await seedProduct({ name: "A2", category: category._id });
+      await seedProduct({ name: "A3", category: category._id });
+      await seedProduct({ name: "A4", category: category._id });
+
+      const res = await request(app).get(ENDPOINT);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({
+        success: true,
+        total: 4,
       });
     });
   });
