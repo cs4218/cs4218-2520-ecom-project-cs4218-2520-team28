@@ -3,7 +3,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CategoryForm from './CategoryForm';
 
-// Chi Thanh, A0276229W
 describe('CategoryForm', () => {
     // AI generated Unit tests using Github Copilot (Claude Sonnet 4.5) Agent Mode for the following:
     // Test Coverage 1: Component rendering with all elements (input, button, form)
@@ -385,7 +384,7 @@ describe('CategoryForm', () => {
             expect(mockHandleSubmit).toHaveBeenCalledTimes(3);
         });
 
-            test('should submit form through the form submit event', () => {
+        test('should submit form when Enter key is pressed in input', () => {
             // Arrange
             render(
                 <CategoryForm 
@@ -397,7 +396,7 @@ describe('CategoryForm', () => {
             const input = screen.getByPlaceholderText('Enter new category');
 
             // Act
-                fireEvent.submit(input.closest('form'));
+            fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', charCode: 13 });
 
             // Assert
             expect(mockHandleSubmit).toHaveBeenCalled();
@@ -493,7 +492,7 @@ describe('CategoryForm', () => {
             expect(mockSetValue).toHaveBeenCalledWith('@#$%^&*()_+-=[]{}|;:,.<>?/');
         });
 
-        test('should normalise line breaks in value for text input', () => {
+        test('should handle line breaks in value', () => {
             // Arrange
             const valueWithLineBreak = 'Line1\nLine2';
             render(
@@ -506,7 +505,7 @@ describe('CategoryForm', () => {
 
             // Assert
             const input = screen.getByPlaceholderText('Enter new category');
-            expect(input).toHaveValue('Line1Line2');
+            expect(input).toHaveValue(valueWithLineBreak);
         });
     });
 
