@@ -1,6 +1,7 @@
 import productModel from "../models/productModel.js";
 import categoryModel from "../models/categoryModel.js";
 import orderModel from "../models/orderModel.js";
+import mongoose from "mongoose";
 
 import fs from "fs";
 import slugify from "slugify";
@@ -121,20 +122,37 @@ export const getProductController = async (req, res) => {
 // get single product
 export const getSingleProductController = async (req, res) => {
   try {
+    const { pid } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(pid)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
     const product = await productModel
-      .findOne({ slug: req.params.slug })
+      .findById(pid)
       .select("-photo")
       .populate("category");
+
+    if (!product) {
+      return res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
     res.status(200).send({
       success: true,
       message: "Single Product Fetched",
       product,
     });
   } catch (error) {
-    res.status(500).send({
+    res.status(400).send({
       success: false,
-      message: "Eror while getitng single product",
-      error,
+      message: "Error while getting single product",
+      error: error.message,
     });
   }
 };
