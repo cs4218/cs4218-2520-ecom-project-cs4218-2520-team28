@@ -13,6 +13,7 @@ import os from "os";
 
 import {
   createProductController,
+  getProductController,
   updateProductController,
   deleteProductController,
   productFiltersController,
@@ -21,6 +22,7 @@ import productRoutes from "../../routes/productRoutes.js";
 import app from "../../app.js";
 import userModel from "../../models/userModel.js";
 import productModel from "../../models/productModel.js";
+import categoryModel from "../../models/categoryModel.js";
 import * as dbHelper from "./dbHelper.js";
 
 // Foo Chao, A0272024R
@@ -503,6 +505,206 @@ describe("createProductController integration tests", () => {
         expect(res.status).toBe(201);
         expect(res.body.products.slug).toBe("Hello-World-Product");
       });
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// getProductController
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Chi Thanh, A0276229W.
+// AI generated tests using GitHub Copilot (GPT-5.3 Codex) Agent Mode.
+describe("getProductController integration tests", () => {
+  /**
+   * Bottom-up approach — three levels of integration, each as a nested describe:
+   *
+   *  Level 1 — Controller + Model
+   *    Real Mongoose operations against in-memory MongoDB.
+   *    req/res constructed manually; no HTTP layer involved.
+   *
+   *  Level 2 — Controller + Model + Route
+   *    Same DB. Product router mounted on a minimal Express app.
+   *    Verifies route output at /get-product.
+   *
+   *  Level 3 — Full App (app.js)
+   *    Same DB. Full Express application imported from app.js.
+   *    Tests complete stack at /api/v1/product/get-product.
+   */
+
+  const ENDPOINT = "/api/v1/product/get-product";
+
+  const routerApp = express();
+  routerApp.use(express.json());
+  routerApp.use("/api/v1/product", productRoutes);
+
+  const makeRes = () => ({
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+  });
+
+  const seedCategory = async (name) => {
+    const category = await categoryModel.create({
+      name,
+      slug: name.toLowerCase().replace(/\s+/g, "-"),
+    });
+    return category;
+  };
+
+  const seedProduct = async ({
+    name,
+    category,
+    price = 10,
+    quantity = 5,
+    description = "get-product-test",
+    withPhoto = false,
+  }) => {
+    const product = {
+      name,
+      slug: name.replace(/\s+/g, "-"),
+      description,
+      price,
+      category,
+      quantity,
+    };
+
+    if (withPhoto) {
+      product.photo = {
+        data: Buffer.from([1, 2, 3, 4]),
+        contentType: "image/jpeg",
+      };
+    }
+
+    return productModel.create(product);
+  };
+
+  beforeAll(async () => {
+    await dbHelper.connect();
+  });
+
+  afterEach(async () => {
+    await productModel.deleteMany({});
+    await categoryModel.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await dbHelper.closeDB();
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 1 — Controller + Model
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 1 — Controller + Model Integration (no HTTP)", () => {
+    it("should retrieve all products with populated category and photo excluded", async () => {
+      const category = await seedCategory("Electronics");
+      await seedProduct({ name: "Camera", category: category._id, withPhoto: true });
+
+      const req = {};
+      const res = makeRes();
+
+      await getProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.success).toBe(true);
+      expect(payload.counTotal).toBe(1);
+      expect(payload.products).toHaveLength(1);
+      expect(payload.products[0].category).toMatchObject({ name: "Electronics" });
+      expect(payload.products[0].photo?.data).toBeUndefined();
+    });
+
+    it("should enforce pagination limit(12) and sort by createdAt descending", async () => {
+      const category = await seedCategory("Books");
+
+      for (let i = 1; i <= 13; i++) {
+        await seedProduct({
+          name: `Item-${i}`,
+          category: category._id,
+          price: i,
+        });
+        await new Promise((resolve) => setTimeout(resolve, 2));
+      }
+
+      const req = {};
+      const res = makeRes();
+
+      await getProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.products).toHaveLength(12);
+      expect(payload.counTotal).toBe(12);
+      expect(payload.products[0].name).toBe("Item-13");
+      expect(payload.products[payload.products.length - 1].name).toBe("Item-2");
+    });
+
+    it("should return 400 with error message when productModel.find throws", async () => {
+      const req = {};
+      const res = makeRes();
+      const dbError = new Error("forced find failure");
+      const findSpy = jest.spyOn(productModel, "find").mockImplementation(() => {
+        throw dbError;
+      });
+
+      await getProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Error in getting products",
+          error: "forced find failure",
+        })
+      );
+
+      findSpy.mockRestore();
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 2 — Controller + Model + Route
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 2 — Route + Controller Integration (minimal Express)", () => {
+    it("should return correct response structure from /get-product", async () => {
+      const category = await seedCategory("Gadgets");
+      await seedProduct({ name: "Speaker", category: category._id, withPhoto: true });
+      await seedProduct({ name: "Mouse", category: category._id, withPhoto: true });
+
+      const res = await request(routerApp).get(ENDPOINT);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        success: true,
+        counTotal: 2,
+      });
+      expect(Array.isArray(res.body.products)).toBe(true);
+      expect(res.body.products[0].photo).toBeUndefined();
+      expect(res.body.products[0].category).toEqual(
+        expect.objectContaining({
+          name: "Gadgets",
+        })
+      );
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // LEVEL 3 — Full App Integration (app.js)
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe("Level 3 — Full App Integration (app.js, server level)", () => {
+    it("should return { success: true, products: [], counTotal } from /api/v1/product/get-product", async () => {
+      const category = await seedCategory("Appliances");
+      await seedProduct({ name: "Kettle", category: category._id });
+
+      const res = await request(app).get(ENDPOINT);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(typeof res.body.counTotal).toBe("number");
+      expect(Array.isArray(res.body.products)).toBe(true);
+      expect(res.body.products).toHaveLength(1);
     });
   });
 });
@@ -1359,7 +1561,7 @@ describe("productFiltersController integration tests", () => {
 
     it("should handle invalid filter values gracefully (negative prices)", async () => {
       const req = { body: { priceMin: -1, priceMax: 10 } };
-      const res = makeRes();
+      const res = makeRes   ();
 
       await productFiltersController(req, res);
 

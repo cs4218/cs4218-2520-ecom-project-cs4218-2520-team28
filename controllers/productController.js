@@ -93,6 +93,8 @@ export const createProductController = async (req, res) => {
   }
 };
 
+// Chi Thanh, A0276229W.
+// AI generated tests using GitHub Copilot (GPT-5.3 Codex) Agent Mode.
 //get all products
 export const getProductController = async (req, res) => {
   try {
@@ -109,9 +111,9 @@ export const getProductController = async (req, res) => {
       products,
     });
   } catch (error) {
-    res.status(500).send({
+    res.status(400).send({
       success: false,
-      message: "Erorr in getting products",
+      message: "Error in getting products",
       error: error.message,
     });
   }
