@@ -661,6 +661,7 @@ describe(
       ).toBeGreaterThanOrEqual(1);
     });
 
+    
     it("L4.2.5 clicking a product card navigates to UpdateProduct page", async () => {
       // This test navigates, not redirects — restore real timers
       jest.useRealTimers();
