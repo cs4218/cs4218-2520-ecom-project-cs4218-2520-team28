@@ -73,6 +73,7 @@ const UpdateProduct = () => {
       productData.append("quantity", quantity);
       photo && productData.append("photo", photo);
       productData.append("category", category);
+      productData.append("shipping", shipping);
       const { data } = await axios.put(
         `/api/v1/product/update-product/${id}`,
         productData
@@ -84,7 +85,7 @@ const UpdateProduct = () => {
         // Foo Chao, A0272024R
         // AI Assistance: Github Copilot (Claude Sonnet 4.6)
         // fix typo
-        toast.success("Product updated successfully");
+        toast.success("Product Updated Successfully");
         navigate("/dashboard/admin/products");
       } else {
         toast.error(data?.message);

@@ -27,8 +27,8 @@ jest.mock('../../components/Form/CategoryForm', () => ({ handleSubmit, value, se
     </form>
 ));
 jest.mock('antd', () => {
-    const ModalComponent = ({ visible, onCancel, children }) =>
-        visible ? (
+    const ModalComponent = ({ open, visible, onCancel, children }) =>
+        (open ?? visible) ? (
             <div data-testid="modal">
                 <button data-testid="modal-cancel" onClick={onCancel}>Cancel</button>
                 {children}

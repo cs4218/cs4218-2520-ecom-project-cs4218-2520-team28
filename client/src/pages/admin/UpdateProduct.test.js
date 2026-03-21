@@ -1057,7 +1057,7 @@ describe('UpdateProduct', () => {
 
             // Assert
             await waitFor(() => {
-                expect(mockToastSuccess).toHaveBeenCalledWith('Product updated successfully');
+                expect(mockToastSuccess).toHaveBeenCalledWith('Product Updated Successfully');
                 expect(mockNavigate).toHaveBeenCalledWith('/dashboard/admin/products');
             });
         });
