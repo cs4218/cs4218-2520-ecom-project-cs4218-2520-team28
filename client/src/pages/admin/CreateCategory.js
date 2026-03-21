@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Layout from "./../../components/Layout";
 import AdminMenu from "./../../components/AdminMenu";
 import toast from "react-hot-toast";
@@ -7,6 +7,9 @@ import CategoryForm from "../../components/Form/CategoryForm";
 import { Modal } from "antd";
 const CreateCategory = () => {
   const [categories, setCategories] = useState([]);
+  // Chi Thanh, A0276229W
+  // Guard async category updates so tests and runtime do not set state after unmount.
+  const isMountedRef = useRef(true);
   const [name, setName] = useState("");
   const [visible, setVisible] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -21,7 +24,9 @@ const CreateCategory = () => {
       if (data?.success) {
         toast.success(`${name} is created`);
         setName("");
-        getAllCategory();
+        // Chi Thanh, A0276229W
+        // Wait for category refresh before continuing so UI state settles predictably.
+        await getAllCategory();
         // Foo Chao, A0272024R
         // AI Assistance: Github Copilot (Claude Sonnet 4.6)
         // Bug fix: notify Header's useCategory hook to re-fetch so the nav dropdown updates immediately
@@ -42,7 +47,9 @@ const CreateCategory = () => {
   const getAllCategory = async () => {
     try {
       const { data } = await axios.get("/api/v1/category/get-category");
-      if (data.success) {
+      // Chi Thanh, A0276229W
+      // Only update state while mounted to avoid late async updates.
+      if (data.success && isMountedRef.current) {
         setCategories(data.category);
       }
     } catch (error) {
@@ -55,7 +62,13 @@ const CreateCategory = () => {
   };
 
   useEffect(() => {
+    // Chi Thanh, A0276229W
+    // Track mounted lifecycle for safe async setState handling.
+    isMountedRef.current = true;
     getAllCategory();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   //update category
@@ -71,7 +84,7 @@ const CreateCategory = () => {
         setSelected(null);
         setUpdatedName("");
         setVisible(false);
-        getAllCategory();
+        await getAllCategory();
         // Foo Chao, A0272024R
         // AI Assistance: Github Copilot (Claude Sonnet 4.6)
         // Bug fix: notify Header's useCategory hook to re-fetch so the nav dropdown updates immediately
@@ -102,7 +115,7 @@ const CreateCategory = () => {
           );
           if (data.success) {
             toast.success("Category deleted successfully");
-            getAllCategory();
+            await getAllCategory();
             // Foo Chao, A0272024R
             // AI Assistance: Github Copilot (Claude Sonnet 4.6)
             // Bug fix: notify Header's useCategory hook to re-fetch so the nav dropdown updates immediately
@@ -142,9 +155,10 @@ const CreateCategory = () => {
                 </thead>
                 <tbody>
                   {categories?.map((c) => (
-                    <>
-                      <tr>
-                        <td key={c._id}>{c.name}</td>
+                      // Chi Thanh, A0276229W
+                      // Use stable row key on the mapped element to satisfy React list key requirements.
+                      <tr key={c._id}>
+                        <td>{c.name}</td>
                         <td>
                           <button
                             className="btn btn-primary ms-2"
@@ -166,7 +180,6 @@ const CreateCategory = () => {
                           </button>
                         </td>
                       </tr>
-                    </>
                   ))}
                 </tbody>
               </table>

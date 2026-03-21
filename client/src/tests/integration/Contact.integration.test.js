@@ -85,6 +85,14 @@ import { AuthProvider } from "../../context/auth";
 import { CartProvider } from "../../context/cart";
 import { SearchProvider } from "../../context/search";
 
+// Chi Thanh, A0276229W
+// Mock Bi icons as simple components so integration tests avoid runtime icon-render errors.
+jest.mock("react-icons/bi", () => ({
+  BiMailSend: () => <span aria-hidden="true" data-testid="bi-mail-send" />,
+  BiPhoneCall: () => <span aria-hidden="true" data-testid="bi-phone-call" />,
+  BiSupport: () => <span aria-hidden="true" data-testid="bi-support" />,
+}));
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 /**

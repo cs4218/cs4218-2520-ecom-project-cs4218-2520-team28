@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CreateCategory from './CreateCategory';
 import axios from 'axios';
@@ -58,6 +58,26 @@ describe('CreateCategory', () => {
 
     let mockAxiosGet, mockAxiosPost, mockAxiosPut, mockAxiosDelete;
     let mockToastSuccess, mockToastError;
+
+    // Chi Thanh, A0276229W
+    // Wrap click interactions in act and flush microtasks so async state updates complete before assertions.
+    const clickWithAct = async (element) => {
+        await act(async () => {
+            fireEvent.click(element);
+            await Promise.resolve();
+            await Promise.resolve();
+        });
+    };
+
+    // Chi Thanh, A0276229W
+    // Wrap submit interactions in act and flush microtasks to reduce act warning noise from async handlers.
+    const submitWithAct = async (element) => {
+        await act(async () => {
+            fireEvent.submit(element);
+            await Promise.resolve();
+            await Promise.resolve();
+        });
+    };
 
     beforeEach(() => {
         // Arrange: Create fresh mock functions
@@ -302,7 +322,7 @@ describe('CreateCategory', () => {
 
             // Act
             fireEvent.change(input, { target: { value: 'Sports' } });
-            fireEvent.submit(form);
+            await submitWithAct(form);
 
             // Assert
             await waitFor(() => {
@@ -311,6 +331,10 @@ describe('CreateCategory', () => {
                     { name: 'Sports' }
                 );
                 expect(mockToastSuccess).toHaveBeenCalledWith('Sports is created');
+            });
+
+            await waitFor(() => {
+                expect(mockAxiosGet).toHaveBeenCalledTimes(2);
             });
         });
 
@@ -339,7 +363,7 @@ describe('CreateCategory', () => {
 
             // Act
             fireEvent.change(input, { target: { value: 'Sports' } });
-            fireEvent.submit(form);
+            await submitWithAct(form);
 
             // Assert
             await waitFor(() => {
@@ -367,7 +391,7 @@ describe('CreateCategory', () => {
 
             // Act
             fireEvent.change(input, { target: { value: 'Electronics' } });
-            fireEvent.submit(form);
+            await submitWithAct(form);
 
             // Assert
             await waitFor(() => {
@@ -394,7 +418,7 @@ describe('CreateCategory', () => {
             const form = screen.getByTestId('category-form');
 
             // Act
-            fireEvent.submit(form);
+            await submitWithAct(form);
 
             // Assert
             await waitFor(() => {
@@ -423,7 +447,7 @@ describe('CreateCategory', () => {
 
             // Act
             fireEvent.change(input, { target: { value: 'Electronics' } });
-            fireEvent.submit(form);
+            await submitWithAct(form);
 
             // Assert
             await waitFor(() => {
@@ -449,7 +473,7 @@ describe('CreateCategory', () => {
 
             // Act
             fireEvent.change(input, { target: { value: 'Sports' } });
-            fireEvent.submit(form);
+            await submitWithAct(form);
 
             // Assert
             await waitFor(() => {
@@ -478,11 +502,19 @@ describe('CreateCategory', () => {
             // Act
             const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
             submitEvent.preventDefault = mockPreventDefault;
-            form.dispatchEvent(submitEvent);
+            await act(async () => {
+                form.dispatchEvent(submitEvent);
+                await Promise.resolve();
+                await Promise.resolve();
+            });
 
             // Assert
             await waitFor(() => {
                 expect(mockPreventDefault).toHaveBeenCalled();
+            });
+
+            await waitFor(() => {
+                expect(mockAxiosGet).toHaveBeenCalledTimes(2);
             });
         });
     });
@@ -505,7 +537,7 @@ describe('CreateCategory', () => {
 
             // Act
             const editButton = screen.getByText('Edit');
-            fireEvent.click(editButton);
+            await clickWithAct(editButton);
 
             // Assert
             await waitFor(() => {
@@ -530,7 +562,7 @@ describe('CreateCategory', () => {
 
             // Act
             const editButton = screen.getByText('Edit');
-            fireEvent.click(editButton);
+            await clickWithAct(editButton);
 
             // Assert
             await waitFor(() => {
@@ -559,7 +591,7 @@ describe('CreateCategory', () => {
             });
 
             const editButton = screen.getByText('Edit');
-            fireEvent.click(editButton);
+            await clickWithAct(editButton);
 
             await waitFor(() => {
                 expect(screen.getByTestId('modal')).toBeInTheDocument();
@@ -572,7 +604,7 @@ describe('CreateCategory', () => {
 
             // Act
             fireEvent.change(modalInput, { target: { value: 'Electronics & Gadgets' } });
-            fireEvent.submit(modalForm);
+            await submitWithAct(modalForm);
 
             // Assert
             await waitFor(() => {
@@ -603,7 +635,7 @@ describe('CreateCategory', () => {
             });
 
             const editButton = screen.getByText('Edit');
-            fireEvent.click(editButton);
+            await clickWithAct(editButton);
 
             await waitFor(() => {
                 expect(screen.getByTestId('modal')).toBeInTheDocument();
@@ -613,7 +645,7 @@ describe('CreateCategory', () => {
             const modalForm = forms[forms.length - 1];
 
             // Act
-            fireEvent.submit(modalForm);
+            await submitWithAct(modalForm);
 
             // Assert
             await waitFor(() => {
@@ -640,7 +672,7 @@ describe('CreateCategory', () => {
             });
 
             const editButton = screen.getByText('Edit');
-            fireEvent.click(editButton);
+            await clickWithAct(editButton);
 
             await waitFor(() => {
                 expect(screen.getByTestId('modal')).toBeInTheDocument();
@@ -650,7 +682,7 @@ describe('CreateCategory', () => {
             const modalForm = forms[forms.length - 1];
 
             // Act
-            fireEvent.submit(modalForm);
+            await submitWithAct(modalForm);
 
             // Assert
             await waitFor(() => {
@@ -674,7 +706,7 @@ describe('CreateCategory', () => {
             });
 
             const editButton = screen.getByText('Edit');
-            fireEvent.click(editButton);
+            await clickWithAct(editButton);
 
             await waitFor(() => {
                 expect(screen.getByTestId('modal')).toBeInTheDocument();
@@ -682,7 +714,7 @@ describe('CreateCategory', () => {
 
             // Act
             const cancelButton = screen.getByTestId('modal-cancel');
-            fireEvent.click(cancelButton);
+            await clickWithAct(cancelButton);
 
             // Assert
             await waitFor(() => {
@@ -709,7 +741,7 @@ describe('CreateCategory', () => {
             });
 
             const editButton = screen.getByText('Edit');
-            fireEvent.click(editButton);
+            await clickWithAct(editButton);
 
             await waitFor(() => {
                 expect(screen.getByTestId('modal')).toBeInTheDocument();
@@ -719,7 +751,7 @@ describe('CreateCategory', () => {
             const modalForm = forms[forms.length - 1];
 
             // Act
-            fireEvent.submit(modalForm);
+            await submitWithAct(modalForm);
 
             // Assert
             await waitFor(() => {
@@ -744,7 +776,7 @@ describe('CreateCategory', () => {
             });
 
             const editButton = screen.getByText('Edit');
-            fireEvent.click(editButton);
+            await clickWithAct(editButton);
 
             await waitFor(() => {
                 expect(screen.getByTestId('modal')).toBeInTheDocument();
@@ -754,7 +786,7 @@ describe('CreateCategory', () => {
             const modalForm = forms[forms.length - 1];
 
             // Act
-            fireEvent.submit(modalForm);
+            await submitWithAct(modalForm);
 
             // Assert
             await waitFor(() => {
@@ -777,14 +809,14 @@ describe('CreateCategory', () => {
             await waitFor(() => expect(screen.getByText('Electronics')).toBeInTheDocument());
 
             const editButton = screen.getByText('Edit');
-            fireEvent.click(editButton);
+            await clickWithAct(editButton);
             await waitFor(() => expect(screen.getByTestId('modal')).toBeInTheDocument());
 
             const forms = screen.getAllByTestId('category-form');
             const modalForm = forms[forms.length - 1];
 
             // Act
-            fireEvent.submit(modalForm);
+            await submitWithAct(modalForm);
 
             // Assert
             await waitFor(() => {
@@ -814,7 +846,7 @@ describe('CreateCategory', () => {
 
             // Act
             const deleteButton = screen.getByText('Delete');
-            fireEvent.click(deleteButton);
+            await clickWithAct(deleteButton);
 
             // Assert
             await waitFor(() => {
@@ -843,7 +875,7 @@ describe('CreateCategory', () => {
 
             // Act
             const deleteButton = screen.getByText('Delete');
-            fireEvent.click(deleteButton);
+            await clickWithAct(deleteButton);
 
             // Assert
             await waitFor(() => {
@@ -871,7 +903,7 @@ describe('CreateCategory', () => {
 
             // Act
             const deleteButton = screen.getByText('Delete');
-            fireEvent.click(deleteButton);
+            await clickWithAct(deleteButton);
 
             // Assert
             await waitFor(() => {
@@ -897,7 +929,7 @@ describe('CreateCategory', () => {
 
             // Act
             const deleteButton = screen.getByText('Delete');
-            fireEvent.click(deleteButton);
+            await clickWithAct(deleteButton);
 
             // Assert
             await waitFor(() => {
@@ -927,7 +959,7 @@ describe('CreateCategory', () => {
 
             // Act
             const deleteButtons = screen.getAllByText('Delete');
-            fireEvent.click(deleteButtons[1]); // Delete Books
+            await clickWithAct(deleteButtons[1]); // Delete Books
 
             // Assert
             await waitFor(() => {
@@ -956,7 +988,7 @@ describe('CreateCategory', () => {
             });
 
             const editButton = screen.getByText('Edit');
-            fireEvent.click(editButton);
+            await clickWithAct(editButton);
 
             await waitFor(() => {
                 expect(screen.getByTestId('modal')).toBeInTheDocument();
@@ -966,7 +998,7 @@ describe('CreateCategory', () => {
             const modalForm = forms[forms.length - 1];
 
             // Act
-            fireEvent.submit(modalForm);
+            await submitWithAct(modalForm);
 
             // Assert - Modal closes means state was cleared
             await waitFor(() => {
@@ -1016,7 +1048,7 @@ describe('CreateCategory', () => {
             const form = screen.getByTestId('category-form');
 
             // Act
-            fireEvent.submit(form);
+            await submitWithAct(form);
 
             // Assert
             await waitFor(() => {
@@ -1024,6 +1056,10 @@ describe('CreateCategory', () => {
                     '/api/v1/category/create-category',
                     { name: '' }
                 );
+            });
+
+            await waitFor(() => {
+                expect(mockAxiosGet).toHaveBeenCalledTimes(2);
             });
         });
 
@@ -1047,7 +1083,7 @@ describe('CreateCategory', () => {
 
             // Act
             fireEvent.change(input, { target: { value: 'Home & Garden!' } });
-            fireEvent.submit(form);
+            await submitWithAct(form);
 
             // Assert
             await waitFor(() => {
@@ -1055,6 +1091,10 @@ describe('CreateCategory', () => {
                     '/api/v1/category/create-category',
                     { name: 'Home & Garden!' }
                 );
+            });
+
+            await waitFor(() => {
+                expect(mockAxiosGet).toHaveBeenCalledTimes(2);
             });
         });
 
@@ -1075,3 +1115,5 @@ describe('CreateCategory', () => {
         });
     });
 });
+
+
