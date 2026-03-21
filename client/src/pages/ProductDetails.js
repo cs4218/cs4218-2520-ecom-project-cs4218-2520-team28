@@ -76,7 +76,7 @@ const ProductDetails = () => {
           </h6>
           <h6>Category : {product?.category?.name}</h6>
           <button 
-            class="btn btn-secondary ms-1"
+            className="btn btn-secondary ms-1"
             // Jian Tao, A0273320R
             // Fix applied for MS2 UI testing: implemented Add to Cart on ProductDetails page.
             // Previously the button had no working handler, so products could not be added from this page.
