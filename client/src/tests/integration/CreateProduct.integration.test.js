@@ -284,6 +284,10 @@ describe("CreateProduct integration (top-down)", () => {
       target: { value: "12" },
     });
 
+    await waitFor(() => {
+      expect(screen.getByTestId("category-select")).toHaveTextContent("Electronics");
+    });
+
     fireEvent.change(screen.getByTestId("category-select"), {
       target: { value: "cat-1" },
     });
