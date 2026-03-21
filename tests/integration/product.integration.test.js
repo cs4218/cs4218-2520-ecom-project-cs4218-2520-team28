@@ -10,6 +10,7 @@ import mongoose from "mongoose";
 import { writeFileSync, unlinkSync } from "fs";
 import { join } from "path";
 import os from "os";
+import * as dbHelper from "./dbHelper.js";
 
 import {
   createProductController,
@@ -26,7 +27,6 @@ import app from "../../app.js";
 import userModel from "../../models/userModel.js";
 import productModel from "../../models/productModel.js";
 import categoryModel from "../../models/categoryModel.js";
-import * as dbHelper from "./dbHelper.js";
 
 // Foo Chao, A0272024R
 // AI Assistance: Github Copilot (Claude Sonnet 4.6)
