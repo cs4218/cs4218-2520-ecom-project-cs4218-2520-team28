@@ -697,32 +697,47 @@ describe(
         return Promise.resolve({ data: { success: true, category: [] } });
       });
 
-      render(
-        <MemoryRouter initialEntries={["/dashboard/admin/products"]}>
-          <AuthProvider>
-            <CartProvider>
-              <SearchProvider>
-                <App />
-              </SearchProvider>
-            </CartProvider>
-          </AuthProvider>
-        </MemoryRouter>
-      );
+      // Used github copilot(claude sonnet 4.6) to fix bug that only happen on github actions 
+      // (TypeError: Cannot set read-only property 'message' of Error) when using waitFor,
+      // by replacing waitFor with act(async) and setTimeout 0 to flush all pending promises synchronously. 
 
-      // Wait for the product card to appear (img alt = product name)
-      await waitFor(() => {
-        expect(screen.getByAltText("Widget A")).toBeInTheDocument();
-      }, { timeout: 60000 });
+      // Use act(async) with a macrotask fence (setTimeout 0) so that all mocked
+      // Promise microtasks resolve before the macrotask fires. This flushes the
+      // full async chain synchronously:
+      //   AuthProvider reads localStorage → AdminRoute calls admin-auth →
+      //   setOk(true) → Products fetches products → Widget A renders
+      // This avoids waitFor whose internal handleTimeout has a known bug on
+      // Node 24 / jsdom where it throws TypeError (cannot set read-only
+      // error.message), leaving the Promise permanently pending and causing
+      // the 120 s Jest timeout on GitHub Actions.
+      await act(async () => {
+        render(
+          <MemoryRouter initialEntries={["/dashboard/admin/products"]}>
+            <AuthProvider>
+              <CartProvider>
+                <SearchProvider>
+                  <App />
+                </SearchProvider>
+              </CartProvider>
+            </AuthProvider>
+          </MemoryRouter>
+        );
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+
+      // Product card should now be in the DOM
+      expect(screen.getByAltText("Widget A")).toBeInTheDocument();
 
       // Click the product image — the click bubbles up to the wrapping Link
-      fireEvent.click(screen.getByAltText("Widget A"));
+      await act(async () => {
+        fireEvent.click(screen.getByAltText("Widget A"));
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
 
       // UpdateProduct page should now be rendered
-      await waitFor(() => {
-        expect(
-          screen.getByRole("heading", { name: /update product/i })
-        ).toBeInTheDocument();
-      }, { timeout: 60000 });
-    }, 120000);
+      expect(
+        screen.getByRole("heading", { name: /update product/i })
+      ).toBeInTheDocument();
+    }, 30000);
   }
 );
