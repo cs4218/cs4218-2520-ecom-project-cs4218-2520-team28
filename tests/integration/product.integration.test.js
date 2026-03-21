@@ -10,6 +10,12 @@ import mongoose from "mongoose";
 import { writeFileSync, unlinkSync } from "fs";
 import { join } from "path";
 import os from "os";
+import * as dbHelper from "./dbHelper.js";
+
+// Braintree gateway is initialised at module import time in productController.
+process.env.BRAINTREE_MERCHANT_ID = process.env.BRAINTREE_MERCHANT_ID || "test_merchant_id";
+process.env.BRAINTREE_PUBLIC_KEY = process.env.BRAINTREE_PUBLIC_KEY || "test_public_key";
+process.env.BRAINTREE_PRIVATE_KEY = process.env.BRAINTREE_PRIVATE_KEY || "test_private_key";
 
 import {
   createProductController,
@@ -26,7 +32,6 @@ import app from "../../app.js";
 import userModel from "../../models/userModel.js";
 import productModel from "../../models/productModel.js";
 import categoryModel from "../../models/categoryModel.js";
-import * as dbHelper from "./dbHelper.js";
 
 // Foo Chao, A0272024R
 // AI Assistance: Github Copilot (Claude Sonnet 4.6)
