@@ -18,7 +18,7 @@ const Profile = () => {
 
   // get user data
   useEffect(() => {
-    const { email, name, phone, address } = auth?.user;
+    const { email, name, phone, address } = auth?.user || {};
     setName(name);
     setPhone(phone);
     setEmail(email);
@@ -81,7 +81,6 @@ const Profile = () => {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     className="form-control"
                     id="exampleInputEmail1"
                     placeholder="Enter Your Email "
