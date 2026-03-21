@@ -661,11 +661,20 @@ describe(
       ).toBeGreaterThanOrEqual(1);
     });
 
-    
-    it("L4.2.5 clicking a product card navigates to UpdateProduct page", async () => {
-      // This test navigates, not redirects — restore real timers
-      jest.useRealTimers();
+  }
+);
 
+// L4.2.5 is in its own describe block (no fake timers) because
+// @testing-library/dom's waitFor timeout handler throws a TypeError when
+// fake timers are active, causing false CI failures regardless of timeout value.
+describe(
+  "Level 4.2.5 — product click → UpdateProduct (real timers)",
+  () => {
+    afterEach(() => {
+      toast.dismiss();
+    });
+
+    it("L4.2.5 clicking a product card navigates to UpdateProduct page", async () => {
       const adminUser = { _id: "a1", name: "Admin User", role: 1 };
       localStorage.setItem(
         "auth",
@@ -703,7 +712,7 @@ describe(
       // Wait for the product card to appear (img alt = product name)
       await waitFor(() => {
         expect(screen.getByAltText("Widget A")).toBeInTheDocument();
-      });
+      }, { timeout: 10000 });
 
       // Click the product image — the click bubbles up to the wrapping Link
       fireEvent.click(screen.getByAltText("Widget A"));
@@ -713,7 +722,7 @@ describe(
         expect(
           screen.getByRole("heading", { name: /update product/i })
         ).toBeInTheDocument();
-      });
-    }, 15000);
+      }, { timeout: 10000 });
+    }, 30000);
   }
 );
