@@ -10,13 +10,19 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-//payment gateway
-var gateway = new braintree.BraintreeGateway({
-  environment: braintree.Environment.Sandbox,
-  merchantId: process.env.BRAINTREE_MERCHANT_ID,
-  publicKey: process.env.BRAINTREE_PUBLIC_KEY,
-  privateKey: process.env.BRAINTREE_PRIVATE_KEY,
-});
+let gateway;
+
+const getBraintreeGateway = () => {
+  if (!gateway) {
+    gateway = new braintree.BraintreeGateway({
+      environment: braintree.Environment.Sandbox,
+      merchantId: process.env.BRAINTREE_MERCHANT_ID,
+      publicKey: process.env.BRAINTREE_PUBLIC_KEY,
+      privateKey: process.env.BRAINTREE_PRIVATE_KEY,
+    });
+  }
+  return gateway;
+};
 
 // Foo Chao, A0272024R
 // Changes Made:
@@ -536,7 +542,8 @@ export const productCategoryController = async (req, res) => {
 //token
 export const braintreeTokenController = async (req, res) => {
   try {
-    gateway.clientToken.generate({}, function (err, response) {
+    const paymentGateway = getBraintreeGateway();
+    paymentGateway.clientToken.generate({}, function (err, response) {
       if (err) {
         res.status(500).send(err);
       } else {
@@ -544,18 +551,20 @@ export const braintreeTokenController = async (req, res) => {
       }
     });
   } catch (error) {
+    res.status(500).send(error);
   }
 };
 
 //payment
 export const brainTreePaymentController = async (req, res) => {
   try {
+    const paymentGateway = getBraintreeGateway();
     const { nonce, cart } = req.body;
     let total = 0;
     cart.map((i) => {
       total += i.price;
     });
-    let newTransaction = gateway.transaction.sale(
+    let newTransaction = paymentGateway.transaction.sale(
       {
         amount: total,
         paymentMethodNonce: nonce,
@@ -577,5 +586,6 @@ export const brainTreePaymentController = async (req, res) => {
       }
     );
   } catch (error) {
+    res.status(500).send(error);
   }
 };

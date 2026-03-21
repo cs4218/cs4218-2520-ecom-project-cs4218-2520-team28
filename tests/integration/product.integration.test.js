@@ -12,11 +12,6 @@ import { join } from "path";
 import os from "os";
 import * as dbHelper from "./dbHelper.js";
 
-// Braintree gateway is initialised at module import time in productController.
-process.env.BRAINTREE_MERCHANT_ID = process.env.BRAINTREE_MERCHANT_ID || "test_merchant_id";
-process.env.BRAINTREE_PUBLIC_KEY = process.env.BRAINTREE_PUBLIC_KEY || "test_public_key";
-process.env.BRAINTREE_PRIVATE_KEY = process.env.BRAINTREE_PRIVATE_KEY || "test_private_key";
-
 import {
   createProductController,
   getProductController,
