@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1774101235281" clover="3.2.0">
-  <project timestamp="1774101235281" name="All files">
-    <metrics statements="651" coveredstatements="626" conditionals="190" coveredconditionals="182" methods="177" coveredmethods="164" elements="1018" coveredelements="972" complexity="0" loc="651" ncloc="651" packages="10" files="39" classes="39"/>
+<coverage generated="1774101782203" clover="3.2.0">
+  <project timestamp="1774101782203" name="All files">
+    <metrics statements="648" coveredstatements="626" conditionals="188" coveredconditionals="182" methods="176" coveredmethods="164" elements="1012" coveredelements="972" complexity="0" loc="648" ncloc="648" packages="10" files="38" classes="38"/>
     <package name="src">
-      <metrics statements="4" coveredstatements="1" conditionals="2" coveredconditionals="0" methods="2" coveredmethods="1"/>
+      <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
       <file name="App.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\App.js">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="27" count="106" type="stmt"/>
-      </file>
-      <file name="setupProxy.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\setupProxy.js">
-        <metrics statements="3" coveredstatements="0" conditionals="2" coveredconditionals="0" methods="1" coveredmethods="0"/>
-        <line num="8" count="0" type="stmt"/>
-        <line num="10" count="0" type="stmt"/>
-        <line num="11" count="0" type="stmt"/>
       </file>
     </package>
     <package name="src.components">

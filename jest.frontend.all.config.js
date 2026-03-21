@@ -33,6 +33,11 @@ export default {
     "!client/src/reportWebVitals.js",
     "!client/src/index.js",
     "!client/src/_site/**",
+    // setupProxy.js is a CRA dev-server middleware (http-proxy-middleware) that
+    // is only loaded by `react-scripts start` inside the Express pipeline.
+    // It is never imported or executed by Jest, so it will always show 0%
+    // coverage and cannot be meaningfully tested in a jsdom environment.
+    "!client/src/setupProxy.js",
   ],
 
   coverageThreshold: {
