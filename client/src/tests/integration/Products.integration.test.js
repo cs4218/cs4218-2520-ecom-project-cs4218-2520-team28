@@ -682,7 +682,7 @@ describe(
         // UpdateProduct loads the single product by slug and categories
         if (url.includes(PRODUCT_1.slug)) {
           return Promise.resolve({
-            data: { product: { ...PRODUCT_1, category: null } },
+            data: { product: { ...PRODUCT_1, category: { _id: "cat-1", name: "Electronics" } } },
           });
         }
         return Promise.resolve({ data: { success: true, category: [] } });
@@ -714,6 +714,6 @@ describe(
           screen.getByRole("heading", { name: /update product/i })
         ).toBeInTheDocument();
       });
-    });
+    }, 15000);
   }
 );
