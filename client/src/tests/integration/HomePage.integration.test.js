@@ -87,6 +87,12 @@ import { AuthProvider } from "../../context/auth";
 import { CartProvider } from "../../context/cart";
 import { SearchProvider } from "../../context/search";
 
+// Chi Thanh, A0276229W
+// Mock reload icon as a simple component so integration tests avoid runtime icon-render errors.
+jest.mock("react-icons/ai", () => ({
+  AiOutlineReload: () => <span aria-hidden="true" data-testid="ai-reload" />,
+}));
+
 // ── Product / category fixtures ───────────────────────────────────────────────
 
 const CAT_1 = { _id: "c1", name: "Electronics", slug: "electronics" };

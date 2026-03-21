@@ -6,6 +6,7 @@ import express from "express";
 import request from "supertest";
 import JWT from "jsonwebtoken";
 import mongoose from "mongoose";
+import * as dbHelper from "./dbHelper.js";
 
 import {
   createCategoryController,
@@ -16,7 +17,6 @@ import categoryRoutes from "../../routes/categoryRoutes.js";
 import app from "../../app.js";
 import userModel from "../../models/userModel.js";
 import categoryModel from "../../models/categoryModel.js";
-import * as dbHelper from "./dbHelper.js";
 
 // Foo Chao, A0272024R
 // AI Assistance: Github Copilot (Claude Sonnet 4.6)

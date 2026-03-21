@@ -46,6 +46,14 @@ jest.mock("./../components/Layout", () =>
 
 jest.mock("../styles/ProductDetailsStyles.css", () => {}, { virtual: true });
 
+jest.mock("../context/cart", () => ({
+  useCart: () => [[], jest.fn()],
+}));
+
+jest.mock("react-hot-toast", () => ({
+  success: jest.fn(),
+}));
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 // Wraps render in act so all chained async state updates (including the
