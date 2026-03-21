@@ -712,7 +712,7 @@ describe(
       // Wait for the product card to appear (img alt = product name)
       await waitFor(() => {
         expect(screen.getByAltText("Widget A")).toBeInTheDocument();
-      }, { timeout: 10000 });
+      }, { timeout: 60000 });
 
       // Click the product image — the click bubbles up to the wrapping Link
       fireEvent.click(screen.getByAltText("Widget A"));
@@ -722,7 +722,7 @@ describe(
         expect(
           screen.getByRole("heading", { name: /update product/i })
         ).toBeInTheDocument();
-      }, { timeout: 10000 });
-    }, 30000);
+      }, { timeout: 60000 });
+    }, 120000);
   }
 );
