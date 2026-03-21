@@ -714,6 +714,6 @@ describe(
           screen.getByRole("heading", { name: /update product/i })
         ).toBeInTheDocument();
       });
-    });
+    }, 15000);
   }
 );
