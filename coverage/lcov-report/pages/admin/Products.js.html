@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">83.33% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>10/12</span>
+                <span class='fraction'>0/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>3/6</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">83.33% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>10/12</span>
+                <span class='fraction'>0/12</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -180,14 +180,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">25x</span>
-<span class="cline-any cline-yes">19x</span>
-<span class="cline-any cline-yes">19x</span>
-<span class="cline-any cline-yes">19x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -195,12 +195,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">25x</span>
-<span class="cline-any cline-yes">19x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">25x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -208,7 +206,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -266,14 +266,14 @@ import Layout from "./../../components/Layout";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
-const Products = () =&gt; {
-  const [products, setProducts] = useState([]);
+const Products = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+  const [products, setProducts] = <span class="cstat-no" title="statement not covered" >useState([]);</span>
 &nbsp;
   //getall products
-  const getAllProducts = async () =&gt; {
-    try {
-      const response = await axios.get("/api/v1/product/get-product");
-      setProducts(response?.data?.products || <span class="branch-1 cbranch-no" title="branch not covered" >[])</span>;
+  const getAllProducts = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    try {</span>
+      const response = <span class="cstat-no" title="statement not covered" >await axios.get("/api/v1/product/get-product");</span>
+<span class="cstat-no" title="statement not covered" >      setProducts(response?.data?.products || []);</span>
     } catch (error) {
 <span class="cstat-no" title="statement not covered" >      console.log(error);</span>
 <span class="cstat-no" title="statement not covered" >      toast.error("Something Went Wrong");</span>
@@ -281,10 +281,10 @@ const Products = () =&gt; {
   };
 &nbsp;
   //lifecycle method
-  useEffect(() =&gt; {
-    getAllProducts();
+<span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    getAllProducts();</span>
   }, []);
-  return (
+<span class="cstat-no" title="statement not covered" >  return (</span>
     &lt;Layout&gt;
       &lt;div className="row"&gt;
         &lt;div className="col-md-3"&gt;
@@ -293,8 +293,8 @@ const Products = () =&gt; {
         &lt;div className="col-md-9 "&gt;
           &lt;h1 className="text-center"&gt;All Products List&lt;/h1&gt;
           &lt;div className="d-flex flex-wrap" style={{ maxHeight: '70vh', overflowY: 'auto' }}&gt;
-            {products?.map((p) =&gt; (
-              &lt;Link
+            {products?.map(<span class="fstat-no" title="function not covered" >(p</span>) =&gt; (
+<span class="cstat-no" title="statement not covered" >              &lt;Link</span>
                 key={p._id}
                 to={`/dashboard/admin/product/${p.slug}`}
                 className="product-link"
@@ -307,8 +307,8 @@ const Products = () =&gt; {
                     style={{ height: "300px", objectFit: "cover" }}
                   /&gt;
                   &lt;div className="card-body d-flex flex-column justify-content-center" style={{ flex: 1 }}&gt;
-                    &lt;h5 className="card-title"&gt;{p.name || <span class="branch-1 cbranch-no" title="branch not covered" >""}</span>&lt;/h5&gt;
-                    &lt;p className="card-text"&gt;{p.description || <span class="branch-1 cbranch-no" title="branch not covered" >""}</span>&lt;/p&gt;
+                    &lt;h5 className="card-title"&gt;{p.name || ""}&lt;/h5&gt;
+                    &lt;p className="card-text"&gt;{p.description || ""}&lt;/p&gt;
                   &lt;/div&gt;
                 &lt;/div&gt;
               &lt;/Link&gt;
@@ -328,7 +328,7 @@ export default Products;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-18T16:47:54.008Z
+                at 2026-03-21T11:25:17.940Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
