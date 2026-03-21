@@ -63,7 +63,10 @@ function setAuthenticatedAdmin() {
 // Renders full route chain to validate page behavior in-app, not in isolation.
 function renderAppAtCreateCategoryRoute() {
   return render(
-    <MemoryRouter initialEntries={["/dashboard/admin/create-category"]}>
+    <MemoryRouter
+      initialEntries={["/dashboard/admin/create-category"]}
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
       <AuthProvider>
         <CartProvider>
           <SearchProvider>
@@ -142,6 +145,24 @@ function setupAxiosForCreateCategoryFlow({
 
 describe("CreateCategory integration (top-down)", () => {
   let confirmSpy;
+  let consoleErrorSpy;
+
+  beforeAll(() => {
+    // Real provider + route integration can trigger asynchronous internal updates
+    // after event dispatch; filter known act-noise so failures remain actionable.
+    consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation((msg, ...args) => {
+        if (typeof msg === "string" && msg.includes("not wrapped in act")) {
+          return;
+        }
+        process.stderr.write([msg, ...args].map(String).join(" ") + "\n");
+      });
+  });
+
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
+  });
 
   beforeEach(() => {
     localStorage.clear();
