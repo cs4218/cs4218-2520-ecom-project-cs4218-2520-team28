@@ -156,7 +156,7 @@ describe("authController", () => {
     test("should update user profile successfully with changing only password", async () => {
       // Arrange
       const req = {
-        user: { _id: "userId123" },
+        user: { _id: "userId123",},
         body: {
           password: "newpassword",
         },
@@ -505,16 +505,20 @@ describe("authController", () => {
 
   // Foo Tzie Huang - A0262376Y
   // AI-assisted unit tests generated with guidance from GitHub Copilot (Claude Haiku 4.5)
-  // Test Coverage 1: Register new user successfully
-  // Test Coverage 2: Return error if required fields are missing
+  // Updated for MS2: Added comprehensive validation failure tests for all branches,
+  // existing user check, and catch/error branch as per MS1 feedback.
+  // AI Assistance: CodeMax (Claude Sonnet 4)
   describe("registerController", () => {
     let res;
     beforeEach(() => {
+      jest.clearAllMocks();
       res = {
         status: jest.fn().mockReturnThis(),
         send: jest.fn(),
       };
     });
+
+    // --- Success path ---
 
     test("should register a new user successfully", async () => {
       const req = {
@@ -528,9 +532,9 @@ describe("authController", () => {
         },
       };
 
-      userModel.findOne.mockResolvedValue(null); 
+      userModel.findOne.mockResolvedValue(null);
       hashPassword.mockResolvedValue("hashedPassword123");
-      
+
       const mockSave = jest.fn().mockResolvedValue(req.body);
       userModel.mockImplementation(() => ({
         save: mockSave,
@@ -538,6 +542,7 @@ describe("authController", () => {
 
       await registerController(req, res);
 
+      expect(hashPassword).toHaveBeenCalledWith("password123");
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.send).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -547,27 +552,193 @@ describe("authController", () => {
       );
     });
 
+    // --- Validation failure branches (all 6 required fields) ---
+
     test("should return error if name is missing", async () => {
-      const req = { body: { email: "test@example.com" } }; 
+      const req = { body: { email: "t@e.com", password: "p", phone: "1", address: "a", answer: "a" } };
       await registerController(req, res);
       expect(res.send).toHaveBeenCalledWith({ error: "Name is Required" });
+      expect(userModel.findOne).not.toHaveBeenCalled();
+    });
+
+    test("should return error if email is missing", async () => {
+      const req = { body: { name: "User", password: "p", phone: "1", address: "a", answer: "a" } };
+      await registerController(req, res);
+      expect(res.send).toHaveBeenCalledWith({ message: "Email is Required" });
+      expect(userModel.findOne).not.toHaveBeenCalled();
+    });
+
+    test("should return error if password is missing", async () => {
+      const req = { body: { name: "User", email: "t@e.com", phone: "1", address: "a", answer: "a" } };
+      await registerController(req, res);
+      expect(res.send).toHaveBeenCalledWith({ message: "Password is Required" });
+      expect(userModel.findOne).not.toHaveBeenCalled();
+    });
+
+    test("should return error if phone is missing", async () => {
+      const req = { body: { name: "User", email: "t@e.com", password: "p", address: "a", answer: "a" } };
+      await registerController(req, res);
+      expect(res.send).toHaveBeenCalledWith({ message: "Phone no is Required" });
+      expect(userModel.findOne).not.toHaveBeenCalled();
+    });
+
+    test("should return error if address is missing", async () => {
+      const req = { body: { name: "User", email: "t@e.com", password: "p", phone: "1", answer: "a" } };
+      await registerController(req, res);
+      expect(res.send).toHaveBeenCalledWith({ message: "Address is Required" });
+      expect(userModel.findOne).not.toHaveBeenCalled();
+    });
+
+    test("should return error if answer is missing", async () => {
+      const req = { body: { name: "User", email: "t@e.com", password: "p", phone: "1", address: "a" } };
+      await registerController(req, res);
+      expect(res.send).toHaveBeenCalledWith({ message: "Answer is Required" });
+      expect(userModel.findOne).not.toHaveBeenCalled();
+    });
+
+    // --- Existing user ---
+
+    test("should return error if user already exists", async () => {
+      const req = {
+        body: { name: "User", email: "existing@example.com", password: "p", phone: "1", address: "a", answer: "a" },
+      };
+      userModel.findOne.mockResolvedValue({ _id: "existing123", email: "existing@example.com" });
+
+      await registerController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Already Register please login",
+      });
+      expect(hashPassword).not.toHaveBeenCalled();
+    });
+
+    // --- Error/catch branch ---
+
+    test("should return 500 when an unexpected error occurs", async () => {
+      const req = {
+        body: { name: "User", email: "t@e.com", password: "p", phone: "1", address: "a", answer: "a" },
+      };
+      userModel.findOne.mockRejectedValue(new Error("DB crash"));
+
+      await registerController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Errro in Registeration",
+        })
+      );
     });
   });
 
   // Foo Tzie Huang - A0262376Y
   // AI-assisted unit tests generated with guidance from GitHub Copilot (Claude Haiku 4.5)
-  // Test Coverage 1: Verify comparePassword logic correctly during login
+  // Updated for MS2: Added all failure branches (missing credentials, user not found,
+  // wrong password, catch branch) as per MS1 feedback.
+  // AI Assistance: CodeMax (Claude Sonnet 4)
   describe("loginController", () => {
     let res;
     beforeEach(() => {
+      jest.clearAllMocks();
       res = {
         status: jest.fn().mockReturnThis(),
         send: jest.fn(),
       };
     });
 
-    test("should verify comparePassword logic correctly during login", async () => {
+    // --- Success path ---
+
+    test("should login successfully with correct credentials", async () => {
       const req = { body: { email: "test@example.com", password: "password123" } };
+      const mockUser = {
+        _id: "u123",
+        name: "Test User",
+        email: "test@example.com",
+        password: "hashedPassword",
+        phone: "12345678",
+        address: "123 Street",
+        role: 0,
+      };
+
+      userModel.findOne.mockResolvedValue(mockUser);
+      comparePassword.mockResolvedValue(true);
+
+      await loginController(req, res);
+
+      expect(comparePassword).toHaveBeenCalledWith("password123", "hashedPassword");
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "login successfully",
+          user: expect.objectContaining({
+            _id: "u123",
+            name: "Test User",
+            email: "test@example.com",
+          }),
+        })
+      );
+    });
+
+    // --- Missing email or password ---
+
+    test("should return 404 when email is missing", async () => {
+      const req = { body: { password: "password123" } };
+      await loginController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Invalid email or password",
+      });
+      expect(userModel.findOne).not.toHaveBeenCalled();
+    });
+
+    test("should return 404 when password is missing", async () => {
+      const req = { body: { email: "test@example.com" } };
+      await loginController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Invalid email or password",
+      });
+      expect(userModel.findOne).not.toHaveBeenCalled();
+    });
+
+    test("should return 404 when both email and password are missing", async () => {
+      const req = { body: {} };
+      await loginController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Invalid email or password",
+      });
+    });
+
+    // --- User not found ---
+
+    test("should return 404 when email is not registered", async () => {
+      const req = { body: { email: "unknown@example.com", password: "password123" } };
+      userModel.findOne.mockResolvedValue(null);
+
+      await loginController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Email is not registerd",
+      });
+    });
+
+    // --- Wrong password ---
+
+    test("should return 200 with success false when password is invalid", async () => {
+      const req = { body: { email: "test@example.com", password: "wrongpassword" } };
       const mockUser = {
         _id: "u123",
         name: "Test User",
@@ -576,28 +747,52 @@ describe("authController", () => {
       };
 
       userModel.findOne.mockResolvedValue(mockUser);
-      comparePassword.mockResolvedValue(true);
-      
+      comparePassword.mockResolvedValue(false);
+
       await loginController(req, res);
 
-      expect(comparePassword).toHaveBeenCalledWith("password123", "hashedPassword");
+      expect(comparePassword).toHaveBeenCalledWith("wrongpassword", "hashedPassword");
       expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Invalid Password",
+      });
+    });
+
+    // --- Error/catch branch ---
+
+    test("should return 500 when an unexpected error occurs", async () => {
+      const req = { body: { email: "test@example.com", password: "password123" } };
+      userModel.findOne.mockRejectedValue(new Error("DB crash"));
+
+      await loginController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Error in login",
+        })
+      );
     });
   });
 
   // Foo Tzie Huang - A0262376Y
   // AI-assisted unit tests generated with guidance from GitHub Copilot (Claude Haiku 4.5)
-  // Test Coverage 1: Reset password successfully
-  // Test Coverage 2: Return 404 for wrong email or answer
-  // Test Coverage 3: Return 400 if email is missing
+  // Updated for MS2: Added tests for missing answer, missing newPassword, and verified
+  // that validation checks do NOT stop execution (known bug — missing return statements).
+  // AI Assistance: CodeMax (Claude Sonnet 4)
   describe("forgotPasswordController", () => {
     let res;
     beforeEach(() => {
+      jest.clearAllMocks();
       res = {
         status: jest.fn().mockReturnThis(),
         send: jest.fn(),
       };
     });
+
+    // --- Success path ---
 
     test("should reset password successfully", async () => {
       const req = {
@@ -631,9 +826,11 @@ describe("authController", () => {
       );
     });
 
+    // --- Wrong email or answer ---
+
     test("should return 404 for wrong email or answer", async () => {
       const req = {
-        body: { email: "wrong@example.com", answer: "Wrong", newPassword: "123" },
+        body: { email: "wrong@example.com", answer: "Wrong", newPassword: "newpass123" },
       };
       userModel.findOne.mockResolvedValue(null);
 
@@ -648,11 +845,64 @@ describe("authController", () => {
       );
     });
 
-    test("should return 400 if email is missing", async () => {
-      const req = { body: { answer: "Blue", newPassword: "123" } };
+    // --- Validation: missing fields ---
+    // Note: The forgotPasswordController has a known bug where validation checks
+    // do NOT have return statements, so execution continues after sending a 400.
+    // These tests document the actual behaviour of the controller.
+
+    test("should send 400 when email is missing", async () => {
+      const req = { body: { answer: "Blue", newPassword: "newpass123" } };
+      userModel.findOne.mockResolvedValue(null);
+
       await forgotPasswordController(req, res);
+
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.send).toHaveBeenCalledWith({ message: "Emai is required" });
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "Emai is required" })
+      );
+    });
+
+    test("should send 400 when answer is missing", async () => {
+      const req = { body: { email: "user@example.com", newPassword: "newpass123" } };
+      userModel.findOne.mockResolvedValue(null);
+
+      await forgotPasswordController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "answer is required" })
+      );
+    });
+
+    test("should send 400 when newPassword is missing", async () => {
+      const req = { body: { email: "user@example.com", answer: "Blue" } };
+      userModel.findOne.mockResolvedValue(null);
+
+      await forgotPasswordController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "New Password is required" })
+      );
+    });
+
+    // --- Error/catch branch ---
+
+    test("should return 500 when an unexpected error occurs", async () => {
+      const req = {
+        body: { email: "user@example.com", answer: "Blue", newPassword: "newpass123" },
+      };
+      userModel.findOne.mockRejectedValue(new Error("DB crash"));
+
+      await forgotPasswordController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Something went wrong",
+        })
+      );
     });
   });
 

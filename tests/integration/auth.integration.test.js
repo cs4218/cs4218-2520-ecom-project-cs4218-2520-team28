@@ -10,7 +10,7 @@ import router from "../../routes/authRoute.js";
 import userModel from "../../models/userModel.js";
 import orderModel from "../../models/orderModel.js";
 import productModel from "../../models/productModel.js";
-import { hashPassword } from "../../helpers/authHelper.js";
+import { hashPassword, comparePassword } from "../../helpers/authHelper.js";
 
 
 // Keep hashPassword mocked to focus on integration flow rather than hashing implementation.
@@ -1076,6 +1076,673 @@ describe("orderStatusController integration tests", () => {
       expect(res.status).toBe(500);
       expect(res.body.success).toBe(false);
       expect(res.body.message).toBe("Error while updating order status");
+    });
+  });
+});
+
+// Foo Tzie Huang - A0262376Y
+// AI-assisted integration tests generated with guidance from Claude (Anthropic)
+// AI Declaration:
+// Prompt used: "Write bottom-up integration tests for registerController, loginController, forgotPasswordController, and testController."
+// Prompt used: "Structure as Level 1 (Route -> Middleware -> Controller with mocked Model) and Level 2 (Route -> Middleware -> Controller -> Model -> DB with real in-memory MongoDB)."
+describe("registerController integration tests", () => {
+  // Foo Tzie Huang - A0262376Y
+
+  // --------------------------------------------------------------------------
+  // LEVEL 1 — Route -> Middleware -> Controller (mock Model/DB)
+  // --------------------------------------------------------------------------
+  describe("Level 1 - Route -> Middleware -> Controller", () => {
+    beforeEach(() => {
+      jest.restoreAllMocks();
+      jest.clearAllMocks();
+    });
+
+    test("should register a new user successfully", async () => {
+      jest.spyOn(userModel, "findOne").mockResolvedValue(null);
+
+      hashPassword.mockResolvedValue("hashedPassword");
+
+      const mockUser = {
+        _id: "newuser123",
+        name: "Test User",
+        email: "test@test.com",
+        phone: "12345678",
+        address: "Test Address",
+        password: "hashedPassword",
+        answer: "test answer",
+        role: 0,
+      };
+
+      jest.spyOn(userModel.prototype, "save").mockResolvedValue(mockUser);
+
+      const res = await request(app)
+        .post("/api/v1/auth/register")
+        .send({
+          name: "Test User",
+          email: "test@test.com",
+          password: "password123",
+          phone: "12345678",
+          address: "Test Address",
+          answer: "test answer",
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toBe("User Register Successfully");
+      expect(res.body.user).toBeDefined();
+      expect(hashPassword).toHaveBeenCalledWith("password123");
+    });
+
+    test("should return error when user already exists", async () => {
+      jest.spyOn(userModel, "findOne").mockResolvedValue({
+        _id: "existing123",
+        email: "existing@test.com",
+      });
+
+      const res = await request(app)
+        .post("/api/v1/auth/register")
+        .send({
+          name: "Existing User",
+          email: "existing@test.com",
+          password: "password123",
+          phone: "12345678",
+          address: "Test Address",
+          answer: "test answer",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Already Register please login");
+    });
+
+    test("should return error when name is missing", async () => {
+      const res = await request(app)
+        .post("/api/v1/auth/register")
+        .send({
+          email: "test@test.com",
+          password: "password123",
+          phone: "12345678",
+          address: "Test Address",
+          answer: "test answer",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.error).toBe("Name is Required");
+    });
+
+    test("should return 401 for invalid token on protected route", async () => {
+      jest.spyOn(JWT, "verify").mockImplementation(() => {
+        throw new Error("Invalid token");
+      });
+
+      const res = await request(app)
+        .get("/api/v1/auth/test")
+        .set("Authorization", "invalid-token");
+
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // LEVEL 2 — Route -> Middleware -> Controller -> Model -> DB
+  // --------------------------------------------------------------------------
+  describe("Level 2 - Route -> Middleware -> Controller -> Model -> DB", () => {
+    beforeEach(async () => {
+      jest.restoreAllMocks();
+      jest.clearAllMocks();
+      await clearDatabase();
+
+      hashPassword.mockResolvedValue("hashedPassword");
+    });
+
+    test("should register user and persist in DB", async () => {
+      const res = await request(app)
+        .post("/api/v1/auth/register")
+        .send({
+          name: "New DB User",
+          email: "newdbuser@test.com",
+          password: "password123",
+          phone: "12345678",
+          address: "DB Address",
+          answer: "db answer",
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toBe("User Register Successfully");
+
+      const savedUser = await userModel.findOne({ email: "newdbuser@test.com" });
+      expect(savedUser).not.toBeNull();
+      expect(savedUser.name).toBe("New DB User");
+      expect(savedUser.email).toBe("newdbuser@test.com");
+      expect(savedUser.address).toBe("DB Address");
+      expect(savedUser.answer).toBe("db answer");
+    });
+
+    test("should prevent duplicate registration", async () => {
+      await userModel.create({
+        name: "Existing User",
+        email: "duplicate@test.com",
+        password: "hashedPassword",
+        phone: "12345678",
+        address: "Existing Address",
+        answer: "existing answer",
+        role: 0,
+      });
+
+      const res = await request(app)
+        .post("/api/v1/auth/register")
+        .send({
+          name: "Duplicate User",
+          email: "duplicate@test.com",
+          password: "password123",
+          phone: "87654321",
+          address: "New Address",
+          answer: "new answer",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Already Register please login");
+
+      const users = await userModel.find({ email: "duplicate@test.com" });
+      expect(users).toHaveLength(1);
+      expect(users[0].name).toBe("Existing User");
+    });
+
+    test("should verify hashed password is stored (not plain text)", async () => {
+      const res = await request(app)
+        .post("/api/v1/auth/register")
+        .send({
+          name: "Hash Check User",
+          email: "hashcheck@test.com",
+          password: "plainTextPassword",
+          phone: "11112222",
+          address: "Hash Address",
+          answer: "hash answer",
+        });
+
+      expect(res.status).toBe(201);
+
+      const savedUser = await userModel.findOne({ email: "hashcheck@test.com" });
+      expect(savedUser.password).toBe("hashedPassword");
+      expect(savedUser.password).not.toBe("plainTextPassword");
+      expect(hashPassword).toHaveBeenCalledWith("plainTextPassword");
+    });
+  });
+});
+
+// Foo Tzie Huang - A0262376Y
+// AI-assisted integration tests generated with guidance from Claude (Anthropic)
+// AI Declaration:
+// Prompt used: "Write bottom-up integration tests for loginController with Level 1 and Level 2."
+// Prompt used: "Include cases for successful login, missing credentials, non-existent email, and wrong password."
+describe("loginController integration tests", () => {
+  // Foo Tzie Huang - A0262376Y
+
+  // --------------------------------------------------------------------------
+  // LEVEL 1 — Route -> Middleware -> Controller (mock Model/DB)
+  // --------------------------------------------------------------------------
+  describe("Level 1 - Route -> Middleware -> Controller", () => {
+    beforeEach(() => {
+      jest.restoreAllMocks();
+      jest.clearAllMocks();
+    });
+
+    test("should login successfully with correct credentials", async () => {
+      const mockUser = {
+        _id: "user123",
+        name: "Login User",
+        email: "login@test.com",
+        password: "hashedPassword",
+        phone: "12345678",
+        address: "Login Address",
+        role: 0,
+      };
+
+      jest.spyOn(userModel, "findOne").mockResolvedValue(mockUser);
+      comparePassword.mockResolvedValue(true);
+
+      const res = await request(app)
+        .post("/api/v1/auth/login")
+        .send({
+          email: "login@test.com",
+          password: "correctPassword",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toBe("login successfully");
+      expect(res.body.token).toBeDefined();
+      expect(res.body.user).toBeDefined();
+      expect(res.body.user.email).toBe("login@test.com");
+      expect(res.body.user.name).toBe("Login User");
+      expect(comparePassword).toHaveBeenCalledWith("correctPassword", "hashedPassword");
+    });
+
+    test("should return 404 for missing email or password", async () => {
+      const res = await request(app)
+        .post("/api/v1/auth/login")
+        .send({
+          email: "",
+          password: "",
+        });
+
+      expect(res.status).toBe(404);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Invalid email or password");
+    });
+
+    test("should return 404 for non-existent email", async () => {
+      jest.spyOn(userModel, "findOne").mockResolvedValue(null);
+
+      const res = await request(app)
+        .post("/api/v1/auth/login")
+        .send({
+          email: "nonexistent@test.com",
+          password: "somePassword",
+        });
+
+      expect(res.status).toBe(404);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Email is not registerd");
+    });
+
+    test("should return 200 with success false for wrong password", async () => {
+      const mockUser = {
+        _id: "user123",
+        name: "Login User",
+        email: "login@test.com",
+        password: "hashedPassword",
+        phone: "12345678",
+        address: "Login Address",
+        role: 0,
+      };
+
+      jest.spyOn(userModel, "findOne").mockResolvedValue(mockUser);
+      comparePassword.mockResolvedValue(false);
+
+      const res = await request(app)
+        .post("/api/v1/auth/login")
+        .send({
+          email: "login@test.com",
+          password: "wrongPassword",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Invalid Password");
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // LEVEL 2 — Route -> Middleware -> Controller -> Model -> DB
+  // --------------------------------------------------------------------------
+  describe("Level 2 - Route -> Middleware -> Controller -> Model -> DB", () => {
+    beforeEach(async () => {
+      jest.restoreAllMocks();
+      jest.clearAllMocks();
+      await clearDatabase();
+
+      hashPassword.mockResolvedValue("hashedPassword");
+      comparePassword.mockResolvedValue(true);
+    });
+
+    test("should login with real user in DB", async () => {
+      await userModel.create({
+        name: "DB Login User",
+        email: "dblogin@test.com",
+        password: "hashedPassword",
+        phone: "12345678",
+        address: "DB Login Address",
+        answer: "db answer",
+        role: 0,
+      });
+
+      const res = await request(app)
+        .post("/api/v1/auth/login")
+        .send({
+          email: "dblogin@test.com",
+          password: "correctPassword",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toBe("login successfully");
+      expect(res.body.user).toBeDefined();
+      expect(res.body.token).toBeDefined();
+    });
+
+    test("should return user object with correct fields (no password)", async () => {
+      await userModel.create({
+        name: "Fields User",
+        email: "fields@test.com",
+        password: "hashedPassword",
+        phone: "99887766",
+        address: "Fields Address",
+        answer: "fields answer",
+        role: 0,
+      });
+
+      const res = await request(app)
+        .post("/api/v1/auth/login")
+        .send({
+          email: "fields@test.com",
+          password: "correctPassword",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.user._id).toBeDefined();
+      expect(res.body.user.name).toBe("Fields User");
+      expect(res.body.user.email).toBe("fields@test.com");
+      expect(res.body.user.phone).toBe(99887766);
+      expect(res.body.user.address).toBe("Fields Address");
+      expect(res.body.user.role).toBe(0);
+      expect(res.body.user.password).toBeUndefined();
+    });
+
+    test("should return JWT token on successful login", async () => {
+      const createdUser = await userModel.create({
+        name: "Token User",
+        email: "token@test.com",
+        password: "hashedPassword",
+        phone: "55566677",
+        address: "Token Address",
+        answer: "token answer",
+        role: 0,
+      });
+
+      const res = await request(app)
+        .post("/api/v1/auth/login")
+        .send({
+          email: "token@test.com",
+          password: "correctPassword",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.token).toBeDefined();
+
+      const decoded = JWT.verify(res.body.token, process.env.JWT_SECRET);
+      expect(decoded._id).toBe(createdUser._id.toString());
+    });
+  });
+});
+
+// Foo Tzie Huang - A0262376Y
+// AI-assisted integration tests generated with guidance from Claude (Anthropic)
+// AI Declaration:
+// Prompt used: "Write bottom-up integration tests for forgotPasswordController with Level 1 and Level 2."
+// Prompt used: "Include cases for successful password reset, wrong email/answer, missing email, and DB persistence verification."
+describe("forgotPasswordController integration tests", () => {
+  // Foo Tzie Huang - A0262376Y
+
+  // --------------------------------------------------------------------------
+  // LEVEL 1 — Route -> Middleware -> Controller (mock Model/DB)
+  // --------------------------------------------------------------------------
+  describe("Level 1 - Route -> Middleware -> Controller", () => {
+    beforeEach(() => {
+      jest.restoreAllMocks();
+      jest.clearAllMocks();
+    });
+
+    test("should reset password successfully", async () => {
+      const mockUser = {
+        _id: "user123",
+        email: "forgot@test.com",
+        answer: "secret answer",
+      };
+
+      jest.spyOn(userModel, "findOne").mockResolvedValue(mockUser);
+      hashPassword.mockResolvedValue("newHashedPassword");
+      jest.spyOn(userModel, "findByIdAndUpdate").mockResolvedValue({});
+
+      const res = await request(app)
+        .post("/api/v1/auth/forgot-password")
+        .send({
+          email: "forgot@test.com",
+          answer: "secret answer",
+          newPassword: "newPassword123",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toBe("Password Reset Successfully");
+      expect(hashPassword).toHaveBeenCalledWith("newPassword123");
+      expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith("user123", {
+        password: "newHashedPassword",
+      });
+    });
+
+    test("should return 404 for wrong email or answer", async () => {
+      jest.spyOn(userModel, "findOne").mockResolvedValue(null);
+
+      const res = await request(app)
+        .post("/api/v1/auth/forgot-password")
+        .send({
+          email: "wrong@test.com",
+          answer: "wrong answer",
+          newPassword: "newPassword123",
+        });
+
+      expect(res.status).toBe(404);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Wrong Email Or Answer");
+    });
+
+    test("should return 500 when an unexpected error occurs", async () => {
+      jest.spyOn(userModel, "findOne").mockRejectedValue(new Error("DB failure"));
+
+      const res = await request(app)
+        .post("/api/v1/auth/forgot-password")
+        .send({
+          email: "error@test.com",
+          answer: "some answer",
+          newPassword: "newPassword123",
+        });
+
+      expect(res.status).toBe(500);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Something went wrong");
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // LEVEL 2 — Route -> Middleware -> Controller -> Model -> DB
+  // --------------------------------------------------------------------------
+  describe("Level 2 - Route -> Middleware -> Controller -> Model -> DB", () => {
+    beforeEach(async () => {
+      jest.restoreAllMocks();
+      jest.clearAllMocks();
+      await clearDatabase();
+
+      hashPassword.mockResolvedValue("hashedPassword");
+    });
+
+    test("should reset password and persist new hashed password in DB", async () => {
+      await userModel.create({
+        name: "Forgot User",
+        email: "forgotdb@test.com",
+        password: "oldHashedPassword",
+        phone: "12345678",
+        address: "Forgot Address",
+        answer: "my secret",
+        role: 0,
+      });
+
+      hashPassword.mockResolvedValue("newHashedPassword");
+
+      const res = await request(app)
+        .post("/api/v1/auth/forgot-password")
+        .send({
+          email: "forgotdb@test.com",
+          answer: "my secret",
+          newPassword: "brandNewPassword",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toBe("Password Reset Successfully");
+
+      const updatedUser = await userModel.findOne({ email: "forgotdb@test.com" });
+      expect(updatedUser.password).toBe("newHashedPassword");
+      expect(hashPassword).toHaveBeenCalledWith("brandNewPassword");
+    });
+
+    test("should verify old password is replaced", async () => {
+      await userModel.create({
+        name: "Replace PW User",
+        email: "replacepw@test.com",
+        password: "originalHashedPW",
+        phone: "99998888",
+        address: "Replace Address",
+        answer: "replace answer",
+        role: 0,
+      });
+
+      hashPassword.mockResolvedValue("replacementHashedPW");
+
+      const res = await request(app)
+        .post("/api/v1/auth/forgot-password")
+        .send({
+          email: "replacepw@test.com",
+          answer: "replace answer",
+          newPassword: "replacementPassword",
+        });
+
+      expect(res.status).toBe(200);
+
+      const updatedUser = await userModel.findOne({ email: "replacepw@test.com" });
+      expect(updatedUser.password).not.toBe("originalHashedPW");
+      expect(updatedUser.password).toBe("replacementHashedPW");
+    });
+  });
+});
+
+// Foo Tzie Huang - A0262376Y
+// AI-assisted integration tests generated with guidance from Claude (Anthropic)
+// AI Declaration:
+// Prompt used: "Write bottom-up integration tests for testController (GET /api/v1/auth/test) with requireSignIn and isAdmin middleware."
+// Prompt used: "Include Level 1 (mocked JWT and model) and Level 2 (real DB and JWT) tests for admin access, non-admin rejection, and missing token."
+describe("testController integration tests", () => {
+  // Foo Tzie Huang - A0262376Y
+
+  // --------------------------------------------------------------------------
+  // LEVEL 1 — Route -> Middleware -> Controller (mock Model/DB)
+  // --------------------------------------------------------------------------
+  describe("Level 1 - Route -> Middleware -> Controller", () => {
+    beforeEach(() => {
+      jest.restoreAllMocks();
+      jest.clearAllMocks();
+    });
+
+    test("should return 'Protected Routes' for admin user", async () => {
+      jest.spyOn(JWT, "verify").mockReturnValue({ _id: "admin123" });
+
+      jest.spyOn(userModel, "findById").mockResolvedValue({
+        _id: "admin123",
+        name: "Admin User",
+        email: "admin@test.com",
+        password: "hashedpw",
+        phone: "99999999",
+        address: "Admin Address",
+        answer: "admin answer",
+        role: 1,
+      });
+
+      const res = await request(app)
+        .get("/api/v1/auth/test")
+        .set("Authorization", "valid-admin-token");
+
+      expect(res.status).toBe(200);
+      expect(res.text).toBe("Protected Routes");
+    });
+
+    test("should return 403 for non-admin user", async () => {
+      jest.spyOn(JWT, "verify").mockReturnValue({ _id: "user123" });
+
+      jest.spyOn(userModel, "findById").mockResolvedValue({
+        _id: "user123",
+        name: "Normal User",
+        email: "user@test.com",
+        password: "hashedpw",
+        phone: "88888888",
+        address: "User Address",
+        answer: "user answer",
+        role: 0,
+      });
+
+      const res = await request(app)
+        .get("/api/v1/auth/test")
+        .set("Authorization", "valid-user-token");
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Unauthorized Access");
+    });
+
+    test("should return 401 for missing token", async () => {
+      const res = await request(app).get("/api/v1/auth/test");
+
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Unauthorized: Invalid or missing token");
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // LEVEL 2 — Route -> Middleware -> Controller -> Model -> DB
+  // --------------------------------------------------------------------------
+  describe("Level 2 - Route -> Middleware -> Controller -> Model -> DB", () => {
+    beforeEach(async () => {
+      jest.restoreAllMocks();
+      jest.clearAllMocks();
+      await clearDatabase();
+    });
+
+    test("should allow admin to access protected route", async () => {
+      const adminUser = await userModel.create({
+        name: "Admin DB User",
+        email: "admindb@test.com",
+        password: "hashedAdminPW",
+        phone: "99999999",
+        address: "Admin DB Address",
+        answer: "admin db answer",
+        role: 1,
+      });
+
+      const adminToken = JWT.sign({ _id: adminUser._id }, process.env.JWT_SECRET);
+
+      const res = await request(app)
+        .get("/api/v1/auth/test")
+        .set("Authorization", adminToken);
+
+      expect(res.status).toBe(200);
+      expect(res.text).toBe("Protected Routes");
+    });
+
+    test("should reject non-admin from accessing protected route", async () => {
+      const normalUser = await userModel.create({
+        name: "Normal DB User",
+        email: "normaldb@test.com",
+        password: "hashedNormalPW",
+        phone: "88888888",
+        address: "Normal DB Address",
+        answer: "normal db answer",
+        role: 0,
+      });
+
+      const userToken = JWT.sign({ _id: normalUser._id }, process.env.JWT_SECRET);
+
+      const res = await request(app)
+        .get("/api/v1/auth/test")
+        .set("Authorization", userToken);
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toBe("Unauthorized Access");
     });
   });
 });
