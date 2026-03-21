@@ -3,12 +3,19 @@ import Layout from "./../components/Layout";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/ProductDetailsStyles.css";
+// Jian Tao, A0273320R
+// Fix applied for MS2 UI testing: imported cart context and toast so ProductDetails can add items to cart
+import { useCart } from "../context/cart";
+import toast from "react-hot-toast";
 
 const ProductDetails = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState({});
   const [relatedProducts, setRelatedProducts] = useState([]);
+  // Jian Tao, A0273320R
+  // Fix applied for MS2 UI testing: added cart state from context so the selected product can be appended to cart
+  const [cart, setCart] = useCart();
 
   //initalp details
   useEffect(() => {
@@ -68,7 +75,19 @@ const ProductDetails = () => {
             })}
           </h6>
           <h6>Category : {product?.category?.name}</h6>
-          <button className="btn btn-secondary ms-1">ADD TO CART</button>
+          <button 
+            class="btn btn-secondary ms-1"
+            // Jian Tao, A0273320R
+            // Fix applied for MS2 UI testing: implemented Add to Cart on ProductDetails page.
+            // Previously the button had no working handler, so products could not be added from this page.
+            // This update appends the current product into cart state and shows a success toast.
+            onClick={() => {
+              setCart([...cart, product]);
+              toast.success("Item Added to cart");
+            }}
+            >
+              ADD TO CART
+          </button>
         </div>
       </div>
       <hr />

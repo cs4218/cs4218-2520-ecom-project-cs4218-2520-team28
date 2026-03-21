@@ -83,7 +83,15 @@ const AdminOrders = () => {
                         <Select
                           bordered={false}
                           onChange={(value) => handleChange(o._id, value)}
-                          defaultValue={o?.status}
+                          // Jian Tao, A0273320R
+                          // Fixed applied in MS2:
+                          // - Changed Select from defaultValue={o?.status} to value={o?.status}.
+                          // - This was a bug because defaultValue only sets the initial displayed status once.
+                          // - After the admin updates an order status and the page refetches fresh order data,
+                          //   the dropdown could still show the old status, causing stale UI.
+                          // - Using value makes the Select controlled, so the displayed status always stays
+                          //   consistent with the latest orders state after re-render.
+                          value={o?.status}
                         >
                           {status.map((s, i) => (
                             <Option key={i} value={s}>
@@ -93,9 +101,9 @@ const AdminOrders = () => {
                         </Select>
                       </td>
                       <td>{o?.buyer?.name}</td>
-                      // fixed here:
+                      {/* // fixed here:
                       // - Corrected timestamp field from "createAt" to "createdAt" to match Mongoose timestamps
-                      //   and prevent "Invalid date" rendering in the UI.
+                      //   and prevent "Invalid date" rendering in the UI. */}
                       <td>{moment(o?.createdAt).fromNow()}</td>
                       <td>{o?.payment.success ? "Success" : "Failed"}</td>
                       <td>{o?.products?.length}</td>

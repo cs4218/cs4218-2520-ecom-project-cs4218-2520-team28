@@ -27,6 +27,12 @@ import app from "../../app.js";
 import userModel from "../../models/userModel.js";
 import productModel from "../../models/productModel.js";
 import categoryModel from "../../models/categoryModel.js";
+import {
+  productListController,
+  searchProductController,
+  relatedProductController,
+  productCategoryController,
+} from "../../controllers/productController.js";
 
 // Foo Chao, A0272024R
 // AI Assistance: Github Copilot (Claude Sonnet 4.6)
@@ -2376,6 +2382,689 @@ describe("productFiltersController integration tests", () => {
       expect(res.body).toMatchObject({
         success: false,
         message: "Price filter values cannot be negative",
+      });
+    });
+  });
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+// Jian Tao, A0273320R
+
+// import categoryModel from "../../models/categoryModel.js";
+
+
+
+
+const publicProductRouter = express.Router();
+const publicProductApp = express();
+
+publicProductApp.use(express.json());
+
+publicProductRouter.get("/product-list/:page", productListController);
+publicProductRouter.get("/search/:keyword", searchProductController);
+publicProductRouter.get("/related-product/:pid/:cid", relatedProductController);
+publicProductRouter.get("/product-category/:slug", productCategoryController);
+
+publicProductApp.use("/api/v1/product", publicProductRouter);
+const clearDatabase = async () => {
+  await productModel.deleteMany({});
+  await categoryModel.deleteMany({});
+};
+
+const seedCategory = async (name, slug) => {
+  return await categoryModel.create({ name, slug });
+};
+
+const seedProduct1 = async ({
+  name,
+  slug,
+  description,
+  price,
+  category,
+  quantity = 10,
+  shipping = true,
+  withPhoto = false,
+}) => {
+  return await productModel.create({
+    name,
+    slug,
+    description,
+    price,
+    category,
+    quantity,
+    shipping,
+    ...(withPhoto
+      ? {
+          photo: {
+            data: Buffer.from("fake-image-data"),
+            contentType: "image/png",
+          },
+        }
+      : {}),
+  });
+};
+describe("public product query controller integration tests", () => {
+  beforeAll(async () => {
+    if (mongoose.connection.readyState === 0) {
+      await dbHelper.connect();
+    }
+  });
+
+  afterAll(async () => {
+    if (mongoose.connection.readyState !== 0) {
+      await dbHelper.closeDB();
+    }
+  });
+  // Jian Tao, A0273320R
+  // AI Assistance: ChatGPT
+  // Prompt used: Asked for guidance on designing integration tests for the paginated product listing feature,
+  // with a top-down structure separating route/controller behavior from database-backed behavior.
+  // Prompt used: Requested suggestions for suitable test cases covering pagination, response structure,
+  // exclusion of photo data, and error-handling paths.
+  // Prompt used: Sought help reviewing the mocked query chain and the database-seeded test setup
+  // to ensure the tests reflected the intended controller behavior.
+  describe("productListController integration tests", () => {
+    /**
+     * Top-down integration approach:
+     *
+     * Level 1:
+     * Route -> Controller
+     * Model chain is mocked to isolate route/controller behaviour.
+     *
+     * Level 2:
+     * Route -> Controller -> Model -> DB
+     * Uses real Mongoose model and in-memory MongoDB to verify
+     * pagination, select, and returned response structure.
+     */
+
+    // --------------------------------------------------------------------------
+    // LEVEL 1 — Route -> Controller
+    // --------------------------------------------------------------------------
+    describe("Level 1 - Route -> Controller", () => {
+      beforeEach(() => {
+        jest.restoreAllMocks();
+        jest.clearAllMocks();
+      });
+
+      test("should return paginated products successfully", async () => {
+        const mockProducts = [
+          { _id: "p1", name: "Product 1", price: 100 },
+          { _id: "p2", name: "Product 2", price: 200 },
+        ];
+
+        const sortMock = jest.fn().mockResolvedValue(mockProducts);
+        const limitMock = jest.fn().mockReturnValue({ sort: sortMock });
+        const skipMock = jest.fn().mockReturnValue({ limit: limitMock });
+        const selectMock = jest.fn().mockReturnValue({ skip: skipMock });
+
+        jest.spyOn(productModel, "find").mockReturnValue({
+          select: selectMock,
+        });
+
+        const res = await request(publicProductApp).get("/api/v1/product/product-list/2");
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.products).toEqual(mockProducts);
+
+        expect(productModel.find).toHaveBeenCalledWith({});
+        expect(selectMock).toHaveBeenCalledWith("-photo");
+        expect(skipMock).toHaveBeenCalledWith(6);
+        expect(limitMock).toHaveBeenCalledWith(6);
+        expect(sortMock).toHaveBeenCalledWith({ createdAt: -1 });
+      });
+
+      test("should return 400 when product listing fails", async () => {
+        jest.spyOn(productModel, "find").mockImplementation(() => {
+          throw new Error("DB failed");
+        });
+
+        const res = await request(publicProductApp).get("/api/v1/product/product-list/1");
+
+        expect(res.status).toBe(400);
+        expect(res.body.success).toBe(false);
+        expect(res.body.message).toBe("error in per page ctrl");
+      });
+    });
+
+    // --------------------------------------------------------------------------
+    // LEVEL 2 — Route -> Controller -> Model -> DB
+    // --------------------------------------------------------------------------
+    describe("Level 2 - Route -> Controller -> Model -> DB", () => {
+      let category;
+
+      beforeEach(async () => {
+        jest.restoreAllMocks();
+        jest.clearAllMocks();
+        await clearDatabase();
+
+        category = await seedCategory("Electronics", "electronics");
+
+        for (let i = 1; i <= 8; i++) {
+          await seedProduct1({
+            name: `Product ${i}`,
+            slug: `product-${i}`,
+            description: `Description ${i}`,
+            price: i * 100,
+            category: category._id,
+            withPhoto: i === 1,
+          });
+          await new Promise((resolve) => setTimeout(resolve, 2));
+        }
+      });
+
+      test("should return first 6 products for page 1", async () => {
+        const res = await request(publicProductApp).get("/api/v1/product/product-list/1");
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(Array.isArray(res.body.products)).toBe(true);
+        expect(res.body.products).toHaveLength(6);
+
+        for (const product of res.body.products) {
+          expect(product.photo).toBeUndefined();
+        }
+      });
+
+      test("should return remaining products for page 2", async () => {
+        const res = await request(publicProductApp).get("/api/v1/product/product-list/2");
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.products).toHaveLength(2);
+
+        for (const product of res.body.products) {
+          expect(product.photo).toBeUndefined();
+        }
+      });
+    });
+  });
+
+  // Jian Tao, A0273320R
+  // AI Assistance: ChatGPT
+  // Prompt used: Asked for guidance on structuring integration tests for the product search feature,
+  // using a staged top-down approach from route/controller behavior to database-backed behavior.
+  // Prompt used: Requested suggestions for meaningful test scenarios involving keyword matching,
+  // case-insensitive search, selective field return, and failure handling.
+  // Prompt used: Sought feedback on the suitability of the seeded test data and mocked query behavior
+  // for validating search across product name and description fields.
+  describe("searchProductController integration tests", () => {
+    /**
+     * Top-down integration approach:
+     *
+     * Level 1:
+     * Route -> Controller
+     * Model chain is mocked to isolate route/controller behaviour.
+     *
+     * Level 2:
+     * Route -> Controller -> Model -> DB
+     * Uses real Mongoose model and in-memory MongoDB to verify
+     * keyword search on name/description and select("-photo").
+     */
+
+    // --------------------------------------------------------------------------
+    // LEVEL 1 — Route -> Controller
+    // --------------------------------------------------------------------------
+    describe("Level 1 - Route -> Controller", () => {
+      beforeEach(() => {
+        jest.restoreAllMocks();
+        jest.clearAllMocks();
+      });
+
+      test("should search products successfully by keyword", async () => {
+        const mockResults = [
+          { _id: "p1", name: "Phone", description: "A smartphone" },
+        ];
+
+        const selectMock = jest.fn().mockResolvedValue(mockResults);
+
+        jest.spyOn(productModel, "find").mockReturnValue({
+          select: selectMock,
+        });
+
+        const res = await request(publicProductApp).get("/api/v1/product/search/phone");
+
+        expect(res.status).toBe(200);
+        expect(res.body).toEqual(mockResults);
+
+        expect(productModel.find).toHaveBeenCalledWith({
+          $or: [
+            { name: { $regex: "phone", $options: "i" } },
+            { description: { $regex: "phone", $options: "i" } },
+          ],
+        });
+        expect(selectMock).toHaveBeenCalledWith("-photo");
+      });
+
+      test("should return 400 when product search fails", async () => {
+        jest.spyOn(productModel, "find").mockImplementation(() => {
+          throw new Error("Search failed");
+        });
+
+        const res = await request(publicProductApp).get("/api/v1/product/search/phone");
+
+        expect(res.status).toBe(400);
+        expect(res.body.success).toBe(false);
+        expect(res.body.message).toBe("Error In Search Product API");
+      });
+    });
+
+    // --------------------------------------------------------------------------
+    // LEVEL 2 — Route -> Controller -> Model -> DB
+    // --------------------------------------------------------------------------
+    describe("Level 2 - Route -> Controller -> Model -> DB", () => {
+      let category;
+
+      beforeEach(async () => {
+        jest.restoreAllMocks();
+        jest.clearAllMocks();
+        await clearDatabase();
+
+        category = await seedCategory("Electronics", "electronics");
+
+        await seedProduct1({
+          name: "iPhone",
+          slug: "iphone",
+          description: "Premium smartphone",
+          price: 1500,
+          category: category._id,
+          withPhoto: true,
+        });
+
+        await seedProduct1({
+          name: "Laptop",
+          slug: "laptop",
+          description: "Phone companion device",
+          price: 2500,
+          category: category._id,
+        });
+
+        await seedProduct1({
+          name: "Desk",
+          slug: "desk",
+          description: "Wooden furniture",
+          price: 300,
+          category: category._id,
+        });
+      });
+
+      test("should return matching products by keyword from name or description", async () => {
+        const res = await request(publicProductApp).get("/api/v1/product/search/phone");
+
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body).toHaveLength(2);
+
+        const names = res.body.map((p) => p.name);
+        expect(names).toContain("iPhone");
+        expect(names).toContain("Laptop");
+        expect(names).not.toContain("Desk");
+
+        for (const product of res.body) {
+          expect(product.photo).toBeUndefined();
+        }
+      });
+
+      test("should perform case-insensitive search", async () => {
+        const res = await request(publicProductApp).get("/api/v1/product/search/PHONE");
+
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveLength(2);
+      });
+    });
+  });
+
+  // Jian Tao, A0273320R
+  // AI Assistance: ChatGPT
+  // Prompt used: Asked for help planning integration tests for the related products feature,
+  // with emphasis on progressively testing controller flow first and then model/database interaction.
+  // Prompt used: Requested suggestions for test coverage involving category-based filtering,
+  // exclusion of the current product, result limiting, populated category data, and empty-result cases.
+  // Prompt used: Sought review of the mock chain and seeded dataset
+  // to check that the tests accurately reflected the intended related-product behavior.
+  describe("relatedProductController integration tests", () => {
+    /**
+     * Top-down integration approach:
+     *
+     * Level 1:
+     * Route -> Controller
+     * Model chain is mocked to isolate route/controller behaviour.
+     *
+     * Level 2:
+     * Route -> Controller -> Model -> DB
+     * Uses real Mongoose model and in-memory MongoDB to verify
+     * related product filtering by category, exclusion of current product,
+     * limit(3), and category population.
+     */
+
+    // --------------------------------------------------------------------------
+    // LEVEL 1 — Route -> Controller
+    // --------------------------------------------------------------------------
+    describe("Level 1 - Route -> Controller", () => {
+      beforeEach(() => {
+        jest.restoreAllMocks();
+        jest.clearAllMocks();
+      });
+
+      test("should get related products successfully", async () => {
+        const mockProducts = [
+          {
+            _id: "p2",
+            name: "Related Product",
+            category: { _id: "c1", name: "Electronics" },
+          },
+        ];
+
+        const populateMock = jest.fn().mockResolvedValue(mockProducts);
+        const limitMock = jest.fn().mockReturnValue({ populate: populateMock });
+        const selectMock = jest.fn().mockReturnValue({ limit: limitMock });
+
+        jest.spyOn(productModel, "find").mockReturnValue({
+          select: selectMock,
+        });
+
+        const res = await request(publicProductApp).get(
+          "/api/v1/product/related-product/p1/c1"
+        );
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.products).toEqual(mockProducts);
+
+        expect(productModel.find).toHaveBeenCalledWith({
+          category: "c1",
+          _id: { $ne: "p1" },
+        });
+        expect(selectMock).toHaveBeenCalledWith("-photo");
+        expect(limitMock).toHaveBeenCalledWith(3);
+        expect(populateMock).toHaveBeenCalledWith("category");
+      });
+
+      test("should return 400 when related product lookup fails", async () => {
+        jest.spyOn(productModel, "find").mockImplementation(() => {
+          throw new Error("DB failed");
+        });
+
+        const res = await request(publicProductApp).get(
+          "/api/v1/product/related-product/p1/c1"
+        );
+
+        expect(res.status).toBe(400);
+        expect(res.body.success).toBe(false);
+        expect(res.body.message).toBe("error while getting related product");
+      });
+    });
+
+    // --------------------------------------------------------------------------
+    // LEVEL 2 — Route -> Controller -> Model -> DB
+    // --------------------------------------------------------------------------
+    describe("Level 2 - Route -> Controller -> Model -> DB", () => {
+      let category1;
+      let category2;
+      let baseProduct;
+
+      beforeEach(async () => {
+        jest.restoreAllMocks();
+        jest.clearAllMocks();
+        await clearDatabase();
+
+        category1 = await seedCategory("Electronics", "electronics");
+        category2 = await seedCategory("Furniture", "furniture");
+
+        baseProduct = await seedProduct1({
+          name: "Base Phone",
+          slug: "base-phone",
+          description: "Main product",
+          price: 1000,
+          category: category1._id,
+          withPhoto: true,
+        });
+
+        await seedProduct1({
+          name: "Related 1",
+          slug: "related-1",
+          description: "Same category",
+          price: 1100,
+          category: category1._id,
+        });
+
+        await seedProduct1({
+          name: "Related 2",
+          slug: "related-2",
+          description: "Same category",
+          price: 1200,
+          category: category1._id,
+        });
+
+        await seedProduct1({
+          name: "Related 3",
+          slug: "related-3",
+          description: "Same category",
+          price: 1300,
+          category: category1._id,
+        });
+
+        await seedProduct1({
+          name: "Other Category Product",
+          slug: "other-category-product",
+          description: "Different category",
+          price: 1400,
+          category: category2._id,
+        });
+      });
+
+      test("should return only related products from same category excluding current product", async () => {
+        const res = await request(publicProductApp).get(
+          `/api/v1/product/related-product/${baseProduct._id}/${category1._id}`
+        );
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.products).toHaveLength(3);
+
+        const names = res.body.products.map((p) => p.name);
+        expect(names).toContain("Related 1");
+        expect(names).toContain("Related 2");
+        expect(names).toContain("Related 3");
+        expect(names).not.toContain("Base Phone");
+        expect(names).not.toContain("Other Category Product");
+
+        for (const product of res.body.products) {
+          expect(product.category._id.toString()).toBe(category1._id.toString());
+          expect(product.photo).toBeUndefined();
+        }
+      });
+
+      test("should return empty array when no related products exist", async () => {
+        const soloCategory = await seedCategory("Books", "books");
+        const soloProduct = await seedProduct1({
+          name: "Solo Product",
+          slug: "solo-product",
+          description: "Only one in category",
+          price: 50,
+          category: soloCategory._id,
+        });
+
+        const res = await request(publicProductApp).get(
+          `/api/v1/product/related-product/${soloProduct._id}/${soloCategory._id}`
+        );
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.products).toEqual([]);
+      });
+    });
+  });
+
+  // Jian Tao, A0273320R
+  // AI Assistance: ChatGPT
+  // Prompt used: Asked for guidance on designing integration tests for category-based product retrieval,
+  // following the same staged test organization used in earlier controller tests.
+  // Prompt used: Requested suggestions for suitable scenarios covering category lookup by slug,
+  // retrieval of products within the category, populated category data, unknown-category behavior,
+  // and controller error handling.
+  // Prompt used: Sought feedback on whether the mocked model behavior and seeded database setup
+  // were appropriate for validating the controller’s expected responses.
+  describe("productCategoryController integration tests", () => {
+    /**
+     * Top-down integration approach:
+     *
+     * Level 1:
+     * Route -> Controller
+     * Model chain is mocked to isolate route/controller behaviour.
+     *
+     * Level 2:
+     * Route -> Controller -> Model -> DB
+     * Uses real Mongoose models and in-memory MongoDB to verify
+     * category lookup, category-based product retrieval, and population.
+     */
+
+    // --------------------------------------------------------------------------
+    // LEVEL 1 — Route -> Controller
+    // --------------------------------------------------------------------------
+    describe("Level 1 - Route -> Controller", () => {
+      beforeEach(() => {
+        jest.restoreAllMocks();
+        jest.clearAllMocks();
+      });
+
+      test("should get products by category successfully", async () => {
+        const mockCategory = {
+          _id: "c1",
+          name: "Electronics",
+          slug: "electronics",
+        };
+
+        const mockProducts = [
+          {
+            _id: "p1",
+            name: "Phone",
+            category: mockCategory,
+          },
+        ];
+
+        const populateMock = jest.fn().mockResolvedValue(mockProducts);
+
+        jest.spyOn(categoryModel, "findOne").mockResolvedValue(mockCategory);
+        jest.spyOn(productModel, "find").mockReturnValue({
+          populate: populateMock,
+        });
+
+        const res = await request(publicProductApp).get(
+          "/api/v1/product/product-category/electronics"
+        );
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.category).toEqual(mockCategory);
+        expect(res.body.products).toEqual(mockProducts);
+
+        expect(categoryModel.findOne).toHaveBeenCalledWith({
+          slug: "electronics",
+        });
+        expect(productModel.find).toHaveBeenCalledWith({
+          category: mockCategory,
+        });
+        expect(populateMock).toHaveBeenCalledWith("category");
+      });
+
+      test("should return 400 when category lookup fails", async () => {
+        jest.spyOn(categoryModel, "findOne").mockRejectedValue(
+          new Error("Category lookup failed")
+        );
+
+        const res = await request(publicProductApp).get(
+          "/api/v1/product/product-category/electronics"
+        );
+
+        expect(res.status).toBe(400);
+        expect(res.body.success).toBe(false);
+        expect(res.body.message).toBe("Error While Getting products");
+      });
+    });
+
+    // --------------------------------------------------------------------------
+    // LEVEL 2 — Route -> Controller -> Model -> DB
+    // --------------------------------------------------------------------------
+    describe("Level 2 - Route -> Controller -> Model -> DB", () => {
+      let electronics;
+      let furniture;
+
+      beforeEach(async () => {
+        jest.restoreAllMocks();
+        jest.clearAllMocks();
+        await clearDatabase();
+
+        electronics = await seedCategory("Electronics", "electronics");
+        furniture = await seedCategory("Furniture", "furniture");
+
+        await seedProduct1({
+          name: "Phone",
+          slug: "phone",
+          description: "Smartphone",
+          price: 1000,
+          category: electronics._id,
+          withPhoto: true,
+        });
+
+        await seedProduct1({
+          name: "Laptop",
+          slug: "laptop",
+          description: "Portable computer",
+          price: 2000,
+          category: electronics._id,
+        });
+
+        await seedProduct1({
+          name: "Chair",
+          slug: "chair",
+          description: "Office chair",
+          price: 300,
+          category: furniture._id,
+        });
+      });
+
+      test("should return category and products under that category", async () => {
+        const res = await request(publicProductApp).get(
+          "/api/v1/product/product-category/electronics"
+        );
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.category.slug).toBe("electronics");
+        expect(res.body.products).toHaveLength(2);
+
+        const names = res.body.products.map((p) => p.name);
+        expect(names).toContain("Phone");
+        expect(names).toContain("Laptop");
+        expect(names).not.toContain("Chair");
+
+        for (const product of res.body.products) {
+          expect(product.category.slug).toBe("electronics");
+        }
+      });
+
+      test("should return null category and empty products for unknown slug", async () => {
+        const res = await request(publicProductApp).get(
+          "/api/v1/product/product-category/unknown-category"
+        );
+
+        expect(res.status).toBe(200);
+        expect(res.body.success).toBe(true);
+        expect(res.body.category).toBeNull();
+        expect(res.body.products).toEqual([]);
       });
     });
   });
