@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1774099840856" clover="3.2.0">
-  <project timestamp="1774099840857" name="All files">
+<coverage generated="1774101235281" clover="3.2.0">
+  <project timestamp="1774101235281" name="All files">
     <metrics statements="651" coveredstatements="626" conditionals="190" coveredconditionals="182" methods="177" coveredmethods="164" elements="1018" coveredelements="972" complexity="0" loc="651" ncloc="651" packages="10" files="39" classes="39"/>
     <package name="src">
       <metrics statements="4" coveredstatements="1" conditionals="2" coveredconditionals="0" methods="2" coveredmethods="1"/>
@@ -20,30 +20,30 @@
       <file name="AdminMenu.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\components\AdminMenu.js">
         <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="3" count="13" type="stmt"/>
-        <line num="4" count="98" type="stmt"/>
+        <line num="4" count="99" type="stmt"/>
       </file>
       <file name="Footer.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\components\Footer.js">
         <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="4" count="17" type="stmt"/>
-        <line num="5" count="383" type="stmt"/>
+        <line num="5" count="385" type="stmt"/>
       </file>
       <file name="Header.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\components\Header.js">
         <metrics statements="10" coveredstatements="10" conditionals="4" coveredconditionals="4" methods="3" coveredmethods="3"/>
         <line num="10" count="17" type="stmt"/>
-        <line num="11" count="479" type="stmt"/>
-        <line num="12" count="473" type="stmt"/>
-        <line num="13" count="473" type="stmt"/>
-        <line num="14" count="473" type="stmt"/>
+        <line num="11" count="481" type="stmt"/>
+        <line num="12" count="475" type="stmt"/>
+        <line num="13" count="475" type="stmt"/>
+        <line num="14" count="475" type="stmt"/>
         <line num="15" count="1" type="stmt"/>
         <line num="20" count="1" type="stmt"/>
         <line num="21" count="1" type="stmt"/>
-        <line num="23" count="473" type="stmt"/>
+        <line num="23" count="475" type="stmt"/>
         <line num="66" count="112" type="stmt"/>
       </file>
       <file name="Layout.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\components\Layout.js">
         <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="8" count="17" type="stmt"/>
-        <line num="9" count="382" type="stmt"/>
+        <line num="9" count="384" type="stmt"/>
         <line num="28" count="17" type="stmt"/>
       </file>
       <file name="Prices.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\components\Prices.js">
@@ -66,7 +66,7 @@
       <file name="UserMenu.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\components\UserMenu.js">
         <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="3" count="12" type="stmt"/>
-        <line num="4" count="33" type="stmt"/>
+        <line num="4" count="34" type="stmt"/>
       </file>
     </package>
     <package name="src.components.Form">
@@ -80,16 +80,16 @@
       <file name="SearchInput.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\components\Form\SearchInput.js">
         <metrics statements="12" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="1"/>
         <line num="5" count="13" type="stmt"/>
-        <line num="6" count="443" type="stmt"/>
-        <line num="7" count="443" type="stmt"/>
-        <line num="9" count="443" type="stmt"/>
+        <line num="6" count="445" type="stmt"/>
+        <line num="7" count="445" type="stmt"/>
+        <line num="9" count="445" type="stmt"/>
         <line num="10" count="0" type="stmt"/>
         <line num="11" count="0" type="stmt"/>
         <line num="12" count="0" type="stmt"/>
         <line num="15" count="0" type="stmt"/>
         <line num="16" count="0" type="stmt"/>
         <line num="18" count="0" type="stmt"/>
-        <line num="21" count="443" type="stmt"/>
+        <line num="21" count="445" type="stmt"/>
         <line num="30" count="0" type="stmt"/>
       </file>
     </package>
@@ -121,9 +121,9 @@
       </file>
       <file name="Private.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\components\Routes\Private.js">
         <metrics statements="17" coveredstatements="17" conditionals="6" coveredconditionals="6" methods="3" coveredmethods="3"/>
-        <line num="11" count="59" type="stmt"/>
-        <line num="13" count="59" type="stmt"/>
-        <line num="15" count="59" type="stmt"/>
+        <line num="11" count="60" type="stmt"/>
+        <line num="13" count="60" type="stmt"/>
+        <line num="15" count="60" type="stmt"/>
         <line num="16" count="41" type="stmt"/>
         <line num="19" count="24" type="stmt"/>
         <line num="20" count="24" type="stmt"/>
@@ -137,7 +137,7 @@
         <line num="37" count="41" type="cond" truecount="2" falsecount="0"/>
         <line num="38" count="24" type="stmt"/>
         <line num="40" count="17" type="stmt"/>
-        <line num="45" count="59" type="cond" truecount="2" falsecount="0"/>
+        <line num="45" count="60" type="cond" truecount="2" falsecount="0"/>
       </file>
     </package>
     <package name="src.context">
@@ -156,7 +156,7 @@
         <line num="22" count="75" type="stmt"/>
         <line num="23" count="75" type="stmt"/>
         <line num="32" count="237" type="stmt"/>
-        <line num="40" count="1064" type="stmt"/>
+        <line num="40" count="1068" type="stmt"/>
       </file>
       <file name="cart.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\context\cart.js">
         <metrics statements="28" coveredstatements="28" conditionals="20" coveredconditionals="20" methods="5" coveredmethods="5"/>
@@ -185,9 +185,9 @@
         <line num="67" count="484" type="stmt"/>
         <line num="73" count="484" type="stmt"/>
         <line num="80" count="14" type="stmt"/>
-        <line num="81" count="665" type="stmt"/>
-        <line num="82" count="664" type="cond" truecount="2" falsecount="0"/>
-        <line num="83" count="660" type="stmt"/>
+        <line num="81" count="667" type="stmt"/>
+        <line num="82" count="666" type="cond" truecount="2" falsecount="0"/>
+        <line num="83" count="662" type="stmt"/>
       </file>
       <file name="search.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\context\search.js">
         <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
@@ -195,24 +195,24 @@
         <line num="4" count="11" type="stmt"/>
         <line num="5" count="154" type="stmt"/>
         <line num="10" count="154" type="stmt"/>
-        <line num="18" count="416" type="stmt"/>
+        <line num="18" count="418" type="stmt"/>
       </file>
     </package>
     <package name="src.hooks">
       <metrics statements="11" coveredstatements="11" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
       <file name="useCategory.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\hooks\useCategory.js">
         <metrics statements="11" coveredstatements="11" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
-        <line num="5" count="443" type="stmt"/>
-        <line num="8" count="443" type="stmt"/>
-        <line num="9" count="177" type="stmt"/>
-        <line num="10" count="177" type="stmt"/>
-        <line num="11" count="170" type="stmt"/>
+        <line num="5" count="445" type="stmt"/>
+        <line num="8" count="445" type="stmt"/>
+        <line num="9" count="178" type="stmt"/>
+        <line num="10" count="178" type="stmt"/>
+        <line num="11" count="171" type="stmt"/>
         <line num="13" count="7" type="stmt"/>
-        <line num="17" count="443" type="stmt"/>
-        <line num="18" count="174" type="stmt"/>
-        <line num="23" count="174" type="stmt"/>
-        <line num="24" count="174" type="stmt"/>
-        <line num="27" count="443" type="stmt"/>
+        <line num="17" count="445" type="stmt"/>
+        <line num="18" count="175" type="stmt"/>
+        <line num="23" count="175" type="stmt"/>
+        <line num="24" count="175" type="stmt"/>
+        <line num="27" count="445" type="stmt"/>
       </file>
     </package>
     <package name="src.pages">
@@ -662,18 +662,18 @@
         <metrics statements="71" coveredstatements="71" conditionals="15" coveredconditionals="15" methods="16" coveredmethods="16"/>
         <line num="8" count="12" type="stmt"/>
         <line num="10" count="12" type="stmt"/>
-        <line num="11" count="100" type="stmt"/>
-        <line num="12" count="99" type="stmt"/>
-        <line num="13" count="99" type="stmt"/>
-        <line num="14" count="99" type="stmt"/>
-        <line num="15" count="99" type="stmt"/>
-        <line num="16" count="99" type="stmt"/>
-        <line num="17" count="99" type="stmt"/>
-        <line num="18" count="99" type="stmt"/>
-        <line num="19" count="99" type="stmt"/>
-        <line num="20" count="99" type="stmt"/>
-        <line num="21" count="99" type="stmt"/>
-        <line num="24" count="99" type="stmt"/>
+        <line num="11" count="101" type="stmt"/>
+        <line num="12" count="100" type="stmt"/>
+        <line num="13" count="100" type="stmt"/>
+        <line num="14" count="100" type="stmt"/>
+        <line num="15" count="100" type="stmt"/>
+        <line num="16" count="100" type="stmt"/>
+        <line num="17" count="100" type="stmt"/>
+        <line num="18" count="100" type="stmt"/>
+        <line num="19" count="100" type="stmt"/>
+        <line num="20" count="100" type="stmt"/>
+        <line num="21" count="100" type="stmt"/>
+        <line num="24" count="100" type="stmt"/>
         <line num="25" count="52" type="stmt"/>
         <line num="26" count="52" type="stmt"/>
         <line num="29" count="51" type="stmt"/>
@@ -685,18 +685,18 @@
         <line num="35" count="51" type="stmt"/>
         <line num="36" count="51" type="stmt"/>
         <line num="38" count="1" type="stmt"/>
-        <line num="41" count="99" type="stmt"/>
+        <line num="41" count="100" type="stmt"/>
         <line num="42" count="52" type="stmt"/>
-        <line num="46" count="99" type="stmt"/>
+        <line num="46" count="100" type="stmt"/>
         <line num="47" count="52" type="stmt"/>
         <line num="48" count="52" type="stmt"/>
         <line num="49" count="50" type="cond" truecount="2" falsecount="0"/>
         <line num="50" count="48" type="stmt"/>
         <line num="53" count="2" type="stmt"/>
         <line num="57" count="2" type="stmt"/>
-        <line num="61" count="99" type="stmt"/>
+        <line num="61" count="100" type="stmt"/>
         <line num="62" count="52" type="stmt"/>
-        <line num="66" count="99" type="stmt"/>
+        <line num="66" count="100" type="stmt"/>
         <line num="67" count="12" type="stmt"/>
         <line num="68" count="12" type="stmt"/>
         <line num="69" count="12" type="stmt"/>
@@ -714,7 +714,7 @@
         <line num="91" count="7" type="stmt"/>
         <line num="94" count="3" type="stmt"/>
         <line num="98" count="3" type="cond" truecount="3" falsecount="0"/>
-        <line num="103" count="99" type="stmt"/>
+        <line num="103" count="100" type="stmt"/>
         <line num="104" count="6" type="stmt"/>
         <line num="109" count="3" type="stmt"/>
         <line num="110" count="3" type="stmt"/>
@@ -722,7 +722,7 @@
         <line num="112" count="2" type="stmt"/>
         <line num="114" count="1" type="stmt"/>
         <line num="115" count="1" type="stmt"/>
-        <line num="120" count="99" type="stmt"/>
+        <line num="120" count="100" type="stmt"/>
         <line num="140" count="2" type="stmt"/>
         <line num="145" count="29" type="stmt"/>
         <line num="157" count="5" type="stmt"/>
@@ -749,16 +749,16 @@
       <file name="Orders.js" path="C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\client\src\pages\user\Orders.js">
         <metrics statements="13" coveredstatements="13" conditionals="4" coveredconditionals="4" methods="5" coveredmethods="5"/>
         <line num="22" count="13" type="stmt"/>
-        <line num="23" count="19" type="stmt"/>
-        <line num="24" count="19" type="stmt"/>
-        <line num="25" count="19" type="stmt"/>
-        <line num="26" count="11" type="stmt"/>
-        <line num="27" count="11" type="stmt"/>
-        <line num="28" count="8" type="stmt"/>
+        <line num="23" count="20" type="stmt"/>
+        <line num="24" count="20" type="stmt"/>
+        <line num="25" count="20" type="stmt"/>
+        <line num="26" count="12" type="stmt"/>
+        <line num="27" count="12" type="stmt"/>
+        <line num="28" count="9" type="stmt"/>
         <line num="30" count="3" type="stmt"/>
-        <line num="34" count="19" type="stmt"/>
-        <line num="35" count="13" type="cond" truecount="2" falsecount="0"/>
-        <line num="37" count="19" type="stmt"/>
+        <line num="34" count="20" type="stmt"/>
+        <line num="35" count="14" type="cond" truecount="2" falsecount="0"/>
+        <line num="37" count="20" type="stmt"/>
         <line num="47" count="10" type="stmt"/>
         <line num="75" count="12" type="stmt"/>
       </file>

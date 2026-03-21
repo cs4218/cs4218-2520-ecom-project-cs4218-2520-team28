@@ -734,10 +734,12 @@ describe(
         await new Promise(resolve => setTimeout(resolve, 0));
       });
 
-      // UpdateProduct page should now be rendered
-      expect(
-        screen.getByRole("heading", { name: /update product/i })
-      ).toBeInTheDocument();
+      // UpdateProduct page should now be rendered.
+      // Use getByText instead of getByRole("heading") because getByRole triggers
+      // dom-accessibility-api → getComputedStyle, which processes Ant Design's
+      // injected CSS containing selectors nwsapi (jsdom) cannot parse, causing
+      // a SyntaxError crash unrelated to the feature under test.
+      expect(screen.getByText("Update Product")).toBeInTheDocument();
     }, 30000);
   }
 );
