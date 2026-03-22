@@ -6,4 +6,5 @@ node_modules
 .env
 coverage/
 playwright-report/
-.tmp/test-env.json
+.tmp/
+.scannerwork/
