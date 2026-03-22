@@ -3533,7 +3533,7 @@ describe("braintreeTokenController integration tests (MS2)", () => {
       expect(res.status).not.toBe(404);
     });
 
-    test("should return a successful response with client token from braintree sandbox", async () => {
+    (process.env.BRAINTREE_MERCHANT_ID ? test : test.skip)("should return a successful response with client token from braintree sandbox", async () => {
       const res = await request(app).get("/api/v1/product/braintree/token");
 
       // Braintree sandbox credentials are configured, so the gateway returns a token
@@ -3596,7 +3596,7 @@ describe("brainTreePaymentController integration tests (MS2)", () => {
       expect(res.body.success).toBe(false);
     });
 
-    test("should pass auth middleware with valid token and reach payment controller", async () => {
+    (process.env.BRAINTREE_MERCHANT_ID ? test : test.skip)("should pass auth middleware with valid token and reach payment controller", async () => {
       const testCategory = await categoryModel.create({
         name: "Payment Test Category",
         slug: "payment-test-cat-ms2",
