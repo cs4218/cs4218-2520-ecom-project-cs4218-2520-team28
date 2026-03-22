@@ -81,6 +81,8 @@ const ProductDetails = () => {
             // Fix applied for MS2 UI testing: implemented Add to Cart on ProductDetails page.
             // Previously the button had no working handler, so products could not be added from this page.
             // This update appends the current product into cart state and shows a success toast.
+            // Disabled until product has loaded to prevent adding an empty object to cart.
+            disabled={!product._id}
             onClick={() => {
               setCart([...cart, product]);
               toast.success("Item Added to cart");

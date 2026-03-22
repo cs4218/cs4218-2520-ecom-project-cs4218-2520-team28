@@ -828,17 +828,17 @@ describe("getSingleProductController integration tests", () => {
       findByIdSpy.mockRestore();
     });
 
-    it("should return 400 when product ID is malformed", async () => {
+    it("should return 404 when product slug does not exist in DB", async () => {
       const req = { params: { pid: "bad-id" } };
       const res = makeRes();
 
       await getSingleProductController(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.status).toHaveBeenCalledWith(404);
       expect(res.send).toHaveBeenCalledWith(
         expect.objectContaining({
           success: false,
-          message: "Invalid product ID",
+          message: "Product not found",
         })
       );
     });
@@ -914,13 +914,13 @@ describe("getSingleProductController integration tests", () => {
   // ───────────────────────────────────────────────────────────────────────────
 
   describe("Level 3 — Full App Integration (app.js, server level)", () => {
-    it("should return 400 for malformed product ID", async () => {
+    it("should return 404 for unknown slug", async () => {
       const res = await request(app).get("/api/v1/product/get-product/not-a-valid-objectid");
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(404);
       expect(res.body).toMatchObject({
         success: false,
-        message: "Invalid product ID",
+        message: "Product not found",
       });
     });
 

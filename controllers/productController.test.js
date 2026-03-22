@@ -1726,17 +1726,22 @@ describe("getSingleProductController", () => {
     });
   });
 
-  it("should return 400 when product ID format is invalid", async () => {
+  it("should return 404 when product slug does not exist", async () => {
     req.params.pid = "bad-id";
+
+    const mockFindOnePopulate = jest.fn().mockResolvedValue(null);
+    const mockFindOneSelect = jest.fn().mockReturnValue({ populate: mockFindOnePopulate });
+    productModel.findOne = jest.fn().mockReturnValue({ select: mockFindOneSelect });
 
     await getSingleProductController(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(productModel.findById).not.toHaveBeenCalled();
+    expect(productModel.findOne).toHaveBeenCalledWith({ slug: "bad-id" });
+    expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: "Invalid product ID",
+      message: "Product not found",
     });
-    expect(productModel.findById).not.toHaveBeenCalled();
   });
 
   it("should return 404 when valid product ID does not exist", async () => {

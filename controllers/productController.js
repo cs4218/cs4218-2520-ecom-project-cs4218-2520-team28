@@ -130,17 +130,19 @@ export const getSingleProductController = async (req, res) => {
   try {
     const { pid } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(pid)) {
-      return res.status(400).send({
-        success: false,
-        message: "Invalid product ID",
-      });
+    // Support both ObjectId (legacy) and slug (used by ProductDetails.js URL params)
+    let product;
+    if (mongoose.Types.ObjectId.isValid(pid)) {
+      product = await productModel
+        .findById(pid)
+        .select("-photo")
+        .populate("category");
+    } else {
+      product = await productModel
+        .findOne({ slug: pid })
+        .select("-photo")
+        .populate("category");
     }
-
-    const product = await productModel
-      .findById(pid)
-      .select("-photo")
-      .populate("category");
 
     if (!product) {
       return res.status(404).send({
