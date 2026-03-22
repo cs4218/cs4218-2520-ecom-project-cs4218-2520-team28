@@ -303,3 +303,20 @@ To begin unit testing with Jest in your project, follow these steps:
 ##### - client/src/pages/Pagenotfound.test.js
 
 ##### - config/db.test.js
+
+### Milestone 2
+
+#### Member 5: HO JIN HAN
+##### - client/src/tests/integration/About.integration.test.js
+##### - client/src/tests/integration/AdminDashboard.integration.test.js
+##### - client/src/tests/integration/Header.integration.test.js
+##### - client/src/tests/integration/Header.dropdown.integration.test.js
+##### - client/src/tests/integration/Layout.integration.test.js
+##### - client/src/tests/integration/Pagenotfound.integration.test.js
+##### - client/src/tests/integration/Profile.integration.test.js
+##### - client/src/tests/integration/Spinner.integration.test.js
+##### - tests/integration/categoryController.integration.test.js
+1. categoryController
+2. singleCategoryController
+##### - tests/ui/profile-flow.spec.ts
+Test the profile register/update/invalid flow
