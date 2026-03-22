@@ -182,29 +182,15 @@ To begin unit testing with Jest in your project, follow these steps:
 
 ###### 4. testController
 
-###### 5. updateProfileController
-
-###### 6. getOrdersController
-
-###### 7. getAllOrdersController
-
-###### 8. orderStatusController
-
 ##### - controllers/productController.js
 
 ###### 1. braintreeTokenController
 
 ###### 2. brainTreePaymentController
 
-##### - models/orderModel.js
+##### - client/src/pages/admin/Users.test.js
 
-##### - helpers/authHelper.js
-
-##### - client/src/pages/Auth/Login.js
-
-##### - client/src/pages/Auth/Register.js
-
-##### - client/src/pages/CartPage.js
+##### - client/src/pages/Search.test.js
 
 #### Member 3: HO CHI THANH
 
@@ -341,6 +327,21 @@ To begin unit testing with Jest in your project, follow these steps:
 ##### - tests/ui/editProductAndCategroy1.spec.ts (Test the edit product/category flow part 3)
 
 #### Member 2: FOO TZIE HUANG
+
+##### - tests/integration/auth.integration.test.js
+
+1. registerController
+2. loginController
+3. forgotPasswordController
+4. testController
+
+##### - tests/integration/product.integration.test.js
+
+1. searchProductController
+2. braintreeTokenController
+3. brainTreePaymentController
+
+##### - tests/ui/registerLoginSearchProduct.spec.ts (Register, Login, Admin Users, Product Selection, Search, Cart flows)
 
 #### Member 3: HO CHI THANH
 
