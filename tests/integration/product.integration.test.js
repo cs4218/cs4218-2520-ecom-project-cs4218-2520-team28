@@ -3069,3 +3069,595 @@ describe("public product query controller integration tests", () => {
     });
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// searchProductController — MS2 bottom-up integration tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Foo Tzie Huang - A0262376Y
+// AI Assistance: Claude (Anthropic)
+// Prompt used: Asked for guidance on designing bottom-up integration tests for searchProductController,
+// braintreeTokenController, and brainTreePaymentController with three levels of integration testing.
+describe("searchProductController integration tests (MS2 - bottom-up)", () => {
+  /**
+   * Bottom-up integration approach:
+   *
+   * Level 1: Controller + Model (direct invocation, real in-memory DB)
+   * Level 2: Route + Controller (HTTP via supertest on publicProductApp)
+   * Level 3: Full App (HTTP via supertest on app.js)
+   */
+
+  const makeRes = () => ({
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+    json: jest.fn(),
+  });
+
+  beforeAll(async () => {
+    await dbHelper.connect();
+  });
+
+  afterEach(async () => {
+    await productModel.deleteMany({});
+    await categoryModel.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await dbHelper.closeDB();
+  });
+
+  // --------------------------------------------------------------------------
+  // LEVEL 1 — Controller + Model Integration (no HTTP)
+  // --------------------------------------------------------------------------
+  // Foo Tzie Huang - A0262376Y
+  // AI Assistance: Claude (Anthropic)
+  describe("Level 1 — Controller + Model Integration (no HTTP)", () => {
+    let testCategory;
+
+    beforeEach(async () => {
+      testCategory = await categoryModel.create({
+        name: "Electronics",
+        slug: "electronics-ms2",
+      });
+    });
+
+    test("should match products by name", async () => {
+      await productModel.create({
+        name: "iPhone 15",
+        slug: "iphone-15-ms2",
+        description: "Latest Apple smartphone",
+        price: 999,
+        category: testCategory._id,
+        quantity: 10,
+        shipping: true,
+      });
+      await productModel.create({
+        name: "Samsung Galaxy",
+        slug: "samsung-galaxy-ms2",
+        description: "Android flagship",
+        price: 899,
+        category: testCategory._id,
+        quantity: 5,
+        shipping: true,
+      });
+
+      const req = { params: { keyword: "iPhone" } };
+      const res = makeRes();
+
+      await searchProductController(req, res);
+
+      expect(res.json).toHaveBeenCalledTimes(1);
+      const results = res.json.mock.calls[0][0];
+      expect(results).toHaveLength(1);
+      expect(results[0].name).toBe("iPhone 15");
+    });
+
+    test("should match products by description", async () => {
+      await productModel.create({
+        name: "iPhone 15",
+        slug: "iphone-15-desc-ms2",
+        description: "Latest Apple smartphone",
+        price: 999,
+        category: testCategory._id,
+        quantity: 10,
+        shipping: true,
+      });
+      await productModel.create({
+        name: "MacBook Pro",
+        slug: "macbook-pro-ms2",
+        description: "Apple laptop for professionals",
+        price: 1999,
+        category: testCategory._id,
+        quantity: 3,
+        shipping: true,
+      });
+
+      const req = { params: { keyword: "laptop" } };
+      const res = makeRes();
+
+      await searchProductController(req, res);
+
+      expect(res.json).toHaveBeenCalledTimes(1);
+      const results = res.json.mock.calls[0][0];
+      expect(results).toHaveLength(1);
+      expect(results[0].name).toBe("MacBook Pro");
+    });
+
+    test("should perform case-insensitive search", async () => {
+      await productModel.create({
+        name: "iPhone 15",
+        slug: "iphone-15-case-ms2",
+        description: "Latest Apple smartphone",
+        price: 999,
+        category: testCategory._id,
+        quantity: 10,
+        shipping: true,
+      });
+
+      const req = { params: { keyword: "IPHONE" } };
+      const res = makeRes();
+
+      await searchProductController(req, res);
+
+      expect(res.json).toHaveBeenCalledTimes(1);
+      const results = res.json.mock.calls[0][0];
+      expect(results).toHaveLength(1);
+      expect(results[0].name).toBe("iPhone 15");
+    });
+
+    test("should return empty array when no products match", async () => {
+      await productModel.create({
+        name: "iPhone 15",
+        slug: "iphone-15-empty-ms2",
+        description: "Latest Apple smartphone",
+        price: 999,
+        category: testCategory._id,
+        quantity: 10,
+        shipping: true,
+      });
+
+      const req = { params: { keyword: "NonExistentProduct" } };
+      const res = makeRes();
+
+      await searchProductController(req, res);
+
+      expect(res.json).toHaveBeenCalledTimes(1);
+      const results = res.json.mock.calls[0][0];
+      expect(results).toHaveLength(0);
+    });
+
+    test("should exclude photo field from results", async () => {
+      await productModel.create({
+        name: "iPhone 15",
+        slug: "iphone-15-photo-ms2",
+        description: "Latest Apple smartphone",
+        price: 999,
+        category: testCategory._id,
+        quantity: 10,
+        shipping: true,
+        photo: {
+          data: Buffer.from("fake-photo-data"),
+          contentType: "image/png",
+        },
+      });
+
+      const req = { params: { keyword: "iPhone" } };
+      const res = makeRes();
+
+      await searchProductController(req, res);
+
+      expect(res.json).toHaveBeenCalledTimes(1);
+      const results = res.json.mock.calls[0][0];
+      expect(results).toHaveLength(1);
+      // select("-photo") excludes the photo field from Mongoose documents
+      expect("photo" in results[0].toObject()).toBe(false);
+      expect(results[0].name).toBe("iPhone 15");
+    });
+
+    test("should match products from both name and description with same keyword", async () => {
+      await productModel.create({
+        name: "Wireless Headphones",
+        slug: "wireless-headphones-ms2",
+        description: "Bluetooth audio device",
+        price: 199,
+        category: testCategory._id,
+        quantity: 20,
+        shipping: true,
+      });
+      await productModel.create({
+        name: "USB Cable",
+        slug: "usb-cable-ms2",
+        description: "Wireless charging cable",
+        price: 15,
+        category: testCategory._id,
+        quantity: 100,
+        shipping: true,
+      });
+      await productModel.create({
+        name: "Monitor",
+        slug: "monitor-ms2",
+        description: "4K display",
+        price: 500,
+        category: testCategory._id,
+        quantity: 8,
+        shipping: true,
+      });
+
+      const req = { params: { keyword: "wireless" } };
+      const res = makeRes();
+
+      await searchProductController(req, res);
+
+      expect(res.json).toHaveBeenCalledTimes(1);
+      const results = res.json.mock.calls[0][0];
+      expect(results).toHaveLength(2);
+      const names = results.map((p) => p.name);
+      expect(names).toContain("Wireless Headphones");
+      expect(names).toContain("USB Cable");
+    });
+
+    test("should return 400 when database query throws", async () => {
+      const findSpy = jest.spyOn(productModel, "find").mockImplementation(() => {
+        throw new Error("DB failure");
+      });
+
+      const req = { params: { keyword: "test" } };
+      const res = makeRes();
+
+      await searchProductController(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Error In Search Product API",
+        })
+      );
+
+      findSpy.mockRestore();
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // LEVEL 2 — Route + Controller (HTTP via publicProductApp)
+  // --------------------------------------------------------------------------
+  // Foo Tzie Huang - A0262376Y
+  // AI Assistance: Claude (Anthropic)
+  describe("Level 2 — Route + Controller (HTTP via publicProductApp)", () => {
+    let testCategory;
+
+    beforeEach(async () => {
+      testCategory = await categoryModel.create({
+        name: "Gadgets",
+        slug: "gadgets-ms2",
+      });
+      await productModel.create({
+        name: "iPhone 15",
+        slug: "iphone-15-l2-ms2",
+        description: "Latest Apple smartphone",
+        price: 999,
+        category: testCategory._id,
+        quantity: 10,
+        shipping: true,
+      });
+      await productModel.create({
+        name: "Samsung Galaxy S24",
+        slug: "samsung-galaxy-s24-ms2",
+        description: "Premium Android tablet",
+        price: 899,
+        category: testCategory._id,
+        quantity: 7,
+        shipping: true,
+      });
+      await productModel.create({
+        name: "Sony Headphones",
+        slug: "sony-headphones-ms2",
+        description: "Noise cancelling audio",
+        price: 350,
+        category: testCategory._id,
+        quantity: 15,
+        shipping: true,
+      });
+    });
+
+    test("should return matching products via HTTP GET", async () => {
+      const res = await request(publicProductApp).get(
+        "/api/v1/product/search/iPhone"
+      );
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0].name).toBe("iPhone 15");
+    });
+
+    test("should return empty array for non-matching keyword", async () => {
+      const res = await request(publicProductApp).get(
+        "/api/v1/product/search/NonExistentKeyword"
+      );
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body).toHaveLength(0);
+    });
+
+    test("should match keyword in description via HTTP", async () => {
+      const res = await request(publicProductApp).get(
+        "/api/v1/product/search/Android"
+      );
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0].name).toBe("Samsung Galaxy S24");
+    });
+
+    test("should perform case-insensitive search via HTTP", async () => {
+      const res = await request(publicProductApp).get(
+        "/api/v1/product/search/HEADPHONES"
+      );
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0].name).toBe("Sony Headphones");
+    });
+
+    test("should exclude photo field from HTTP response", async () => {
+      await productModel.deleteMany({});
+      await productModel.create({
+        name: "Photo Test Product",
+        slug: "photo-test-ms2",
+        description: "Has a photo field",
+        price: 100,
+        category: testCategory._id,
+        quantity: 1,
+        shipping: true,
+        photo: {
+          data: Buffer.from("image-binary-data"),
+          contentType: "image/jpeg",
+        },
+      });
+
+      const res = await request(publicProductApp).get(
+        "/api/v1/product/search/Photo"
+      );
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0].name).toBe("Photo Test Product");
+      expect(res.body[0].photo).toBeUndefined();
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // LEVEL 3 — Full App Integration (app.js)
+  // --------------------------------------------------------------------------
+  // Foo Tzie Huang - A0262376Y
+  // AI Assistance: Claude (Anthropic)
+  describe("Level 3 — Full App Integration (app.js)", () => {
+    let testCategory;
+
+    beforeEach(async () => {
+      testCategory = await categoryModel.create({
+        name: "Computers",
+        slug: "computers-ms2",
+      });
+      await productModel.create({
+        name: "MacBook Air",
+        slug: "macbook-air-ms2",
+        description: "Lightweight Apple laptop",
+        price: 1299,
+        category: testCategory._id,
+        quantity: 5,
+        shipping: true,
+      });
+      await productModel.create({
+        name: "Dell XPS 15",
+        slug: "dell-xps-15-ms2",
+        description: "Windows ultrabook",
+        price: 1499,
+        category: testCategory._id,
+        quantity: 4,
+        shipping: true,
+      });
+    });
+
+    test("should return matching products via full app endpoint", async () => {
+      const res = await request(app).get("/api/v1/product/search/MacBook");
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0].name).toBe("MacBook Air");
+    });
+
+    test("should return products matching description via full app", async () => {
+      const res = await request(app).get("/api/v1/product/search/laptop");
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0].name).toBe("MacBook Air");
+    });
+
+    test("should return empty array for unmatched keyword via full app", async () => {
+      const res = await request(app).get(
+        "/api/v1/product/search/TabletThatDoesNotExist"
+      );
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body).toHaveLength(0);
+    });
+
+    test("should perform case-insensitive search via full app", async () => {
+      const res = await request(app).get("/api/v1/product/search/DELL");
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0].name).toBe("Dell XPS 15");
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// braintreeTokenController — MS2 integration tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Foo Tzie Huang - A0262376Y
+// AI Assistance: Claude (Anthropic)
+// Prompt used: Asked for guidance on designing integration tests for braintreeTokenController
+// and brainTreePaymentController, focusing on route + auth middleware integration since the
+// braintree gateway is an external dependency that cannot be tested with real credentials.
+describe("braintreeTokenController integration tests (MS2)", () => {
+  /**
+   * Braintree is an external payment service. These tests focus on:
+   * - Route accessibility (token endpoint is public, no auth required)
+   * - Verifying the endpoint responds correctly via the braintree sandbox
+   */
+
+  beforeAll(async () => {
+    await dbHelper.connect();
+  });
+
+  afterAll(async () => {
+    await dbHelper.closeDB();
+  });
+
+  // Foo Tzie Huang - A0262376Y
+  // AI Assistance: Claude (Anthropic)
+  describe("Level 2 — Route accessibility", () => {
+    test("should reach braintree token endpoint via full app without auth", async () => {
+      const res = await request(app).get("/api/v1/product/braintree/token");
+
+      // The endpoint is accessible without authentication (not blocked by auth middleware).
+      expect(res.status).not.toBe(401);
+      expect(res.status).not.toBe(404);
+    });
+
+    (process.env.BRAINTREE_MERCHANT_ID ? test : test.skip)("should return a successful response with client token from braintree sandbox", async () => {
+      const res = await request(app).get("/api/v1/product/braintree/token");
+
+      // Braintree sandbox credentials are configured, so the gateway returns a token
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty("clientToken");
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// brainTreePaymentController — MS2 integration tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Foo Tzie Huang - A0262376Y
+// AI Assistance: Claude (Anthropic)
+// Prompt used: Asked for integration test coverage for the braintree payment endpoint,
+// focusing on auth middleware enforcement and route-level integration.
+describe("brainTreePaymentController integration tests (MS2)", () => {
+  /**
+   * The payment endpoint requires authentication (requireSignIn middleware).
+   * Braintree transaction processing is external, so we test:
+   * - Auth middleware enforcement (401 for unauthenticated requests)
+   * - Authenticated request reaching the controller (braintree sandbox is active)
+   */
+
+  const JWT_SECRET = "test-integration-secret";
+
+  beforeAll(async () => {
+    await dbHelper.connect();
+    process.env.JWT_SECRET = JWT_SECRET;
+  });
+
+  afterEach(async () => {
+    await productModel.deleteMany({});
+    await categoryModel.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await dbHelper.closeDB();
+  });
+
+  // Foo Tzie Huang - A0262376Y
+  // AI Assistance: Claude (Anthropic)
+  describe("Level 2 — Route + Auth Middleware Integration", () => {
+    test("should return 401 for unauthenticated request to payment endpoint", async () => {
+      const res = await request(app)
+        .post("/api/v1/product/braintree/payment")
+        .send({ nonce: "fake-nonce", cart: [] });
+
+      expect(res.status).toBe(401);
+    });
+
+    test("should return 401 when Authorization header has invalid token", async () => {
+      const res = await request(app)
+        .post("/api/v1/product/braintree/payment")
+        .set("Authorization", "invalid-jwt-token")
+        .send({ nonce: "fake-nonce", cart: [{ price: 100 }] });
+
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
+    });
+
+    (process.env.BRAINTREE_MERCHANT_ID ? test : test.skip)("should pass auth middleware with valid token and reach payment controller", async () => {
+      const testCategory = await categoryModel.create({
+        name: "Payment Test Category",
+        slug: "payment-test-cat-ms2",
+      });
+
+      // Create real products so their ObjectIds can be used in the cart
+      const product1 = await productModel.create({
+        name: "Payment Test Item 1",
+        slug: "payment-test-1-ms2",
+        description: "First test item",
+        price: 100,
+        category: testCategory._id,
+        quantity: 10,
+        shipping: true,
+      });
+      const product2 = await productModel.create({
+        name: "Payment Test Item 2",
+        slug: "payment-test-2-ms2",
+        description: "Second test item",
+        price: 200,
+        category: testCategory._id,
+        quantity: 5,
+        shipping: true,
+      });
+
+      const user = await userModel.create({
+        name: "Test Buyer",
+        email: "buyer-ms2@test.com",
+        password: "hashedpassword123",
+        phone: "1234567890",
+        address: "123 Test St",
+        answer: "testanswer",
+      });
+
+      const validToken = JWT.sign({ _id: user._id }, JWT_SECRET);
+
+      const res = await request(app)
+        .post("/api/v1/product/braintree/payment")
+        .set("Authorization", validToken)
+        .send({
+          nonce: "fake-valid-nonce",
+          cart: [
+            { _id: product1._id.toString(), price: 100 },
+            { _id: product2._id.toString(), price: 200 },
+          ],
+        });
+
+      // Auth middleware passes (not 401). The braintree sandbox processes
+      // the transaction and the controller responds with { ok: true }.
+      expect(res.status).not.toBe(401);
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ ok: true });
+
+      await userModel.findByIdAndDelete(user._id);
+    });
+
+    test("should not allow GET method on payment endpoint", async () => {
+      const res = await request(app).get("/api/v1/product/braintree/payment");
+
+      // GET is not defined for this route, should get 404
+      expect(res.status).toBe(404);
+    });
+  });
+});
