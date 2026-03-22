@@ -243,6 +243,7 @@ To begin unit testing with Jest in your project, follow these steps:
 #### Member 4: HO JIAN TAO
 
 ##### milestone 1
+
 ##### - pages/admin/AdminOrders.js
 
 ##### - pages/user/Orders.js
@@ -279,7 +280,6 @@ To begin unit testing with Jest in your project, follow these steps:
 
 ##### - models/categoryModel.js
 
-
 #### Member 5: HO JIN HAN
 
 ##### - helpers/authHelper.test.js
@@ -309,56 +309,112 @@ To begin unit testing with Jest in your project, follow these steps:
 ### Milestone 2
 
 #### Member 1: FOO CHAO
+
 ##### - client/src/tests/integration/CartPage.integration.test.js
+
 ##### - client/src/tests/integration/Contact.integration.test.js
+
 ##### - client/src/tests/integration/DashBoard.integration.test.js
+
 ##### - client/src/tests/integration/HomePage.integration.test.js
+
 ##### - client/src/tests/integration/Policy.integration.test.js
+
 ##### - client/src/tests/integration/Products.integration.test.js
+
 ##### - tests/integration/product.integration.test.js
+
 1. createProductController
 2. deleteProductController
 3. updateProductController
+
 ##### - tests/integration/category.integration.test.js
+
 1. createCategoryController
 2. deleteCategoryController
 3. updateCategoryController
+
 ##### - tests/ui/editProductAndCategroy1.spec.ts (Test the edit product/category flow part 1)
+
 ##### - tests/ui/editProductAndCategroy1.spec.ts (Test the edit product/category flow part 2)
+
 ##### - tests/ui/editProductAndCategroy1.spec.ts (Test the edit product/category flow part 3)
 
 #### Member 2: FOO TZIE HUANG
 
 #### Member 3: HO CHI THANH
 
+##### - tests/integration/product.integration.test.js
+
+1. getProductController
+2. updateProductController
+3. deleteProductController
+4. productFiltersController
+5. productCountController
+
+##### - client/src/tests/integration/CategoryForm.integration.test.js
+
+##### - client/src/tests/integration/CreateCategory.integration.test.js
+
+##### - client/src/tests/integration/CreateProduct.integration.test.js
+
+##### - client/src/tests/integration/UpdateProduct.integration.test.js
+
+##### - client/src/tests/integration/ProductDetails.integration.test.js
+
+##### - client/src/tests/integration/CategoryProduct.integration.test.js
+
+##### - tests/ui/cartCheckoutNoLogin.spec.ts
+
+##### - tests/ui/productCrudRefetch.spec.ts
+
 #### Member 4: HO JIAN TAO
+
 ##### - client/src/tests/integration/AdminOrders.integration.test.js
+
 ##### - client/src/tests/integration/Orders.integration.test.js
+
 ##### - client/src/tests/integration/CategoryProduct2.integration.test.js
+
 ##### - tests/integration/auth.integration.test.js
+
 1. updateProfileController
 2. getOrdersController
 3. getAllOrdersController
 4. orderStatusController
+
 ##### - tests/integration/product.integration.test.js
+
 1. productListController
 2. searchProductController
 3. relatedProductController
 4. productCategoryController
+
 ##### - tests/ui/categoryProductAndCart.spec.ts
+
 ##### - tests/ui/cartCheckoutOrders.spec.ts
 
 #### Member 5: HO JIN HAN
+
 ##### - client/src/tests/integration/About.integration.test.js
+
 ##### - client/src/tests/integration/AdminDashboard.integration.test.js
+
 ##### - client/src/tests/integration/Header.integration.test.js
+
 ##### - client/src/tests/integration/Header.dropdown.integration.test.js
+
 ##### - client/src/tests/integration/Layout.integration.test.js
+
 ##### - client/src/tests/integration/Pagenotfound.integration.test.js
+
 ##### - client/src/tests/integration/Profile.integration.test.js
+
 ##### - client/src/tests/integration/Spinner.integration.test.js
+
 ##### - tests/integration/categoryController.integration.test.js
+
 1. categoryController
 2. singleCategoryController
-##### - tests/ui/profile-flow.spec.ts (Test the profile register/update/invalid flow)
 
+##### - tests/ui/profile-flow.spec.ts (Test the profile register/update/invalid flow)
