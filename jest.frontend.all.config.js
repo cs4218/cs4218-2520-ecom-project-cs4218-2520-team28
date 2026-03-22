@@ -25,6 +25,7 @@ export default {
 
   // Collect coverage from every JS source file under client/src,
   // excluding test files, setup/config files, generated output, and pure entry-points.
+  coverageDirectory: "coverage/frontend",
   collectCoverage: true,
   collectCoverageFrom: [
     "client/src/**/*.js",

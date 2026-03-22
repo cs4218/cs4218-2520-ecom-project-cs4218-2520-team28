@@ -52,7 +52,7 @@ const CreateProduct = () => {
         productData
       );
       if (data?.success) {
-        toast.success(`${name} is created`);
+        toast.success("Product Created Successfully");
         navigate("/dashboard/admin/products");
       } else {
         toast.error(data?.message);

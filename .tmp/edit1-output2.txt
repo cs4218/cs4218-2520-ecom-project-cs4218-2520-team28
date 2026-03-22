@@ -1,0 +1,440 @@
+﻿node.exe : [2m[WebServer] [22m(node:26948) [MODULE_TYPELESS_PACKAGE_JSON] 
+Warning: Module type of file:///C:/Foo%20Chao/NUS/Y3S2/CS4218/CS4218%20project/
+tests/ui/start-test-server.js is not specified and it doesn't parse as 
+CommonJS.
+At C:\Program Files\nodejs\npx.ps1:29 char:3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([2m[WebServer]...se as CommonJS. 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[2m[WebServer] [22mReparsing as ES module because module syntax was 
+detected. This incurs a performance overhead.
+[2m[WebServer] [22mTo eliminate this warning, add "type": "module" to C:\Foo 
+Chao\NUS\Y3S2\CS4218\CS4218 project\package.json.
+[2m[WebServer] [22m(Use `node --trace-warnings ...` to show where the 
+warning was created)
+[2m[WebServer] [22m(node:27236) [MODULE_TYPELESS_PACKAGE_JSON] Warning: 
+Module type of 
+file:///C:/Foo%20Chao/NUS/Y3S2/CS4218/CS4218%20project/server.js is not 
+specified and it doesn't parse as CommonJS.
+[2m[WebServer] [22mReparsing as ES module because module syntax was 
+detected. This incurs a performance overhead.
+[2m[WebServer] [22mTo eliminate this warning, add "type": "module" to C:\Foo 
+Chao\NUS\Y3S2\CS4218\CS4218 project\package.json.
+[2m[WebServer] [22m(Use `node --trace-warnings ...` to show where the 
+warning was created)
+[2m[WebServer] [22mBrowserslist: caniuse-lite is outdated. Please run:
+[2m[WebServer] [22m  npx update-browserslist-db@latest
+[2m[WebServer] [22m  Why you should do it regularly: 
+https://github.com/browserslist/update-db#readme
+[2m[WebServer] [22m(node:13628) 
+[DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 
+'onAfterSetupMiddleware' option is deprecated. Please use the 
+'setupMiddlewares' option.
+[2m[WebServer] [22m(Use `node --trace-deprecation ...` to show where the 
+warning was created)
+[2m[WebServer] [22m(node:13628) 
+[DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 
+'onBeforeSetupMiddleware' option is deprecated. Please use the 
+'setupMiddlewares' option.
+
+Running 63 tests using 1 worker
+
+[2m[WebServer] [22m(node:13628) [DEP0060] DeprecationWarning: The 
+`util._extend` API is deprecated. Please use Object.assign() instead.
+  Γ£ÿ  1 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:345:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-1: shows success toast after creating product without photo (11.2s)
+  Γ£ÿ  2 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:359:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-2: shows success toast after creating product with photo (8.9s)
+  Γ£ÿ  3 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:376:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-3: product is saved in database with correct details (no photo) (8.5s)
+  Γ£ÿ  4 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:396:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-4: product is saved in database with photo data when photo is uploaded (9.7s)
+  Γ£ÿ  5 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:417:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-5: created product is visible on home page (no photo) (8.8s)
+  Γ£ÿ  6 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:433:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-6: created product is visible on home page (with photo) (9.5s)
+  Γ£ÿ  7 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:453:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-7: created product is visible on category page (no photo) (9.3s)
+  Γ£ÿ  8 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:469:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-8: created product is visible on category page (with photo) (8.8s)
+  Γ£ÿ  9 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:488:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-9: created product is visible on admin products page (15.1s)
+  Γ£ÿ  10 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:506:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-10: created product shows correct details on product details page (no photo) (8.5s)
+  Γ£ÿ  11 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:523:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-11: created product shows photo on product details page (with photo) (9.1s)
+  Γ£ÿ  12 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:543:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-12: created product is visible to regular user on home page (9.3s)
+  Γ£ÿ  13 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:563:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-13: created product is visible to regular user on category page (8.9s)
+  Γ£ÿ  14 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:584:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-14: created product shows correct details to regular user on product details page (with photo) (8.4s)
+  Γ£ô  15 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:610:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-15: shows error when all required fields are missing (3.1s)
+  Γ£ô  16 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:617:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-16: shows "Name is Required" when only name is missing (4.0s)
+  Γ£ô  17 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:630:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-17: shows "Description is Required" when only description is missing (3.5s)
+  Γ£ô  18 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:643:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-18: shows "Price is Required" when only price is missing (3.3s)
+  Γ£ô  19 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:656:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-19: shows "Category is Required" when only category is missing (3.5s)
+  Γ£ô  20 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:669:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-20: shows "Quantity is Required" when only quantity is missing (3.8s)
+  Γ£ô  21 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:682:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-21: shows "Name is Required" when name and price are both missing (pairwise) (3.7s)
+  Γ£ô  22 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:694:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-22: shows "Description is Required" when description and category are both missing (pairwise) (3.4s)
+  Γ£ô  23 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:706:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-23: shows "Name is Required" when name, description and quantity are missing (triplet) (3.8s)
+  Γ£ô  24 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:719:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-24: shows error for negative price (4.9s)
+  Γ£ô  25 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:733:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-25: shows error for zero price (4.0s)
+  Γ£ô  26 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:747:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-26: shows error for negative price and negative quantity (pairwise invalid) (4.1s)
+  Γ£ÿ  27 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:762:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-27: excessively long name is accepted (no max-length restriction) (8.6s)
+  Γ£ô  28 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:796:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-1: shows success toast after updating product without new photo (3.8s)
+  Γ£ô  29 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:808:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-2: shows success toast after updating product with new photo (3.7s)
+  Γ£ô  30 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:823:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-3: product is updated in database with correct details (no new photo) (2.9s)
+  Γ£ô  31 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:843:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-4: product is updated in database with photo data when new photo is uploaded (4.1s)
+  Γ£ô  32 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:862:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-5: updated product is visible on home page (no new photo) (4.5s)
+  Γ£ô  33 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:877:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-6: updated product is visible on home page (with new photo) (4.0s)
+  Γ£ô  34 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:895:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-7: updated product is visible on category page (no new photo) (3.8s)
+  Γ£ô  35 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:910:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-8: updated product is visible on category page (with new photo) (4.0s)
+  Γ£ô  36 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:927:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-9: updated product is visible on admin products page (3.2s)
+  Γ£ô  37 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:944:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-10: updated product shows correct details on product details page (no new photo) (3.3s)
+  Γ£ô  38 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:959:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-11: updated product shows photo on product details page (with new photo) (4.3s)
+  Γ£ô  39 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:977:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-12: updated product is visible to regular user on home page (5.4s)
+  Γ£ô  40 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:996:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-13: updated product is visible to regular user on category page (5.3s)
+  Γ£ô  41 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1015:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-14: updated product shows correct details to regular user on product details page (with photo) (4.5s)
+  Γ£ô  42 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1039:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-15: shows error when all clearable required fields are empty (3.5s)
+  Γ£ô  43 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1046:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-16: shows "Name is Required" when name is cleared (2.8s)
+  Γ£ô  44 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1053:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-17: shows "Description is Required" when description is cleared (3.1s)
+  Γ£ô  45 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1060:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-18: shows "Price is Required" when price is cleared (2.9s)
+  Γ£ô  46 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1067:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-19: shows "Quantity is Required" when quantity is cleared (3.5s)
+  Γ£ô  47 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1074:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-20: shows "Name is Required" when name and price are both cleared (pairwise) (3.0s)
+  Γ£ô  48 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1081:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-21: shows "Description is Required" when description and quantity are cleared (pairwise) (3.6s)
+  Γ£ô  49 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1088:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-22: shows "Name is Required" when name, description and quantity are cleared (triplet) (3.3s)
+  Γ£ô  50 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1097:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-23: shows error for negative price during update (3.8s)
+  Γ£ô  51 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1104:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-24: shows error for zero price during update (3.0s)
+  Γ£ô  52 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1111:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-25: shows error for negative price and negative quantity (pairwise invalid) (3.4s)
+  Γ£ô  53 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1119:7 ΓÇ║ Suite B: Update Product ΓÇ║ B-26: excessively long name is accepted during update (no max-length restriction) (2.8s)
+  Γ£ô  54 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1146:7 ΓÇ║ Suite C: Delete Product ΓÇ║ C-1: shows success toast after deleting product (3.6s)
+  Γ£ô  55 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1155:7 ΓÇ║ Suite C: Delete Product ΓÇ║ C-2: product is removed from database after deletion (3.4s)
+  Γ£ô  56 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1166:7 ΓÇ║ Suite C: Delete Product ΓÇ║ C-3: deleted product is not visible on home page (3.9s)
+  Γ£ô  57 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1175:7 ΓÇ║ Suite C: Delete Product ΓÇ║ C-4: deleted product is not visible on category page (3.9s)
+  Γ£ô  58 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1184:7 ΓÇ║ Suite C: Delete Product ΓÇ║ C-5: deleted product is not visible on admin products page (4.3s)
+  Γ£ô  59 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1192:7 ΓÇ║ Suite C: Delete Product ΓÇ║ C-6: deleted product details page renders without the product name (4.2s)
+  Γ£ô  60 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1203:7 ΓÇ║ Suite C: Delete Product ΓÇ║ C-7: deleted product is not visible to regular user on home page (5.1s)
+  Γ£ô  61 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1216:7 ΓÇ║ Suite C: Delete Product ΓÇ║ C-8: deleted product is not visible to regular user on category page (5.4s)
+  Γ£ô  62 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1232:7 ΓÇ║ Suite C: Delete Product ΓÇ║ C-9: confirmation dialog appears with Yes/No buttons when DELETE PRODUCT is clicked (3.6s)
+  Γ£ô  63 [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:1240:7 ΓÇ║ Suite C: Delete Product ΓÇ║ C-10: product is not deleted when confirmation is cancelled (No button) (4.4s)
+
+
+  1) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:345:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-1: shows success toast after creating product without photo 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      354 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+      355 |
+    > 356 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      357 |   });
+      358 |
+      359 |   test('A-2: shows success toast after creating product with photo', async ({ page }) => {
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:356:66
+
+  2) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:359:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-2: shows success toast after creating product with photo 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      369 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+      370 |
+    > 371 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      372 |   });
+      373 |
+      374 |   // ΓöÇΓöÇ A-3 / A-4: Product saved in database ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:371:66
+
+  3) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:376:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-3: product is saved in database with correct details (no photo) 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      384 |     });
+      385 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    > 386 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      387 |
+      388 |     const doc = await db.collection('products').findOne({ name: NEW_PRODUCT.name });
+      389 |     expect(doc).not.toBeNull();
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:386:66
+
+  4) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:396:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-4: product is saved in database with photo data when photo is uploaded 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      405 |     });
+      406 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    > 407 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      408 |
+      409 |     const doc = await db.collection('products').findOne({ name: NEW_PRODUCT.name });
+      410 |     expect(doc).not.toBeNull();
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:407:66
+
+  5) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:417:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-5: created product is visible on home page (no photo) 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      425 |     });
+      426 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    > 427 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      428 |
+      429 |     await page.goto('/');
+      430 |     await expect(page.getByText(NEW_PRODUCT.name)).toBeVisible();
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:427:66
+
+  6) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:433:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-6: created product is visible on home page (with photo) 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      442 |     });
+      443 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    > 444 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      445 |
+      446 |     await page.goto('/');
+      447 |     await expect(page.getByText(NEW_PRODUCT.name)).toBeVisible();
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:444:66
+
+  7) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:453:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-7: created product is visible on category page (no photo) 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      461 |     });
+      462 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    > 463 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      464 |
+      465 |     await page.goto(`/category/${CATEGORY.slug}`);
+      466 |     await expect(page.getByText(NEW_PRODUCT.name)).toBeVisible();
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:463:66
+
+  8) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:469:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-8: created product is visible on category page (with photo) 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      478 |     });
+      479 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    > 480 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      481 |
+      482 |     await page.goto(`/category/${CATEGORY.slug}`);
+      483 |     await expect(page.getByText(NEW_PRODUCT.name)).toBeVisible();
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:480:66
+
+  9) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:488:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-9: created product is visible on admin products page 
+
+    [31mTest timeout of 15000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 15000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "/dashboard/admin/products" until "load"
+    ============================================================
+
+      498 |
+      499 |     // App navigates to /dashboard/admin/products on success
+    > 500 |     await page.waitForURL('/dashboard/admin/products');
+          |                ^
+      501 |     await expect(page.getByText(NEW_PRODUCT.name)).toBeVisible();
+      502 |   });
+      503 |
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:500:16
+
+  10) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:506:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-10: created product shows correct details on product details page (no photo) 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      514 |     });
+      515 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    > 516 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      517 |
+      518 |     await page.goto(`/product/${NEW_PRODUCT.slug}`);
+      519 |     await expect(page.getByText(`Name : ${NEW_PRODUCT.name}`)).toBeVisible();
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:516:66
+
+  11) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:523:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-11: created product shows photo on product details page (with photo) 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      532 |     });
+      533 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    > 534 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      535 |
+      536 |     await page.goto(`/product/${NEW_PRODUCT.slug}`);
+      537 |     await expect(page.getByText(`Name : ${NEW_PRODUCT.name}`)).toBeVisible();
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:534:66
+
+  12) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:543:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-12: created product is visible to regular user on home page 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      553 |     });
+      554 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    > 555 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      556 |
+      557 |     await logout(page);
+      558 |     await loginAs(page, USER.email, USER.password);
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:555:66
+
+  13) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:563:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-13: created product is visible to regular user on category page 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      573 |     });
+      574 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    > 575 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      576 |
+      577 |     await logout(page);
+      578 |     await loginAs(page, USER.email, USER.password);
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:575:66
+
+  14) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:584:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-14: created product shows correct details to regular user on product details page (with photo) 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      595 |     });
+      596 |     await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    > 597 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      598 |
+      599 |     await logout(page);
+      600 |     await loginAs(page, USER.email, USER.password);
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:597:66
+
+  15) [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:762:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-27: excessively long name is accepted (no max-length restriction) 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Product Created Successfully')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+    [2m  - expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByText('Product Created Successfully')[22m
+
+
+      772 |
+      773 |     // Long names are allowed ΓÇö product should be created successfully
+    > 774 |     await expect(page.getByText('Product Created Successfully')).toBeVisible();
+          |                                                                  ^
+      775 |   });
+      776 |
+      777 | });
+        at C:\Foo Chao\NUS\Y3S2\CS4218\CS4218 project\tests\ui\editProductAndCategory1.spec.ts:774:66
+
+  15 failed
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:345:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-1: shows success toast after creating product without photo 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:359:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-2: shows success toast after creating product with photo 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:376:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-3: product is saved in database with correct details (no photo) 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:396:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-4: product is saved in database with photo data when photo is uploaded 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:417:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-5: created product is visible on home page (no photo) 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:433:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-6: created product is visible on home page (with photo) 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:453:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-7: created product is visible on category page (no photo) 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:469:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-8: created product is visible on category page (with photo) 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:488:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-9: created product is visible on admin products page 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:506:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-10: created product shows correct details on product details page (no photo) 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:523:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-11: created product shows photo on product details page (with photo) 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:543:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-12: created product is visible to regular user on home page 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:563:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-13: created product is visible to regular user on category page 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:584:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-14: created product shows correct details to regular user on product details page (with photo) 
+    [chromium] ΓÇ║ tests\ui\editProductAndCategory1.spec.ts:762:7 ΓÇ║ Suite A: Create Product ΓÇ║ A-27: excessively long name is accepted (no max-length restriction) 
+  48 passed (6.4m)

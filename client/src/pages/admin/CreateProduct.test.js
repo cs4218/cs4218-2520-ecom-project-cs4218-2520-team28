@@ -523,7 +523,7 @@ describe('CreateProduct Component', () => {
 
       // Assert
       await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith('Product is created');
+        expect(toast.success).toHaveBeenCalledWith('Product Created Successfully');
       });
     });
 

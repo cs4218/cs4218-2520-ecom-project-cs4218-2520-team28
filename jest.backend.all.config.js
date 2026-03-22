@@ -19,6 +19,7 @@ export default {
 
   // Collect coverage from every JS source file in the backend tree,
   // excluding test files and the server entry-point.
+  coverageDirectory: "coverage/backend",
   collectCoverage: true,
   collectCoverageFrom: [
     "controllers/**/*.js",

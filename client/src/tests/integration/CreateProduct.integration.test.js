@@ -319,7 +319,7 @@ describe("CreateProduct integration (top-down)", () => {
     expect(formDataInstances.length).toBeGreaterThan(0);
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith("Gaming Mouse is created");
+      expect(toast.success).toHaveBeenCalledWith("Product Created Successfully");
     });
 
     await waitFor(() => {

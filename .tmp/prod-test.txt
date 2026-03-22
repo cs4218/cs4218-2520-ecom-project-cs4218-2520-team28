@@ -1,0 +1,256 @@
+﻿node.exe : FAIL backend:all controllers/productController.test.js
+At C:\Program Files\nodejs\npx.ps1:29 char:3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FAIL backend:al...troller.test.js 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  createProductController
+    ΓêÜ should return 400 error when req.fields is missing (8 ms)
+    ΓêÜ should return error when name is missing (2 ms)
+    ΓêÜ should return error when description is missing (2 ms)
+    ΓêÜ should return error when price is missing (1 ms)
+    ΓêÜ should return error when category is missing (2 ms)
+    ΓêÜ should return error when quantity is missing (1 ms)
+    ΓêÜ should return error when photo size exceeds 1MB (1 ms)
+    ΓêÜ should return first error when multiple fields are missing (1 ms)
+    ΓêÜ should create product successfully without photo (2 ms)
+    ΓêÜ should create product successfully with photo (3 ms)
+    ΓêÜ should not include extra fields from req.fields (14 ms)
+    ΓêÜ should handle empty req.files without error (5 ms)
+    ΓêÜ should handle undefined req.files without error (2 ms)
+    ΓêÜ should handle missing req.files.photo without error (1 ms)
+    ΓêÜ should return 500 error when database save fails (2 ms)
+    ΓêÜ should return 500 error when photo file read fails (1 ms)
+    ΓêÜ should generate slug from product name using slugify (1 ms)
+    ΓêÜ should assign photo as object without causing undefined error (1 ms)
+    ΓêÜ should return error when name is empty string (1 ms)
+    ΓêÜ should accept price as string from form input (1 ms)
+    ΓêÜ should accept quantity as string from form input (1 ms)
+    ├ù should handle missing shipping field gracefully (3 ms)
+    ΓêÜ should accept photo at exactly 1MB size (1 ms)
+    ΓêÜ should reject photo at 1MB + 1 byte (1 ms)
+    ΓêÜ should reject photo with size 0 (7 ms)
+    ΓêÜ should reject photo with negative size (2 ms)
+    ΓêÜ should accept photo with size 1 byte (2 ms)
+    ΓêÜ should accept photo with size 999999 bytes (1 ms)
+    ΓêÜ should return 400 error when price is negative (1 ms)
+    ΓêÜ should return 400 error when price is zero (1 ms)
+    ΓêÜ should return 400 error when quantity is negative (1 ms)
+    ΓêÜ should return 400 error when quantity is zero
+  deleteProductController
+    ΓêÜ should delete product successfully with valid ID (1 ms)
+    ΓêÜ should return 404 error when product not found (1 ms)
+    ΓêÜ should handle invalid product ID format (2 ms)
+    ΓêÜ should handle database connection error (3 ms)
+    ΓêÜ should call findByIdAndDelete with correct product ID (2 ms)
+    ΓêÜ should successfully delete product without returning photo data (5 ms)
+    ΓêÜ should return 400 error when product ID is missing (2 ms)
+    ΓêÜ should return 400 error when product ID is empty string (1 ms)
+  updateProductController
+    ΓêÜ should return 400 error when req.fields is missing (2 ms)
+    ΓêÜ should return 400 error when product ID is missing (6 ms)
+    ΓêÜ should return 400 error when product ID is empty string (1 ms)
+    ΓêÜ should return 404 error when product not found (1 ms)
+    ΓêÜ should return 400 error when name is missing (1 ms)
+    ΓêÜ should return 400 error when description is missing (1 ms)
+    ΓêÜ should return 400 error when price is missing (1 ms)
+    ΓêÜ should return 400 error when category is missing
+    ΓêÜ should return 400 error when quantity is missing (1 ms)
+    ├ù should not return error when shipping is missing (1 ms)
+    ΓêÜ should update product successfully without photo
+    ΓêÜ should update product successfully with photo (1 ms)
+    ΓêÜ should reject photo larger than 1MB
+    ΓêÜ should accept photo at exactly 1MB size (1 ms)
+    ΓêÜ should not add extra fields to product update (1 ms)
+    ΓêÜ should return 500 error when database update fails
+    ΓêÜ should return 500 error when photo file read fails
+    ΓêÜ should generate slug from updated product name using slugify
+    ΓêÜ should return 500 error when save fails after photo update (1 ms)
+    ΓêÜ should handle invalid product ID format (1 ms)
+    ΓêÜ should call findByIdAndUpdate with correct product ID
+    ΓêÜ should return 400 error when name is empty string
+    ΓêÜ should accept different price values (1 ms)
+    ΓêÜ should accept different quantity values
+    ΓêÜ should reject photo with size 0
+    ΓêÜ should reject photo with negative size (1 ms)
+    ΓêÜ should accept photo with size 1 byte
+    ΓêÜ should accept photo with size 999999 bytes
+    ΓêÜ should return 400 error when price is negative (1 ms)
+    ΓêÜ should return 400 error when price is zero
+    ΓêÜ should return 400 error when quantity is negative
+    ΓêÜ should return 400 error when quantity is zero
+  getProductController
+    ΓêÜ should return 200 with all products on success (1 ms)
+    ΓêÜ should send correct response body including success, counTotal, 
+message and products
+    ΓêÜ should call find with empty query object
+    ΓêÜ should populate the category field
+    ΓêÜ should select -photo to exclude photo binary data
+    ΓêÜ should limit results to 12
+    ΓêÜ should sort results by createdAt descending (1 ms)
+    ΓêÜ should set counTotal equal to the number of products returned
+    ΓêÜ should return counTotal 0 and empty products array when no products 
+exist (1 ms)
+    ΓêÜ should call find exactly once (4 ms)
+    ΓêÜ should set counTotal to 1 when exactly one product is returned (1 ms)
+    ΓêÜ should include success: true in the response on success
+    ΓêÜ should return 500 when the DB query throws (1 ms)
+    ΓêÜ should include error.message string in 500 response (1 ms)
+    ΓêÜ should include success: false in the 500 error response (1 ms)
+    ΓêÜ should include the correct error message string in the 500 response (1 
+ms)
+    ΓêÜ should return the exact products array resolved by the DB
+    ΓêÜ should complete the full query chain: find ΓåÆ populate ΓåÆ select ΓåÆ 
+limit ΓåÆ sort (3 ms)
+  getSingleProductController
+    ΓêÜ should return 200 with product when valid ID exists (8 ms)
+    ΓêÜ should return 404 when product slug does not exist (4 ms)
+    ΓêÜ should return 404 when valid product ID does not exist (2 ms)
+    ΓêÜ should return 400 with error.message when DB query throws (1 ms)
+  productPhotoController
+    ΓêÜ should return binary photo with Content-Type when photo exists (1 ms)
+    ΓêÜ should return 404 when product does not exist (1 ms)
+    ΓêÜ should return 404 when product exists but photo data is missing (1 ms)
+    ΓêÜ should return 500 with error.message when DB query throws (1 ms)
+  productFiltersController
+    ΓêÜ should return 200 on success (1 ms)
+    ΓêÜ should return correct response body with success and products
+    ΓêÜ should include success: true in the response
+    ΓêÜ should return empty products array when no products match
+    ΓêÜ should filter by category when checked array is non-empty
+    ΓêÜ should pass a single-element checked array as the category filter (1 
+ms)
+    ΓêÜ should filter by price $gte/$lte when radio array is non-empty
+    ΓêÜ should apply both category and price filters simultaneously (1 ms)
+    ΓêÜ should call find with empty object when both checked and radio are 
+empty
+    ΓêÜ should not include category in query args when checked is empty (1 ms)
+    ΓêÜ should not include price in query args when radio is empty
+    ΓêÜ should call find exactly once
+    ΓêÜ should return the exact products array resolved by the DB (1 ms)
+    ΓêÜ should return 400 when the DB query throws
+    ΓêÜ should include correct error message in the 400 response (1 ms)
+    ΓêÜ should include success: false in the 400 error response
+    ΓêÜ should include the error object in the 400 error response
+    ΓêÜ should return exact 400 response shape when DB throws (1 ms)
+  productCountController
+    ΓêÜ should return 200 on success
+    ΓêÜ should return correct response body with success and total (1 ms)
+    ΓêÜ should include success: true in the response
+    ΓêÜ should return the exact count resolved by estimatedDocumentCount
+    ΓêÜ should call find with an empty query object (1 ms)
+    ΓêÜ should call estimatedDocumentCount on the find result
+    ΓêÜ should call find exactly once
+    ΓêÜ should return total 0 when count is 0 (1 ms)
+    ΓêÜ should return total 1 when exactly one product exists
+    ΓêÜ should return the correct total for large product counts
+    ΓêÜ should return 400 when the DB query throws (1 ms)
+    ΓêÜ should include correct error message in the 400 response
+    ΓêÜ should include success: false in the 400 error response (1 ms)
+    ΓêÜ should include the error object in the 400 error response
+    ΓêÜ should return exact 400 response shape when DB throws (1 ms)
+    ΓêÜ should complete the chain: find({}) ΓåÆ estimatedDocumentCount()
+  productListController
+    ΓêÜ should return products with default page = 1 (2 ms)
+    ΓêÜ should apply correct pagination when page param is provided (1 ms)
+    ΓêÜ should sort by createdAt descending (1 ms)
+    ΓêÜ should handle errors and return 400 status (1 ms)
+    ΓêÜ should use default page when page param is undefined (1 ms)
+  searchProductController
+    ΓêÜ should search products using keyword with regex and return results (1 
+ms)
+    ΓêÜ should handle different keyword values correctly
+    ΓêÜ should call select with -photo to exclude photo field (1 ms)
+    ΓêÜ should handle errors and return 400 status
+  relatedProductController
+    ΓêÜ should return related products excluding current product (2 ms)
+    ΓêÜ should limit the results to 3 products (2 ms)
+    ΓêÜ should populate category field (3 ms)
+    ΓêÜ should return 400 if pid or cid is missing (validation branch) (1 ms)
+    ΓêÜ should handle database errors and return 400 status (2 ms)
+  productCategoryController
+    ΓêÜ should fetch category by slug and return products in that category (9 
+ms)
+    ΓêÜ should return empty products if category exists but no products found 
+(5 ms)
+    ΓêÜ should handle case when category is null (slug not found) (2 ms)
+    ΓêÜ should handle errors and return 400 status (2 ms)
+  Payment Gateway Controllers
+    braintreeTokenController
+      ΓêÜ should generate and send client token on success (2 ms)
+      ΓêÜ should return 500 status on gateway error (5 ms)
+      ΓêÜ should call clientToken.generate with empty options object (2 ms)
+      ΓêÜ should handle network errors gracefully (1 ms)
+      ΓêÜ should send token with correct response structure
+    brainTreePaymentController
+      ΓêÜ should save order with correct products and buyer information (1 ms)
+      ΓêÜ should calculate and process total from multiple items (1 ms)
+      ΓêÜ should save order with products, payment, and buyer fields (2 ms)
+      ΓêÜ should handle empty cart and save empty products array (2 ms)
+      ΓêÜ should use authenticated user ID as buyer in order (2 ms)
+      ΓêÜ should handle decimal prices in cart items (1 ms)
+      ΓêÜ should handle multiple cart items with different prices (2 ms)
+      ΓêÜ should call save method on the order instance (1 ms)
+
+  ΓùÅ createProductController ΓÇ║ should handle missing shipping field 
+gracefully
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: ObjectContaining {"shipping": undefined}
+    Received: {"category": "category123", "description": "Test Description", 
+"name": "Test Product", "price": "100", "quantity": "10", "slug": 
+"test-product"}
+
+    Number of calls: 1
+
+    [0m [90m 448 |[39m     [36mawait[39m 
+createProductController(req[33m,[39m res)[33m;[39m
+     [90m 449 |[39m
+    [31m[1m>[22m[39m[90m 450 |[39m     
+expect(productModel)[33m.[39mtoHaveBeenCalledWith(
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 451 |[39m       expect[33m.[39mobjectContaining({
+     [90m 452 |[39m         shipping[33m:[39m undefined[33m,[39m
+     [90m 453 |[39m       })[0m
+
+      at Object.toHaveBeenCalledWith 
+(controllers/productController.test.js:450:26)
+
+  ΓùÅ updateProductController ΓÇ║ should not return error when shipping is 
+missing
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      "validProductId123",
+    - ObjectContaining {"shipping": undefined},
+    + {"category": "category456", "description": "Updated Description", 
+"name": "Updated Product", "price": "150", "quantity": "20", "slug": 
+"updated-product"},
+      {"new": true},
+
+    Number of calls: 1
+
+    [0m [90m 1001 |[39m     [36mawait[39m 
+updateProductController(req[33m,[39m res)[33m;[39m
+     [90m 1002 |[39m
+    [31m[1m>[22m[39m[90m 1003 |[39m     
+expect(mockFindByIdAndUpdate)[33m.[39mtoHaveBeenCalledWith(
+     [90m      |[39m                                   [31m[1m^[22m[39m
+     [90m 1004 |[39m       [32m"validProductId123"[39m[33m,[39m
+     [90m 1005 |[39m       expect[33m.[39mobjectContaining({
+     [90m 1006 |[39m         shipping[33m:[39m undefined[33m,[39m[0m
+
+      at Object.toHaveBeenCalledWith 
+(controllers/productController.test.js:1003:35)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 161 passed, 163 total
+Snapshots:   0 total
+Time:        4.512 s, estimated 5 s
+Ran all test suites matching /productController.test/i.
