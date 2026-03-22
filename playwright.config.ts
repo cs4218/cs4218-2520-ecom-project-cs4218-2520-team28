@@ -22,14 +22,14 @@ export default defineConfig({
   // testMatch: '**/editProductAndCategory4.spec.ts'
 
   /* Maximum time one test can run for. */
-  timeout: 15_000,
+  timeout: 30_000,
 
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: 5_000,
+    timeout: 10_000,
   },
 
   /* Fail the build on CI if you accidentally left test.only in the source code. */

@@ -76,7 +76,7 @@ export const createProductController = async (req, res) => {
       price, 
       category, 
       quantity, 
-      shipping,
+      shipping: (shipping !== "" && shipping !== undefined && shipping !== "undefined") ? shipping : undefined,
       slug: slugify(name) 
     });
     if (photo) {
@@ -294,7 +294,7 @@ export const updateProductController = async (req, res) => {
 
     const products = await productModel.findByIdAndUpdate(
       pid,
-      { name, description, price, category, quantity, shipping, slug: slugify(name) },
+      { name, description, price, category, quantity, shipping: (shipping !== "" && shipping !== undefined && shipping !== "undefined") ? shipping : undefined, slug: slugify(name) },
       { new: true }
     );
     
