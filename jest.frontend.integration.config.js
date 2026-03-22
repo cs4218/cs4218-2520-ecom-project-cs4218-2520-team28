@@ -29,5 +29,12 @@ export default {
     "<rootDir>/client/src/pages/admin/Products.js",
     "<rootDir>/client/src/pages/CartPage.js",
     "<rootDir>/client/src/pages/HomePage.js",
+    "<rootDir>/client/src/pages/About.js",
+    "<rootDir>/client/src/pages/Pagenotfound.js",
+    "<rootDir>/client/src/pages/user/Profile.js",
+    "<rootDir>/client/src/components/Header.js",
+    "<rootDir>/client/src/components/Layout.js",
+    "<rootDir>/client/src/components/Spinner.js",
+    "<rootDir>/client/src/pages/admin/AdminDashboard.js",
   ],
 };

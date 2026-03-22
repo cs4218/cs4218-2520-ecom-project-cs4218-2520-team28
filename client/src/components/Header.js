@@ -7,10 +7,12 @@ import useCategory from "../hooks/useCategory";
 import { useCart } from "../context/cart";
 import { Badge } from "antd";
 import "../styles/Header.css";
+
 const Header = () => {
   const [auth, setAuth] = useAuth();
   const [cart] = useCart();
   const categories = useCategory();
+
   const handleLogout = () => {
     setAuth({
       ...auth,
@@ -20,6 +22,7 @@ const Header = () => {
     localStorage.removeItem("auth");
     toast.success("Logout Successfully");
   };
+
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -35,22 +38,27 @@ const Header = () => {
           >
             <span className="navbar-toggler-icon" />
           </button>
+
           <div className="collapse navbar-collapse" id="navbarTogglerDemo01">
             <Link to="/" className="navbar-brand">
               🛒 Virtual Vault
             </Link>
+
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
               <SearchInput />
+
               <li className="nav-item">
                 <NavLink to="/" className="nav-link ">
                   Home
                 </NavLink>
               </li>
+
               <li className="nav-item dropdown">
                 <Link
                   className="nav-link dropdown-toggle"
                   to={"/categories"}
                   data-bs-toggle="dropdown"
+                  aria-expanded="false"
                 >
                   Categories
                 </Link>
@@ -60,14 +68,12 @@ const Header = () => {
                       All Categories
                     </Link>
                   </li>
+
                   {categories?.map((c) => (
                     // A0272024R, Foo Chao
                     // Added key so it won't give console error
                     <li key={c.slug}>
-                      <Link
-                        className="dropdown-item"
-                        to={`/category/${c.slug}`}
-                      >
+                      <Link className="dropdown-item" to={`/category/${c.slug}`}>
                         {c.name}
                       </Link>
                     </li>
@@ -91,32 +97,32 @@ const Header = () => {
               ) : (
                 <>
                   <li className="nav-item dropdown">
-                    <NavLink
-                      className="nav-link dropdown-toggle"
-                      href="#"
-                      role="button"
+                    {/*
+                      BUG FIX (Jin Han, A0266275W):
+                      Previously used NavLink without `to` for dropdown toggle.
+                      Use button instead (correct semantics + stable behavior).
+                    */}
+                    <button
+                      type="button"
+                      className="nav-link dropdown-toggle btn btn-link"
                       data-bs-toggle="dropdown"
-                      style={{ border: "none" }}
+                      aria-expanded="false"
+                      style={{ border: "none", textDecoration: "none", padding: 0 }}
                     >
                       {auth?.user?.name}
-                    </NavLink>
+                    </button>
+
                     <ul className="dropdown-menu">
                       <li>
                         <NavLink
-                          to={`/dashboard/${
-                            auth?.user?.role === 1 ? "admin" : "user"
-                          }`}
+                          to={`/dashboard/${auth?.user?.role === 1 ? "admin" : "user"}`}
                           className="dropdown-item"
                         >
                           Dashboard
                         </NavLink>
                       </li>
                       <li>
-                        <NavLink
-                          onClick={handleLogout}
-                          to="/login"
-                          className="dropdown-item"
-                        >
+                        <NavLink onClick={handleLogout} to="/login" className="dropdown-item">
                           Logout
                         </NavLink>
                       </li>
@@ -124,6 +130,7 @@ const Header = () => {
                   </li>
                 </>
               )}
+
               <li className="nav-item">
                 <Badge count={cart?.length} showZero>
                   <NavLink to="/cart" className="nav-link">
