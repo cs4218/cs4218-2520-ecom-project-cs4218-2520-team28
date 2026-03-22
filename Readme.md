@@ -172,30 +172,25 @@ To begin unit testing with Jest in your project, follow these steps:
 
 #### Member 2: FOO TZIE HUANG
 
-##### MS1 Unit Tests (leftover)
+##### - controllers/authController.js
+
+###### 1. registerController
+
+###### 2. loginController
+
+###### 3. forgotPasswordController
+
+###### 4. testController
+
+##### - controllers/productController.js
+
+###### 1. braintreeTokenController
+
+###### 2. brainTreePaymentController
 
 ##### - client/src/pages/admin/Users.test.js
 
 ##### - client/src/pages/Search.test.js
-
-##### MS2 Backend Integration Tests
-
-##### - tests/integration/auth.integration.test.js
-
-1. registerController
-2. loginController
-3. forgotPasswordController
-4. testController
-
-##### - tests/integration/product.integration.test.js
-
-1. searchProductController
-2. braintreeTokenController
-3. brainTreePaymentController
-
-##### MS2 UI Tests
-
-##### - tests/ui/registerLoginSearchProduct.spec.ts (Register, Login, Admin Users, Product Selection, Search, Cart flows)
 
 #### Member 3: HO CHI THANH
 
@@ -332,6 +327,21 @@ To begin unit testing with Jest in your project, follow these steps:
 ##### - tests/ui/editProductAndCategroy1.spec.ts (Test the edit product/category flow part 3)
 
 #### Member 2: FOO TZIE HUANG
+
+##### - tests/integration/auth.integration.test.js
+
+1. registerController
+2. loginController
+3. forgotPasswordController
+4. testController
+
+##### - tests/integration/product.integration.test.js
+
+1. searchProductController
+2. braintreeTokenController
+3. brainTreePaymentController
+
+##### - tests/ui/registerLoginSearchProduct.spec.ts (Register, Login, Admin Users, Product Selection, Search, Cart flows)
 
 #### Member 3: HO CHI THANH
 
