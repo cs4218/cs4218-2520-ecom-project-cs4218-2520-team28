@@ -334,6 +334,7 @@ To begin unit testing with Jest in your project, follow these steps:
 #### Member 4: HO JIAN TAO
 ##### - client\src\tests\integration\AdminOrders.integration.test.js
 ##### - client\src\tests\integration\Orders.integration.test.js
+##### - client\src\tests\integration\CategoryProduct2.integration.test.js
 ##### - tests\integration\auth.integration.test.js
 1. updateProfileController
 2. getOrdersController
