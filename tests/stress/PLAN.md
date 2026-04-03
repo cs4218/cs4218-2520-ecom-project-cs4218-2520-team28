@@ -61,26 +61,87 @@ tests/stress/
 
 ## Infrastructure Setup
 
-### Start the observability stack before any test run
+### `tests/stress/docker-compose.yml`
+
+Create this file before running any stress test:
+
+```yaml
+version: '3'
+services:
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+      - INFLUXDB_HTTP_AUTH_ENABLED=false
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    depends_on:
+      - influxdb
+```
+
+> Grafana runs on `3001` (not `3000`) to avoid clashing with the React frontend.
+
+### Step 1 — Start the observability stack
 
 ```bash
 docker-compose -f tests/stress/docker-compose.yml up -d
 ```
 
-This starts:
-- **InfluxDB** on `http://localhost:8086` — receives k6 metrics via `--out influxdb`
-- **Grafana** on `http://localhost:3001` — dashboards for live metric visualization
+Verify both containers are up:
+```bash
+docker ps
+# influxdb   0.0.0.0:8086->8086/tcp
+# grafana    0.0.0.0:3001->3000/tcp
+```
 
-Import the official k6 Grafana dashboard: **Dashboard ID `2587`**
+### Step 2 — Add InfluxDB as a Grafana data source (one-time setup)
 
-### Run any script
+1. Open `http://localhost:3001` in your browser
+2. Go to **Connections → Data Sources → Add new data source**
+3. Choose **InfluxDB**
+4. Set:
+   - URL: `http://influxdb:8086`
+   - Database: `k6`
+   - Leave auth fields blank
+5. Click **Save & Test** — should show "datasource is working"
+
+### Step 3 — Import the official k6 dashboard (one-time setup)
+
+1. Go to **Dashboards → Import**
+2. Enter Dashboard ID: **`2587`** → click **Load**
+3. Select your InfluxDB data source → click **Import**
+
+You now have a dashboard with:
+- Live VU count over time
+- Request rate (RPS)
+- p95 / p99 / avg latency per scenario
+- Error rate
+- All metrics **persisted across runs** — you can compare runs side by side
+
+### Step 4 — Run any script with metrics streaming to InfluxDB
 
 ```bash
 k6 run tests/stress/auth-stress.js --out influxdb=http://localhost:8086/k6
 ```
 
-Or ask Copilot in chat (with MCP active):
-> "Run auth-stress.js with 100 VUs for 5 minutes and tell me the average, p95, and error rate"
+While the test runs, open `http://localhost:3001` to see live graphs updating.
+After the test ends the data stays — **take a screenshot for your submission evidence**.
+
+### Stopping the stack
+
+```bash
+docker-compose -f tests/stress/docker-compose.yml down
+```
+
+InfluxDB data is lost when containers are removed. Take screenshots before stopping.
 
 ---
 
@@ -674,15 +735,43 @@ Once L is known, every other scenario ceiling = round(L × multiplier, 10), mini
 
 ## Running All Stories
 
-```bash
-# Individual story (manual)
-k6 run tests/stress/auth-stress.js --out influxdb=http://localhost:8086/k6
+Always include `--out influxdb=http://localhost:8086/k6` so every run is recorded in Grafana.
 
-# Via MCP — paste into Copilot chat with app running:
-# "Validate auth-stress.js then run the calibration loop and give me a breaking point table"
-# "Run catalog-stress-solo.js and find the exact VU count where product_list first breaches p(95)<200ms"
-# "Run mixed-stress.js calibration loop across all 12 scenarios and report which component fails first"
+```bash
+# Start the stack first (if not already running)
+docker-compose -f tests/stress/docker-compose.yml up -d
+
+# Calibration probe (find login ceiling first)
+k6 run tests/stress/calibration-probe.js -e TARGET_VUS=50  --out influxdb=http://localhost:8086/k6
+k6 run tests/stress/calibration-probe.js -e TARGET_VUS=100 --out influxdb=http://localhost:8086/k6
+# ...double until threshold breaches
+
+# Story 1 — Auth
+k6 run tests/stress/auth-stress-solo.js --out influxdb=http://localhost:8086/k6
+k6 run tests/stress/auth-stress.js      --out influxdb=http://localhost:8086/k6
+
+# Story 2 — Catalog
+k6 run tests/stress/catalog-stress-solo.js --out influxdb=http://localhost:8086/k6
+k6 run tests/stress/catalog-stress.js      --out influxdb=http://localhost:8086/k6
+
+# Story 3 — Checkout
+k6 run tests/stress/checkout-stress-solo.js --out influxdb=http://localhost:8086/k6
+k6 run tests/stress/checkout-stress.js      --out influxdb=http://localhost:8086/k6
+
+# Story 4 — Admin
+k6 run tests/stress/admin-stress-solo.js --out influxdb=http://localhost:8086/k6
+k6 run tests/stress/admin-stress.js      --out influxdb=http://localhost:8086/k6
+
+# Story 5 — Mixed
+k6 run tests/stress/mixed-stress.js --out influxdb=http://localhost:8086/k6
 ```
+
+After each run open `http://localhost:3001`, switch to the k6 dashboard, and **screenshot the graphs before running the next story** — each run overwrites the "current" view but all data is retained in InfluxDB and can be filtered by time range.
+
+**Via MCP (Copilot writes the `--out` flag automatically):**
+> "Run auth-stress.js with InfluxDB output and show me the p95 and error rate at peak VUs"
+> "Run catalog-stress-solo.js and find the exact VU count where product_list first breaches p(95)<500ms"
+> "Run mixed-stress.js and tell me which scenario's threshold was breached first"
 
 ---
 
