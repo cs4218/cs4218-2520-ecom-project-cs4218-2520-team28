@@ -40,16 +40,21 @@ the following live tools during this project:
 
 ```
 tests/stress/
-├── PLAN.md                  ← this file
+├── PLAN.md                       ← this file
+├── calibration-probe.js          ← fast login ceiling finder (NOT a submission, see file header)
 ├── helpers/
-│   ├── auth.js              ← shared login → JWT extraction helper
-│   └── seed-data.js         ← SharedArray loader for product/category IDs
-├── auth-stress.js           ← Story 1: Auth endpoints + login/register pages
-├── catalog-stress.js        ← Story 2: Product catalog + homepage load
-├── checkout-stress.js       ← Story 3: Checkout flow + cart page
-├── admin-stress.js          ← Story 4: Admin CRUD writes + dashboard pages
-├── mixed-stress.js          ← Story 5: Realistic combined workload
-└── docker-compose.yml       ← InfluxDB + Grafana observability stack
+│   ├── auth.js                   ← shared login → JWT extraction helper
+│   └── seed-data.js              ← SharedArray loader for product/category IDs
+├── auth-stress-solo.js           ← Story 1A: login_flow in isolation
+├── auth-stress.js                ← Story 1B: register + session + forgot + frontend (simultaneous)
+├── catalog-stress-solo.js        ← Story 2A: product_list in isolation
+├── catalog-stress.js             ← Story 2B: search + filter + photo + frontend (simultaneous)
+├── checkout-stress-solo.js       ← Story 3A: braintree/token in isolation
+├── checkout-stress.js            ← Story 3B: full checkout + orders + frontend (simultaneous)
+├── admin-stress-solo.js          ← Story 4A: all-orders poll in isolation
+├── admin-stress.js               ← Story 4B: CRUD writes + admin dashboard frontend (simultaneous)
+├── mixed-stress.js               ← Story 5: Realistic combined workload (simultaneous by design)
+└── docker-compose.yml            ← InfluxDB + Grafana observability stack
 ```
 
 ---
@@ -91,23 +96,63 @@ Or ask Copilot in chat (with MCP active):
 - `POST /api/v1/auth/forgot-password` — bcrypt cost under concurrent requests (most CPU-intensive)
 - Frontend: `http://localhost:3000/login` and `/register` pages render under backend stress
 
-### k6 scenarios
+### Scenario A — Solo: `login_flow` *(most-used endpoint)*
+`POST /api/v1/auth/login` is called on every authenticated action — it is the highest-traffic auth endpoint and the most likely bcrypt CPU bottleneck. Run it alone first to get a clean isolated breaking point.
+
+```js
+// auth-stress-solo.js
+scenarios: {
+  login_flow: {
+    executor: 'ramping-vus',
+    stages: [
+      { duration: '1m', target: 50  },  // ramp to step 1
+      { duration: '3m', target: 50  },  // hold step 1 — observe baseline
+      { duration: '1m', target: 100 },  // ramp to step 2
+      { duration: '3m', target: 100 },  // hold step 2
+      { duration: '1m', target: 150 },  // ramp to step 3
+      { duration: '3m', target: 150 },  // hold step 3 — breaking point expected here
+    ],
+  },
+}
 ```
-register_flow    : ramp 0→50 VUs  over 2 min
-login_flow       : ramp 0→150 VUs over 3 min
-session_check    : constant 200 VUs
-forgot_password  : spike 100 VUs for 1 min
-login_page_load  : 50 VUs hitting frontend /login
-register_page_load: 50 VUs hitting frontend /register
+
+### Scenario B — Combined: all endpoints + frontend *(simultaneous)*
+All scenarios run simultaneously from time zero — including `login_flow` from Scenario A. VU ratios reflect realistic auth traffic: session_check fires on every protected page load (many per session), while login happens only once per session; forgot-password is rare.
+
+```js
+// auth-stress.js — all run simultaneously, no startTime
+scenarios: {
+  session_check:      { executor: 'ramping-vus', stages: [150→hold, 250→hold, 400→hold] }, // every protected nav
+  login_flow:         { executor: 'ramping-vus', stages: [80→hold, 160→hold, 300→hold] },
+  login_page_load:    { executor: 'ramping-vus', stages: [60→hold, 120→hold, 200→hold] },  // frontend
+  register_flow:      { executor: 'ramping-vus', stages: [20→hold, 40→hold, 60→hold] },
+  register_page_load: { executor: 'ramping-vus', stages: [15→hold, 30→hold, 50→hold] },   // frontend
+  forgot_password:    { executor: 'ramping-vus', stages: [5→hold, 10→hold, 20→hold] },    // rarest
+}
+```
+
+```
+session_check      : steps 150 → 250 → 400 VUs, hold 3 min each  ← every protected page nav (many/session)
+login_flow         : steps 80 → 160 → 300 VUs,  hold 3 min each  ← once per session
+login_page_load    : steps 60 → 120 → 200 VUs,  hold 2 min each  [frontend]
+register_flow      : steps 20 → 40 → 60 VUs,    hold 3 min each
+register_page_load : steps 15 → 30 → 50 VUs,    hold 2 min each  [frontend]
+forgot_password    : steps 5 → 10 → 20 VUs,     hold 3 min each  ← rare, ~2% of logins
 ```
 
 ### Thresholds
+Values are derived from **user-perceived experience**, not implementation details. The user does not know or care about bcrypt cost, DB query plans, or SPA bundle size — they only feel the delay. Benchmark used: Nielsen Norman Group — < 500ms feels responsive, < 1000ms acceptable, < 3000ms borderline (page load standard), > 3000ms users start abandoning.
+
 ```js
-'http_req_duration{scenario:login_flow}':       ['p(95)<300'],
-'http_req_duration{scenario:forgot_password}':  ['p(95)<2000'],
-'http_req_duration{scenario:login_page_load}':  ['p(95)<2000'],
-'http_req_failed':                              ['rate<0.01'],
-'checks':                                       ['rate>0.99'],
+'http_req_duration{scenario:session_check}':      ['p(95)<500'],   // background call — but slow = every page nav feels sluggish
+'http_req_duration{scenario:login_flow}':         ['p(95)<1000'],  // user clicks Login, expects snappy response
+'http_req_duration{scenario:register_flow}':      ['p(95)<1500'],  // user clicks Register, slightly more patient
+'http_req_duration{scenario:forgot_password}':    ['p(95)<3000'],  // user knows an email is being triggered — tolerates wait
+'http_req_duration{scenario:login_page_load}':    ['p(95)<3000'],  // standard web page load guideline
+'http_req_duration{scenario:register_page_load}': ['p(95)<3000'],  // standard web page load guideline
+// Global
+'http_req_failed':                                ['rate<0.01'],   // <1% HTTP errors (connection fail, timeout, 4xx/5xx)
+'checks':                                         ['rate>0.99'],   // 99% of explicit assertions (status code, body content) must pass
 ```
 
 ### MCP usage in this story
@@ -139,16 +184,52 @@ register_page_load: 50 VUs hitting frontend /register
 - Frontend: `http://localhost:3000/` — triggers 4 simultaneous API calls on mount (highest risk page)
 - Frontend: `http://localhost:3000/categories` and `/search/shirt`
 
-### k6 scenarios
+### Scenario A — Solo: `product_list` *(most-used endpoint)*
+`GET /api/v1/product/product-list/:page` is called on every homepage mount and is the single highest-traffic read endpoint. Run it alone to find the MongoDB read throughput ceiling before introducing competing load.
+
+```js
+// catalog-stress-solo.js
+scenarios: {
+  product_list: {
+    executor: 'ramping-vus',
+    stages: [
+      { duration: '1m', target: 100 },  // ramp to step 1
+      { duration: '3m', target: 100 },  // hold step 1
+      { duration: '1m', target: 200 },  // ramp to step 2
+      { duration: '3m', target: 200 },  // hold step 2
+      { duration: '1m', target: 300 },  // ramp to step 3
+      { duration: '3m', target: 300 },  // hold step 3 — breaking point expected here
+    ],
+  },
+}
 ```
-product_list     : ramp 0→300 VUs, pages 1–5 random
-search_stress    : 100 VUs, 20-keyword bank
-filter_stress    : 100 VUs, random category+price payloads
-photo_stress     : 50 VUs, binary endpoint
-related_products : 50 VUs
-homepage_load    : 100 VUs hitting frontend /
-category_page    : 50 VUs hitting frontend /categories
-search_page      : 50 VUs hitting frontend /search/shirt
+
+### Scenario B — Combined: all endpoints + frontend *(simultaneous)*
+All scenarios run simultaneously from time zero — including `product_list` from Scenario A. VU ratios reflect realistic catalog traffic: product listing and homepage are highest-volume; related-products is lowest.
+
+```js
+// catalog-stress.js — all run simultaneously, no startTime
+scenarios: {
+  product_list:    { executor: 'ramping-vus', stages: [150→hold, 200→hold, 300→hold] }, // most frequent
+  homepage_load:   { executor: 'ramping-vus', stages: [100→hold, 150→hold, 200→hold] }, // frontend
+  photo_stress:    { executor: 'ramping-vus', stages: [70→hold, 100→hold, 150→hold] },  // one per product
+  search_stress:   { executor: 'ramping-vus', stages: [30→hold, 50→hold, 80→hold] },
+  filter_stress:   { executor: 'ramping-vus', stages: [25→hold, 40→hold, 60→hold] },
+  category_page:   { executor: 'ramping-vus', stages: [15→hold, 25→hold, 40→hold] },   // frontend
+  search_page:     { executor: 'ramping-vus', stages: [10→hold, 20→hold, 30→hold] },   // frontend
+  related_products:{ executor: 'ramping-vus', stages: [10→hold, 20→hold, 30→hold] },
+}
+```
+
+```
+product_list     : steps 150 → 200 → 300 VUs, hold 3 min each  ← every homepage mount
+homepage_load    : steps 100 → 150 → 200 VUs, hold 3 min each  [frontend /]
+photo_stress     : steps 70 → 100 → 150 VUs,  hold 3 min each  ← one per product in listing
+search_stress    : steps 30 → 50 → 80 VUs,    hold 3 min each, 20-keyword bank
+filter_stress    : steps 25 → 40 → 60 VUs,    hold 3 min each, random category+price payloads
+category_page    : steps 15 → 25 → 40 VUs,    hold 2 min each  [frontend /categories]
+search_page      : steps 10 → 20 → 30 VUs,    hold 2 min each  [frontend /search/shirt]
+related_products : steps 10 → 20 → 30 VUs,    hold 2 min each
 ```
 
 ### Key check on frontend
@@ -161,11 +242,20 @@ check(res, {
 ```
 
 ### Thresholds
+Values derived from user experience expectations. Photo uses p(99) because images load progressively — a user tolerates a few slow images; it is the stall on ALL images that breaks UX.
+
 ```js
-'http_req_duration{scenario:photo_stress}':    ['p(99)<1000'],
-'http_req_duration{scenario:product_list}':    ['p(95)<200'],
-'http_req_duration{scenario:homepage_load}':   ['p(95)<3000'],
-'checks{scenario:homepage_load}':              ['rate>0.95'],
+'http_req_duration{scenario:product_list}':    ['p(95)<500'],   // user browses shop, expects products to appear quickly
+'http_req_duration{scenario:related_products}':['p(95)<500'],   // secondary content on product page
+'http_req_duration{scenario:search_stress}':   ['p(95)<1000'],  // user typed a query, expects results within 1 s
+'http_req_duration{scenario:filter_stress}':   ['p(95)<1000'],  // user applied a filter, expects quick results
+'http_req_duration{scenario:photo_stress}':    ['p(99)<2000'],  // images load progressively — a few slow ones are OK, all slow is not
+'http_req_duration{scenario:homepage_load}':   ['p(95)<3000'],  // standard web page load guideline (first meaningful paint)
+'http_req_duration{scenario:category_page}':   ['p(95)<3000'],  // standard web page load guideline
+'http_req_duration{scenario:search_page}':     ['p(95)<3000'],  // standard web page load guideline
+// Global
+'http_req_failed':                             ['rate<0.01'],   // <1% HTTP errors
+'checks':                                      ['rate>0.95'],   // 95% of body/status assertions must pass
 ```
 
 ### MCP usage in this story
@@ -195,13 +285,46 @@ check(res, {
 - Frontend: `http://localhost:3000/cart` — calls `GET /braintree/token` on mount; if slow, page hangs
 - Frontend: `http://localhost:3000/product/:slug` — Add to Cart precursor
 
-### k6 scenarios
+### Scenario A — Solo: `token_ramp` *(most-used endpoint)*
+`GET /api/v1/product/braintree/token` fires on every cart page mount — even just browsing `/cart` without buying triggers it. It is the highest-frequency checkout endpoint. Run it alone to isolate Braintree SDK latency from full-journey noise.
+
+```js
+// checkout-stress-solo.js
+scenarios: {
+  token_ramp: {
+    executor: 'ramping-vus',
+    stages: [
+      { duration: '1m', target: 50  },  // ramp to step 1
+      { duration: '3m', target: 50  },  // hold step 1
+      { duration: '1m', target: 100 },  // ramp to step 2
+      { duration: '3m', target: 100 },  // hold step 2
+      { duration: '1m', target: 200 },  // ramp to step 3
+      { duration: '3m', target: 200 },  // hold step 3 — breaking point expected here
+    ],
+  },
+}
 ```
-full_checkout    : 50 VUs, full journey with group() per step
-token_hammer     : 200 VUs on /braintree/token only
-orders_poll      : 100 VUs on /auth/orders
-cart_page_load   : 80 VUs hitting frontend /cart
-product_detail   : 50 VUs hitting frontend /product/:slug
+
+### Scenario B — Combined: all endpoints + frontend *(simultaneous)*
+All scenarios run simultaneously from time zero — including `token_ramp` from Scenario A. VU ratios reflect realistic checkout traffic: token requests and cart browsing vastly outnumber actual purchases.
+
+```js
+// checkout-stress.js — all run simultaneously, no startTime
+scenarios: {
+  token_ramp:     { executor: 'ramping-vus', stages: [80→hold, 120→hold, 200→hold] },  // every cart mount
+  cart_page_load: { executor: 'ramping-vus', stages: [60→hold, 90→hold, 150→hold] },   // frontend
+  product_detail: { executor: 'ramping-vus', stages: [30→hold, 50→hold, 80→hold] },    // frontend
+  orders_ramp:    { executor: 'ramping-vus', stages: [20→hold, 40→hold, 60→hold] },
+  full_checkout:  { executor: 'ramping-vus', stages: [10→hold, 15→hold, 25→hold] },    // only real buyers
+}
+```
+
+```
+token_ramp       : steps 80 → 120 → 200 VUs, hold 3 min each  ← every cart page mount
+cart_page_load   : steps 60 → 90 → 150 VUs,  hold 3 min each  [frontend /cart]
+product_detail   : steps 30 → 50 → 80 VUs,   hold 2 min each  [frontend /product/:slug]
+orders_ramp      : steps 20 → 40 → 60 VUs,   hold 3 min each
+full_checkout    : steps 10 → 15 → 25 VUs,   hold 3 min each  ← only actual purchases (~5%)
 ```
 
 ### Notes
@@ -210,10 +333,17 @@ product_detail   : 50 VUs hitting frontend /product/:slug
 - Use `group()` per step so Grafana shows per-step breakdown
 
 ### Thresholds
+Values derived from user experience. `token_ramp` is invisible to the user but blocks the cart page from rendering — a slow token call means the user stares at a blank cart. `full_checkout` uses a checks rate rather than latency because the user only cares whether the payment succeeded, not how fast each internal step was.
+
 ```js
-'http_req_duration{group:::braintree_token}':  ['p(95)<500'],
-'http_req_duration{scenario:cart_page_load}':  ['p(95)<3000'],
-'checks{scenario:full_checkout}':              ['rate>0.98'],
+'http_req_duration{scenario:token_ramp}':     ['p(95)<1000'],  // invisible call but blocks cart page render
+'http_req_duration{scenario:orders_ramp}':    ['p(95)<1000'],  // user viewing their order history
+'http_req_duration{scenario:cart_page_load}': ['p(95)<3000'],  // standard web page load guideline
+'http_req_duration{scenario:product_detail}': ['p(95)<3000'],  // standard web page load guideline
+// Payment journey — success rate matters more than individual step latency
+'checks{scenario:full_checkout}':             ['rate>0.98'],   // 98% of payment journeys must complete without any step failing
+// Global
+'http_req_failed':                            ['rate<0.01'],   // <1% HTTP-level errors
 ```
 
 ### MCP usage in this story
@@ -244,22 +374,63 @@ product_detail   : 50 VUs hitting frontend /product/:slug
 - Frontend: `http://localhost:3000/dashboard/admin` — admin dashboard under write load
 - Frontend: `http://localhost:3000/dashboard/admin/products` — product list competing with writes
 
-### k6 scenarios
+### Scenario A — Solo: `all_orders_poll` *(most-used endpoint)*
+`GET /api/v1/auth/all-orders` is the most frequently polled admin endpoint — the admin dashboard auto-refreshes it. Run it alone to baseline the read performance of the full orders collection before write contention is introduced.
+
+```js
+// admin-stress-solo.js
+scenarios: {
+  all_orders_poll: {
+    executor: 'ramping-vus',
+    stages: [
+      { duration: '1m', target: 15 },  // ramp to step 1
+      { duration: '3m', target: 15 },  // hold step 1
+      { duration: '1m', target: 30 },  // ramp to step 2
+      { duration: '3m', target: 30 },  // hold step 2
+      { duration: '1m', target: 50 },  // ramp to step 3
+      { duration: '3m', target: 50 },  // hold step 3 — large result set ceiling expected here
+    ],
+  },
+}
 ```
-category_churn       : 20 VUs, create→update→delete loop
-product_create       : 10 VUs, multipart http.file() upload
-order_status_updates : 30 VUs, concurrent PUT order status
-all_orders_poll      : 50 VUs, GET all-orders large result set
-admin_dashboard      : 20 VUs frontend /dashboard/admin
-admin_products_page  : 20 VUs frontend /dashboard/admin/products
+
+### Scenario B — Combined: all endpoints + frontend *(simultaneous)*
+All scenarios run simultaneously from time zero — including `all_orders_poll` from Scenario A. VU ratios reflect realistic admin traffic: order polling and dashboard views are most frequent; new product uploads are rarest.
+
+```js
+// admin-stress.js — all run simultaneously, no startTime
+scenarios: {
+  all_orders_poll:      { executor: 'ramping-vus', stages: [30→hold, 40→hold, 50→hold] },  // dashboard auto-refresh
+  admin_dashboard:      { executor: 'ramping-vus', stages: [25→hold, 35→hold, 45→hold] },  // frontend
+  admin_products_page:  { executor: 'ramping-vus', stages: [20→hold, 25→hold, 35→hold] },  // frontend
+  order_status_updates: { executor: 'ramping-vus', stages: [15→hold, 20→hold, 30→hold] },
+  category_churn:       { executor: 'ramping-vus', stages: [7→hold, 10→hold, 15→hold] },
+  product_create:       { executor: 'ramping-vus', stages: [3→hold, 5→hold, 8→hold] },     // rarest
+}
+```
+
+```
+all_orders_poll      : steps 30 → 40 → 50 VUs,  hold 3 min each  ← dashboard auto-refresh
+admin_dashboard      : steps 25 → 35 → 45 VUs,  hold 2 min each  [frontend /dashboard/admin]
+admin_products_page  : steps 20 → 25 → 35 VUs,  hold 2 min each  [frontend /dashboard/admin/products]
+order_status_updates : steps 15 → 20 → 30 VUs,  hold 3 min each
+category_churn       : steps 7 → 10 → 15 VUs,   hold 3 min each
+product_create       : steps 3 → 5 → 8 VUs,     hold 3 min each  ← rarest, new product uploads
 ```
 
 ### Thresholds
+Values derived from admin user experience. Admins are power users and slightly more tolerant, but still expect responsive feedback. A slow order status update (admin clicks a button and waits) is frustrating regardless of the implementation.
+
 ```js
-'http_req_duration{scenario:product_create}':       ['p(95)<500'],
-'http_req_duration{scenario:order_status_updates}': ['p(95)<200'],
-'http_req_duration{scenario:admin_dashboard}':      ['p(95)<3000'],
-'checks{scenario:admin_dashboard}':                 ['rate>0.95'],
+'http_req_duration{scenario:order_status_updates}': ['p(95)<1000'],  // admin clicks Update Status, expects immediate confirmation
+'http_req_duration{scenario:category_churn}':       ['p(95)<1000'],  // admin doing CRUD, expects responsive feedback
+'http_req_duration{scenario:all_orders_poll}':      ['p(95)<2000'],  // large dataset view — admin knows this takes a moment
+'http_req_duration{scenario:product_create}':       ['p(95)<3000'],  // file upload — user expects it to take a moment
+'http_req_duration{scenario:admin_dashboard}':      ['p(95)<3000'],  // standard web page load guideline
+'http_req_duration{scenario:admin_products_page}':  ['p(95)<3000'],  // standard web page load guideline
+// Global
+'http_req_failed':                                  ['rate<0.01'],   // <1% HTTP errors
+'checks':                                           ['rate>0.95'],   // 95% of admin action assertions (status, body) must pass
 ```
 
 ### MCP usage in this story
@@ -283,23 +454,51 @@ admin_products_page  : 20 VUs frontend /dashboard/admin/products
 **Estimated work:** 4 hrs
 
 ### What is being tested
-All Stories 1–4 combined in realistic traffic-weighted proportions:
+All Stories 1–4 combined as independent scenarios running simultaneously, each with its own staircase VU ramp. Ratios are weighted by realistic traffic: catalog reads dominate, auth checks are high-frequency, checkout is low-volume, admin is the lightest.
 
-| Scenario | Traffic % | VUs at peak | Endpoints |
-|---|---|---|---|
-| Anonymous browsing (backend) | 35% | 105 | catalog, search, filters |
-| Homepage/category (frontend) | 25% | 75 | `localhost:3000/`, `/categories`, `/search/*` |
-| Authenticated checkout (backend) | 20% | 60 | login → token → payment → orders |
-| Cart/product pages (frontend) | 10% | 30 | `/cart`, `/product/:slug` |
-| Admin operations (backend) | 10% | 30 | CRUD writes, all-orders poll |
+### Per-scenario step-up profiles
+```js
+// mixed-stress.js — all scenarios run simultaneously, no startTime
+scenarios: {
+  // Catalog (heaviest — anonymous browsing dominates)
+  product_list:         { executor: 'ramping-vus', stages: [100→hold, 200→hold, 300→hold] },
+  homepage_load:        { executor: 'ramping-vus', stages: [80→hold, 150→hold, 220→hold] },  // frontend
+  photo_stress:         { executor: 'ramping-vus', stages: [50→hold, 100→hold, 150→hold] },
 
-### Ramp profile
+  // Auth (high-frequency — every protected page)
+  session_check:        { executor: 'ramping-vus', stages: [60→hold, 120→hold, 180→hold] },
+  login_flow:           { executor: 'ramping-vus', stages: [30→hold, 60→hold, 90→hold] },
+  login_page_load:      { executor: 'ramping-vus', stages: [25→hold, 50→hold, 80→hold] },   // frontend
+
+  // Checkout (mid-frequency — only cart visitors)
+  token_ramp:           { executor: 'ramping-vus', stages: [20→hold, 40→hold, 60→hold] },
+  cart_page_load:       { executor: 'ramping-vus', stages: [15→hold, 30→hold, 50→hold] },   // frontend
+  full_checkout:        { executor: 'ramping-vus', stages: [5→hold, 10→hold, 20→hold] },
+
+  // Admin (lightest — small user base)
+  all_orders_poll:      { executor: 'ramping-vus', stages: [10→hold, 15→hold, 20→hold] },
+  admin_dashboard:      { executor: 'ramping-vus', stages: [8→hold, 12→hold, 18→hold] },    // frontend
+  order_status_updates: { executor: 'ramping-vus', stages: [5→hold, 8→hold, 12→hold] },
+}
 ```
-0 → 50 VUs   (3 min)   warm-up
-50 → 150 VUs (5 min)   stress begins
-150 → 300 VUs (5 min)  high stress
-300 VUs held  (7 min)  find ceiling
-300 → 0 VUs   (5 min)  recovery
+
+```
+─── Catalog (dominant) ───
+product_list         : steps 100 → 200 → 300 VUs  ← every homepage mount
+homepage_load        : steps 80 → 150 → 220 VUs   [frontend /]
+photo_stress         : steps 50 → 100 → 150 VUs   ← one per listed product
+─── Auth (high-frequency) ───
+session_check        : steps 60 → 120 → 180 VUs   ← every protected nav (many/session)
+login_flow           : steps 30 → 60 → 90 VUs     ← once per session
+login_page_load      : steps 25 → 50 → 80 VUs     [frontend /login]
+─── Checkout (mid-frequency) ───
+token_ramp           : steps 20 → 40 → 60 VUs     ← every cart mount
+cart_page_load       : steps 15 → 30 → 50 VUs     [frontend /cart]
+full_checkout        : steps 5 → 10 → 20 VUs      ← only actual buyers
+─── Admin (lightest) ───
+all_orders_poll      : steps 10 → 15 → 20 VUs     ← dashboard auto-refresh
+admin_dashboard      : steps 8 → 12 → 18 VUs      [frontend /dashboard/admin]
+order_status_updates : steps 5 → 8 → 12 VUs
 ```
 
 ### Custom k6 Trend metrics
@@ -311,10 +510,31 @@ const homepageDuration = new Trend('homepage_duration');   // frontend
 const cartPageDuration = new Trend('cart_page_duration');  // frontend
 ```
 
-### Breaking point criteria — stop increasing VUs when ANY of:
-- API OR frontend error rate exceeds **1%**
-- `p95` for homepage load exceeds **5 s** (page unusable)
-- `p95` for login exceeds **1 s** (auth bottleneck)
+### Thresholds
+Same UX-based values as Stories 1–4. User experience expectations do not change in a mixed workload.
+
+```js
+// Catalog
+'http_req_duration{scenario:product_list}':         ['p(95)<500'],
+'http_req_duration{scenario:photo_stress}':         ['p(99)<2000'],
+'http_req_duration{scenario:homepage_load}':        ['p(95)<3000'],
+// Auth
+'http_req_duration{scenario:session_check}':        ['p(95)<500'],
+'http_req_duration{scenario:login_flow}':           ['p(95)<1000'],
+'http_req_duration{scenario:login_page_load}':      ['p(95)<3000'],
+// Checkout
+'http_req_duration{scenario:token_ramp}':           ['p(95)<1000'],
+'http_req_duration{scenario:cart_page_load}':       ['p(95)<3000'],
+'checks{scenario:full_checkout}':                   ['rate>0.98'],
+// Admin
+'http_req_duration{scenario:all_orders_poll}':      ['p(95)<2000'],
+'http_req_duration{scenario:admin_dashboard}':      ['p(95)<3000'],
+'http_req_duration{scenario:order_status_updates}': ['p(95)<1000'],
+// Global
+'http_req_failed':                                  ['rate<0.01'],
+```
+
+### Breaking point criteria — stop increasing VUs when ANY threshold is breached
 
 ### MCP usage in this story
 - `validate_script`: Validates all imported helpers and custom Trend metric declarations
@@ -333,16 +553,135 @@ const cartPageDuration = new Trend('cart_page_duration');  // frontend
 
 ---
 
+## MCP-Driven Breaking Point Discovery
+
+Because no baseline exists, VU ceilings are unknown. The strategy is:
+
+1. **Probe only `POST /api/v1/auth/login`** using a permanent calibration script with **30 s hold durations** — finds login's ceiling in ~5–10 min.
+2. **Derive all other scenario ceilings proportionally** from that one number using the ratio table below.
+3. **Copilot writes all final stress scripts** with the real ceilings baked in, validates them, and hands them back ready to submit.
+
+You paste one prompt and walk away. Login is the right probe target because it is CPU-bound (bcrypt) — if the server can handle N concurrent logins, everything lighter (reads, JWT checks) will handle more, and everything heavier (forgot-password, full checkout) will handle less. It is the natural calibration anchor.
+
+### Calibration script — `tests/stress/calibration-probe.js`
+
+This is a **permanent file** kept in the repo. It is not a stress test submission — its only job is to find login's VU ceiling fast so the real scripts can use accurate numbers. The comments at the top make this explicit.
+
+```js
+/**
+ * calibration-probe.js
+ *
+ * PURPOSE: Fast VU ceiling finder for POST /api/v1/auth/login.
+ * This is NOT a stress test submission. It uses 30-second hold durations
+ * (instead of the 3-minute holds in the real scripts) so the doubling loop
+ * completes in ~5-10 minutes rather than ~30 minutes.
+ *
+ * HOW TO USE:
+ *   Copilot runs this via mcp_k6_run_script, doubling TARGET_VUS after each
+ *   passing run until p(95) > 300ms or error rate >= 1%. The last passing
+ *   VU count is L — the login ceiling. All other scenario ceilings are
+ *   derived from L using the ratio table in PLAN.md.
+ *
+ * DO NOT submit this file as a stress test result.
+ */
+
+import http from 'k6/http';
+import { check } from 'k6';
+
+const TARGET_VUS = __ENV.TARGET_VUS ? parseInt(__ENV.TARGET_VUS) : 50;
+
+export const options = {
+  scenarios: {
+    login_probe: {
+      executor: 'ramping-vus',
+      stages: [
+        { duration: '30s', target: TARGET_VUS     },  // ramp to ceiling candidate
+        { duration: '30s', target: TARGET_VUS     },  // hold — read p(95) and error rate
+        { duration: '10s', target: 0              },  // ramp down
+      ],
+    },
+  },
+  thresholds: {
+    'http_req_duration{scenario:login_probe}': ['p(95)<300'],
+    'http_req_failed':                         ['rate<0.01'],
+  },
+};
+
+export default function () {
+  const res = http.post(
+    'http://localhost:8080/api/v1/auth/login',
+    JSON.stringify({ email: 'testuser@test.com', password: 'Test@1234' }),
+    { headers: { 'Content-Type': 'application/json' } },
+  );
+  check(res, {
+    'status 200':      (r) => r.status === 200,
+    'has token':       (r) => r.json('token') !== undefined,
+  });
+}
+```
+
+`TARGET_VUS` is passed as an env var so Copilot can double it each run without editing the file:
+```bash
+k6 run tests/stress/calibration-probe.js -e TARGET_VUS=50
+k6 run tests/stress/calibration-probe.js -e TARGET_VUS=100
+k6 run tests/stress/calibration-probe.js -e TARGET_VUS=200
+# ... until threshold is breached
+```
+
+### Deriving all scenarios from L (login ceiling)
+
+Once L is known, every other scenario ceiling = round(L × multiplier, 10), minimum 10.
+
+| Scenario | Multiplier | Reasoning |
+|---|---|---|
+| `session_check` | 4× L | Pure JWT middleware — no DB, no crypto |
+| `login_flow` | 1× L | **L — the baseline** |
+| `register_flow` | 0.5× L | `bcrypt.hash` is slightly slower than `compare` |
+| `forgot_password` | 0.15× L | bcrypt + DB + potential email step |
+| `product_list` | 5× L | Indexed DB read, no auth overhead |
+| `search / filter` | 2× L | More complex query but no crypto |
+| `photo_stress` | 3× L | Disk read only, no CPU crypto |
+| `braintree/token` | 1.5× L | External SDK call — similar order of magnitude to login |
+| `full_checkout` | 0.1× L | Multi-step journey including Braintree payment |
+| `all_orders_poll` | 2× L | Large result set read, similar to product_list |
+| `product_create` | 0.3× L | Multipart upload + image write to disk |
+| Frontend pages | 2× L | React SPA — heavier than API but no crypto |
+
+### Prompt to paste into Copilot chat (run once, covers all stories)
+
+> My app is running on localhost:8080. The file `tests/stress/calibration-probe.js` is a k6 script that probes `POST /api/v1/auth/login` with a configurable `TARGET_VUS` env var.
+>
+> Run the following doubling loop using mcp_k6_run_script:
+> 1. Run with `-e TARGET_VUS=50`. Read p(95) and error rate from the output.
+> 2. If p(95) < 300ms AND error rate < 1%: double TARGET_VUS and run again.
+> 3. If either threshold is breached: the previous TARGET_VUS value is L (login ceiling). Stop the loop and report L.
+>
+> Then apply the ratio table in `tests/stress/PLAN.md` to derive VU ceilings for every scenario across all 5 stories.
+>
+> Using those ceilings, write the final versions of all 9 stress scripts:
+> `auth-stress-solo.js`, `auth-stress.js`, `catalog-stress-solo.js`, `catalog-stress.js`,
+> `checkout-stress-solo.js`, `checkout-stress.js`, `admin-stress-solo.js`, `admin-stress.js`, `mixed-stress.js`
+>
+> Each script must use the staircase pattern (ramp → 3 min hold → ramp → 3 min hold → ramp → 3 min hold) with 3 steps reaching the derived ceiling at step 3. Use mcp_k6_validate_script on every script before showing it to me. Do not show me a script that fails validation.
+
+### What Copilot delivers back
+
+1. L — the confirmed login ceiling VU count
+2. A derived ceiling table for all scenarios across all 5 stories
+3. All 9 final stress scripts, each validated with `validate_script`
+
+---
+
 ## Running All Stories
 
 ```bash
-# Individual story
+# Individual story (manual)
 k6 run tests/stress/auth-stress.js --out influxdb=http://localhost:8086/k6
 
-# Or ask Copilot directly with MCP active:
-# "Validate auth-stress.js then run it with 100 VUs for 3 minutes"
-# "Run catalog-stress.js and tell me which endpoint hit the p95 threshold first"
-# "Run mixed-stress.js and find the VU count where the error rate exceeds 1%"
+# Via MCP — paste into Copilot chat with app running:
+# "Validate auth-stress.js then run the calibration loop and give me a breaking point table"
+# "Run catalog-stress-solo.js and find the exact VU count where product_list first breaches p(95)<200ms"
+# "Run mixed-stress.js calibration loop across all 12 scenarios and report which component fails first"
 ```
 
 ---
