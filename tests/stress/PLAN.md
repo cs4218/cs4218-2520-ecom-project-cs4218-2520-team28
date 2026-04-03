@@ -712,10 +712,10 @@ Once L is known, every other scenario ceiling = round(L × multiplier, 10), mini
 
 > My app is running on localhost:8080. The file `tests/stress/calibration-probe.js` is a k6 script that probes `POST /api/v1/auth/login` with a configurable `TARGET_VUS` env var.
 >
-> Run the following doubling loop using mcp_k6_run_script:
-> 1. Run with `-e TARGET_VUS=50`. Read p(95) and error rate from the output.
-> 2. If p(95) < 300ms AND error rate < 1%: double TARGET_VUS and run again.
-> 3. If either threshold is breached: the previous TARGET_VUS value is L (login ceiling). Stop the loop and report L.
+> Run the following doubling loop using mcp_k6_run_script. Use the `--web-dashboard` flag only — do NOT use `--out influxdb` for any of these probe runs so calibration data does not pollute my InfluxDB submission results.
+> 1. Run with `-e TARGET_VUS=50`. Read p(95) and error rate from the metrics summary in the output.
+> 2. If p(95) < 1000ms AND error rate < 1%: double TARGET_VUS and run again.
+> 3. If either is breached: the previous TARGET_VUS value is L (login ceiling). Stop and report L.
 >
 > Then apply the ratio table in `tests/stress/PLAN.md` to derive VU ceilings for every scenario across all 5 stories.
 >
@@ -724,6 +724,8 @@ Once L is known, every other scenario ceiling = round(L × multiplier, 10), mini
 > `checkout-stress-solo.js`, `checkout-stress.js`, `admin-stress-solo.js`, `admin-stress.js`, `mixed-stress.js`
 >
 > Each script must use the staircase pattern (ramp → 3 min hold → ramp → 3 min hold → ramp → 3 min hold) with 3 steps reaching the derived ceiling at step 3. Use mcp_k6_validate_script on every script before showing it to me. Do not show me a script that fails validation.
+
+> **Note:** You do not need to observe localhost:5665. `mcp_k6_run_script` returns the full metrics summary as text in this chat — read p(95) and error rate from that output directly.
 
 ### What Copilot delivers back
 
@@ -735,16 +737,20 @@ Once L is known, every other scenario ceiling = round(L × multiplier, 10), mini
 
 ## Running All Stories
 
-Always include `--out influxdb=http://localhost:8086/k6` so every run is recorded in Grafana.
+### Who runs what — keeping InfluxDB clean
+
+| Runner | Flag | Why |
+|---|---|---|
+| **Copilot via MCP** (calibration, script generation) | `--web-dashboard` | Probe runs must NOT pollute InfluxDB with non-submission data |
+| **You** (final submission runs) | `--out influxdb=http://localhost:8086/k6` | Only your real stress results go into Grafana |
+
+Copilot reads metrics from the terminal summary text returned by `mcp_k6_run_script` — it does **not** need to open localhost:5665 and no Playwright MCP is required.
+
+### Your submission runs (InfluxDB + Grafana)
 
 ```bash
-# Start the stack first (if not already running)
+# Start the observability stack first
 docker-compose -f tests/stress/docker-compose.yml up -d
-
-# Calibration probe (find login ceiling first)
-k6 run tests/stress/calibration-probe.js -e TARGET_VUS=50  --out influxdb=http://localhost:8086/k6
-k6 run tests/stress/calibration-probe.js -e TARGET_VUS=100 --out influxdb=http://localhost:8086/k6
-# ...double until threshold breaches
 
 # Story 1 — Auth
 k6 run tests/stress/auth-stress-solo.js --out influxdb=http://localhost:8086/k6
@@ -766,12 +772,7 @@ k6 run tests/stress/admin-stress.js      --out influxdb=http://localhost:8086/k6
 k6 run tests/stress/mixed-stress.js --out influxdb=http://localhost:8086/k6
 ```
 
-After each run open `http://localhost:3001`, switch to the k6 dashboard, and **screenshot the graphs before running the next story** — each run overwrites the "current" view but all data is retained in InfluxDB and can be filtered by time range.
-
-**Via MCP (Copilot writes the `--out` flag automatically):**
-> "Run auth-stress.js with InfluxDB output and show me the p95 and error rate at peak VUs"
-> "Run catalog-stress-solo.js and find the exact VU count where product_list first breaches p(95)<500ms"
-> "Run mixed-stress.js and tell me which scenario's threshold was breached first"
+After each run open `http://localhost:3001`, switch to the k6 dashboard, and **screenshot before running the next story**. All data is retained in InfluxDB and filterable by time range for side-by-side comparison.
 
 ---
 
