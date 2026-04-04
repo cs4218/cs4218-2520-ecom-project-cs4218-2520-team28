@@ -128,10 +128,17 @@ You now have a dashboard with:
 
 ### Step 4 — Run any script with metrics streaming to InfluxDB
 
-```bash
-k6 run tests/stress/auth-stress.js --out influxdb=http://localhost:8086/k6
+**PowerShell** (saves output to a timestamped file and shows it live):
+```powershell
+k6 run tests/stress/auth-stress.js --out influxdb=http://localhost:8086/k6 2>&1 | Tee-Object -FilePath "tests/stress/results/auth-stress.txt"
 ```
 
+**bash / Git Bash** (same idea):
+```bash
+k6 run tests/stress/auth-stress.js --out influxdb=http://localhost:8086/k6 2>&1 | tee "tests/stress/results/auth-stress.txt"
+```
+
+The file captures everything k6 prints — scenario progress, threshold pass/fail summary, and the final metrics table.  
 While the test runs, open `http://localhost:3001` to see live graphs updating.
 After the test ends the data stays — **take a screenshot for your submission evidence**.
 
