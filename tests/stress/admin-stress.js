@@ -255,20 +255,32 @@ export function setup() {
 
   // Obtain admin JWT to fetch a sample order ID.
   const token = getToken(BASE_URL, ADMIN_EMAIL, ADMIN_PASS);
+  if (!token) {
+    throw new Error(
+      'Admin stress probe login failed. Verify stress.admin@k6.test exists and the password matches ADMIN_PASS.'
+    );
+  }
+
+  const adminAuthRes = http.get(`${BASE_URL}/api/v1/auth/admin-auth`, {
+    headers: { authorization: token },
+  });
+  if (adminAuthRes.status !== 200) {
+    throw new Error(
+      'Admin stress probe is not an admin. Set role=1 for stress.admin@k6.test before running this script.'
+    );
+  }
 
   // Fetch all orders to find an ID to use for status update stress.
   let sampleOrderId = null;
-  if (token) {
-    const ordersRes = http.get(`${BASE_URL}/api/v1/auth/all-orders`, {
-      headers: { authorization: token },
-    });
-    try {
-      const body = JSON.parse(ordersRes.body);
-      if (Array.isArray(body.orders) && body.orders.length > 0) {
-        sampleOrderId = body.orders[0]._id;
-      }
-    } catch { /* no orders yet — status update scenario will skip gracefully */ }
-  }
+  const ordersRes = http.get(`${BASE_URL}/api/v1/auth/all-orders`, {
+    headers: { authorization: token },
+  });
+  try {
+    const body = JSON.parse(ordersRes.body);
+    if (Array.isArray(body) && body.length > 0) {
+      sampleOrderId = body[0]._id;
+    }
+  } catch { /* no orders yet — status update scenario will skip gracefully */ }
 
   const categories = fetchCategories(BASE_URL);
   return { email: ADMIN_EMAIL, pass: ADMIN_PASS, sampleOrderId, categories };
@@ -287,7 +299,7 @@ export function allOrdersPoll(data) {
   check(res, {
     'all-orders status 200': (r) => r.status === 200,
     'all-orders array':      (r) => {
-      try { return Array.isArray(r.json('orders')); } catch { return false; }
+      try { return Array.isArray(r.json()); } catch { return false; }
     },
   });
 

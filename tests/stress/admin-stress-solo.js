@@ -126,6 +126,24 @@ export function setup() {
     'admin probe user ready': (r) =>
       r.status === 201 || (r.status === 200 && r.json('success') === false),
   });
+
+  const token = getToken(BASE_URL, ADMIN_EMAIL, ADMIN_PASS);
+  if (!token) {
+    throw new Error(
+      'Admin stress probe login failed. Verify stress.admin@k6.test exists and the password matches ADMIN_PASS.'
+    );
+  }
+
+  const adminAuthRes = http.get(`${BASE_URL}/api/v1/auth/admin-auth`, {
+    headers: { authorization: token },
+  });
+
+  if (adminAuthRes.status !== 200) {
+    throw new Error(
+      'Admin stress probe is not an admin. Set role=1 for stress.admin@k6.test before running this script.'
+    );
+  }
+
   return { email: ADMIN_EMAIL, pass: ADMIN_PASS };
 }
 
@@ -145,7 +163,7 @@ export function allOrdersPoll(data) {
   check(res, {
     'all-orders status 200':  (r) => r.status === 200,
     'all-orders array':       (r) => {
-      try { return Array.isArray(r.json('orders')); } catch { return false; }
+      try { return Array.isArray(r.json()); } catch { return false; }
     },
   });
 

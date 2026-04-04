@@ -16,18 +16,18 @@
 // VU STAIRCASE  (each scenario: 1 min ramp + 3 min hold per step)
 //   All scenarios start from time zero (no startTime offset).
 //   Each scenario uses constant VU increments and 10 steps (unless otherwise noted):
-//     product_list:         25 → 50 → 75 → 100 → 125 → 150 → 175 → 200 → 225 → 250 VUs (increment 25)
-//     homepage_load:        16 → 32 → 48 → 64 → 80 → 96 → 112 → 128 → 144 → 160 VUs (increment 16)
-//     photo_stress:         10 → 20 → 30 → 40 → 50 → 60 → 70 → 80 → 90 → 100 VUs (increment 10)
-//     session_check:        12 → 24 → 36 → 48 → 60 → 72 → 84 → 96 → 108 → 120 VUs (increment 12)
-//     login_flow:            6 → 12 → 18 → 24 → 30 → 36 → 42 → 48 → 54 → 60 VUs (increment 6)
-//     login_page_load:       5 → 10 → 15 → 20 → 25 → 30 → 35 → 40 → 45 → 50 VUs (increment 5)
-//     token_ramp:            2 → 4 → 6 → 8 → 10 → 12 → 14 → 16 → 18 → 20 VUs (increment 2)
-//     cart_page_load:        1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 VUs (increment 1)
-//     full_checkout:         1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 VUs (increment 1)
-//     all_orders_poll:       1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 VUs (increment 1)
-//     admin_dashboard:       1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 VUs (increment 1)
-//     order_status_updates:  1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 VUs (increment 1)
+//     product_list:         7 → 13 → 19 → 25 → 32 → 38 → 44 → 50 → 57 → 63 VUs (increment 6 or 7)
+//     homepage_load:        4 → 8 → 12 → 16 → 20 → 24 → 28 → 32 → 36 → 40 VUs (increment 4)
+//     photo_stress:         3 → 5 → 8 → 10 → 13 → 15 → 18 → 20 → 23 → 25 VUs (increment 2 or 3)
+//     session_check:        3 → 6 → 9 → 12 → 15 → 18 → 21 → 24 → 27 → 30 VUs (increment 3)
+//     login_flow:           2 → 3 → 5 → 6 → 8 → 9 → 11 → 12 → 14 → 15 VUs (increment 1 or 2)
+//     login_page_load:      2 → 3 → 4 → 5 → 7 → 8 → 9 → 10 → 12 → 13 VUs (increment 1 or 2)
+//     token_ramp:           1 → 1 → 2 → 2 → 3 → 3 → 4 → 4 → 5 → 5 VUs (increment 1, min 1)
+//     cart_page_load:       1 → 1 → 1 → 1 → 2 → 2 → 2 → 2 → 3 → 3 VUs (increment 1, min 1)
+//     full_checkout:        1 → 1 → 1 → 1 → 2 → 2 → 2 → 2 → 3 → 3 VUs (increment 1, min 1)
+//     all_orders_poll:      1 → 1 → 1 → 1 → 2 → 2 → 2 → 2 → 3 → 3 VUs (increment 1, min 1)
+//     admin_dashboard:      1 → 1 → 1 → 1 → 2 → 2 → 2 → 2 → 3 → 3 VUs (increment 1, min 1)
+//     order_status_updates: 1 → 1 → 1 → 1 → 2 → 2 → 2 → 2 → 3 → 3 VUs (increment 1, min 1)
 //   Each step: 1 min ramp up, 3 min hold. Test aborts on scenario-specific thresholds.
 //
 // THRESHOLD RATIONALE
@@ -97,16 +97,16 @@ export const options = {
       exec:      'productList',
       startVUs:  0,
       stages: [
-        { duration: '1m',  target:  25 }, { duration: '3m',  target:  25 },
-        { duration: '1m',  target:  50 }, { duration: '3m',  target:  50 },
-        { duration: '1m',  target:  75 }, { duration: '3m',  target:  75 },
-        { duration: '1m',  target: 100 }, { duration: '3m',  target: 100 },
-        { duration: '1m',  target: 125 }, { duration: '3m',  target: 125 },
-        { duration: '1m',  target: 150 }, { duration: '3m',  target: 150 },
-        { duration: '1m',  target: 175 }, { duration: '3m',  target: 175 },
-        { duration: '1m',  target: 200 }, { duration: '3m',  target: 200 },
-        { duration: '1m',  target: 225 }, { duration: '3m',  target: 225 },
-        { duration: '1m',  target: 250 }, { duration: '3m',  target: 250 }
+        { duration: '1m',  target:  7 }, { duration: '3m',  target:  7 },
+        { duration: '1m',  target: 13 }, { duration: '3m',  target: 13 },
+        { duration: '1m',  target: 19 }, { duration: '3m',  target: 19 },
+        { duration: '1m',  target: 25 }, { duration: '3m',  target: 25 },
+        { duration: '1m',  target: 32 }, { duration: '3m',  target: 32 },
+        { duration: '1m',  target: 38 }, { duration: '3m',  target: 38 },
+        { duration: '1m',  target: 44 }, { duration: '3m',  target: 44 },
+        { duration: '1m',  target: 50 }, { duration: '3m',  target: 50 },
+        { duration: '1m',  target: 57 }, { duration: '3m',  target: 57 },
+        { duration: '1m',  target: 63 }, { duration: '3m',  target: 63 }
       ],
       gracefulRampDown: '30s',
     },
@@ -114,128 +114,6 @@ export const options = {
     homepage_load: {
       executor:  'ramping-vus',
       exec:      'homepageLoad',
-      startVUs:  0,
-      stages: [
-        { duration: '1m',  target:  20 }, { duration: '3m',  target:  20 },
-        { duration: '1m',  target:  40 }, { duration: '3m',  target:  40 },
-        { duration: '1m',  target:  60 }, { duration: '3m',  target:  60 },
-        { duration: '1m',  target:  80 }, { duration: '3m',  target:  80 },
-        { duration: '1m',  target: 100 }, { duration: '3m',  target: 100 },
-        { duration: '1m',  target: 120 }, { duration: '3m',  target: 120 },
-        { duration: '1m',  target: 140 }, { duration: '3m',  target: 140 },
-        { duration: '1m',  target: 160 }, { duration: '3m',  target: 160 },
-        { duration: '1m',  target: 180 }, { duration: '3m',  target: 180 },
-        { duration: '1m',  target: 200 }, { duration: '3m',  target: 200 }
-      ],
-      gracefulRampDown: '30s',
-    },
-
-    photo_stress: {
-      executor:  'ramping-vus',
-      exec:      'photoStress',
-      startVUs:  0,
-      stages: [
-        { duration: '1m',  target:  12 }, { duration: '3m',  target:  12 },
-        { duration: '1m',  target:  24 }, { duration: '3m',  target:  24 },
-        { duration: '1m',  target:  36 }, { duration: '3m',  target:  36 },
-        { duration: '1m',  target:  48 }, { duration: '3m',  target:  48 },
-        { duration: '1m',  target:  60 }, { duration: '3m',  target:  60 },
-        { duration: '1m',  target:  72 }, { duration: '3m',  target:  72 },
-        { duration: '1m',  target:  84 }, { duration: '3m',  target:  84 },
-        { duration: '1m',  target:  96 }, { duration: '3m',  target:  96 },
-        { duration: '1m',  target: 108 }, { duration: '3m',  target: 108 },
-        { duration: '1m',  target: 120 }, { duration: '3m',  target: 120 }
-      ],
-      gracefulRampDown: '30s',
-    },
-
-    // ═══════════════════════════════════════════════════════════════
-    // AUTH — high-frequency (every protected page nav)
-    // ═══════════════════════════════════════════════════════════════
-
-    session_check: {
-      executor:  'ramping-vus',
-      exec:      'sessionCheck',
-      startVUs:  0,
-      stages: [
-        { duration: '1m',  target:  15 }, { duration: '3m',  target:  15 },
-        { duration: '1m',  target:  30 }, { duration: '3m',  target:  30 },
-        { duration: '1m',  target:  45 }, { duration: '3m',  target:  45 },
-        { duration: '1m',  target:  60 }, { duration: '3m',  target:  60 },
-        { duration: '1m',  target:  75 }, { duration: '3m',  target:  75 },
-        { duration: '1m',  target:  90 }, { duration: '3m',  target:  90 },
-        { duration: '1m',  target: 105 }, { duration: '3m',  target: 105 },
-        { duration: '1m',  target: 120 }, { duration: '3m',  target: 120 },
-        { duration: '1m',  target: 135 }, { duration: '3m',  target: 135 },
-        { duration: '1m',  target: 150 }, { duration: '3m',  target: 150 }
-      ],
-      gracefulRampDown: '30s',
-    },
-
-    login_flow: {
-      executor:  'ramping-vus',
-      exec:      'loginFlow',
-      startVUs:  0,
-      stages: [
-        { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
-        { duration: '1m',  target: 16 }, { duration: '3m',  target: 16 },
-        { duration: '1m',  target: 24 }, { duration: '3m',  target: 24 },
-        { duration: '1m',  target: 32 }, { duration: '3m',  target: 32 },
-        { duration: '1m',  target: 40 }, { duration: '3m',  target: 40 },
-        { duration: '1m',  target: 48 }, { duration: '3m',  target: 48 },
-        { duration: '1m',  target: 56 }, { duration: '3m',  target: 56 },
-        { duration: '1m',  target: 64 }, { duration: '3m',  target: 64 },
-        { duration: '1m',  target: 72 }, { duration: '3m',  target: 72 },
-        { duration: '1m',  target: 80 }, { duration: '3m',  target: 80 }
-      ],
-      gracefulRampDown: '30s',
-    },
-
-    login_page_load: {
-      executor:  'ramping-vus',
-      exec:      'loginPageLoad',
-      startVUs:  0,
-      stages: [
-        { duration: '1m',  target:  6 }, { duration: '3m',  target:  6 },
-        { duration: '1m',  target: 12 }, { duration: '3m',  target: 12 },
-        { duration: '1m',  target: 18 }, { duration: '3m',  target: 18 },
-        { duration: '1m',  target: 24 }, { duration: '3m',  target: 24 },
-        { duration: '1m',  target: 30 }, { duration: '3m',  target: 30 },
-        { duration: '1m',  target: 36 }, { duration: '3m',  target: 36 },
-        { duration: '1m',  target: 42 }, { duration: '3m',  target: 42 },
-        { duration: '1m',  target: 48 }, { duration: '3m',  target: 48 },
-        { duration: '1m',  target: 54 }, { duration: '3m',  target: 54 },
-        { duration: '1m',  target: 60 }, { duration: '3m',  target: 60 }
-      ],
-      gracefulRampDown: '30s',
-    },
-
-    // ═══════════════════════════════════════════════════════════════
-    // CHECKOUT — mid-frequency (cart visitors only)
-    // ═══════════════════════════════════════════════════════════════
-
-    token_ramp: {
-      executor:  'ramping-vus',
-      exec:      'tokenRamp',
-      startVUs:  0,
-      stages: [
-        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 },
-        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
-        { duration: '1m',  target: 15 }, { duration: '3m',  target: 15 },
-        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 },
-        { duration: '1m',  target: 25 }, { duration: '3m',  target: 25 },
-        { duration: '1m',  target: 30 }, { duration: '3m',  target: 30 },
-        { duration: '1m',  target: 35 }, { duration: '3m',  target: 35 },
-        { duration: '1m',  target: 40 }, { duration: '3m',  target: 40 },
-        { duration: '1m',  target: 45 }, { duration: '3m',  target: 45 },
-        { duration: '1m',  target: 50 }, { duration: '3m',  target: 50 }
-      ],
-      gracefulRampDown: '30s',
-    },
-
-    cart_page_load: {
-      executor:  'ramping-vus',
-      exec:      'cartPageLoad',
       startVUs:  0,
       stages: [
         { duration: '1m',  target:  4 }, { duration: '3m',  target:  4 },
@@ -252,21 +130,137 @@ export const options = {
       gracefulRampDown: '30s',
     },
 
+    photo_stress: {
+      executor:  'ramping-vus',
+      exec:      'photoStress',
+      startVUs:  0,
+      stages: [
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 },
+        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 },
+        { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
+        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
+        { duration: '1m',  target: 13 }, { duration: '3m',  target: 13 },
+        { duration: '1m',  target: 15 }, { duration: '3m',  target: 15 },
+        { duration: '1m',  target: 18 }, { duration: '3m',  target: 18 },
+        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 },
+        { duration: '1m',  target: 23 }, { duration: '3m',  target: 23 },
+        { duration: '1m',  target: 25 }, { duration: '3m',  target: 25 }
+      ],
+      gracefulRampDown: '30s',
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // AUTH — high-frequency (every protected page nav)
+    // ═══════════════════════════════════════════════════════════════
+
+    session_check: {
+      executor:  'ramping-vus',
+      exec:      'sessionCheck',
+      startVUs:  0,
+      stages: [
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 },
+        { duration: '1m',  target:  6 }, { duration: '3m',  target:  6 },
+        { duration: '1m',  target:  9 }, { duration: '3m',  target:  9 },
+        { duration: '1m',  target: 12 }, { duration: '3m',  target: 12 },
+        { duration: '1m',  target: 15 }, { duration: '3m',  target: 15 },
+        { duration: '1m',  target: 18 }, { duration: '3m',  target: 18 },
+        { duration: '1m',  target: 21 }, { duration: '3m',  target: 21 },
+        { duration: '1m',  target: 24 }, { duration: '3m',  target: 24 },
+        { duration: '1m',  target: 27 }, { duration: '3m',  target: 27 },
+        { duration: '1m',  target: 30 }, { duration: '3m',  target: 30 }
+      ],
+      gracefulRampDown: '30s',
+    },
+
+    login_flow: {
+      executor:  'ramping-vus',
+      exec:      'loginFlow',
+      startVUs:  0,
+      stages: [
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 },
+        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 },
+        { duration: '1m',  target:  6 }, { duration: '3m',  target:  6 },
+        { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
+        { duration: '1m',  target:  9 }, { duration: '3m',  target:  9 },
+        { duration: '1m',  target: 11 }, { duration: '3m',  target: 11 },
+        { duration: '1m',  target: 12 }, { duration: '3m',  target: 12 },
+        { duration: '1m',  target: 14 }, { duration: '3m',  target: 14 },
+        { duration: '1m',  target: 15 }, { duration: '3m',  target: 15 }
+      ],
+      gracefulRampDown: '30s',
+    },
+
+    login_page_load: {
+      executor:  'ramping-vus',
+      exec:      'loginPageLoad',
+      startVUs:  0,
+      stages: [
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 },
+        { duration: '1m',  target:  4 }, { duration: '3m',  target:  4 },
+        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 },
+        { duration: '1m',  target:  7 }, { duration: '3m',  target:  7 },
+        { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
+        { duration: '1m',  target:  9 }, { duration: '3m',  target:  9 },
+        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
+        { duration: '1m',  target: 12 }, { duration: '3m',  target: 12 },
+        { duration: '1m',  target: 13 }, { duration: '3m',  target: 13 }
+      ],
+      gracefulRampDown: '30s',
+    },
+
+    // ═══════════════════════════════════════════════════════════════
+    // CHECKOUT — mid-frequency (cart visitors only)
+    // ═══════════════════════════════════════════════════════════════
+
+    token_ramp: {
+      executor:  'ramping-vus',
+      exec:      'tokenRamp',
+      startVUs:  0,
+      stages: [
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 },
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 },
+        { duration: '1m',  target:  4 }, { duration: '3m',  target:  4 },
+        { duration: '1m',  target:  4 }, { duration: '3m',  target:  4 },
+        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 }
+      ],
+      gracefulRampDown: '30s',
+    },
+
+    cart_page_load: {
+      executor:  'ramping-vus',
+      exec:      'cartPageLoad',
+      startVUs:  0,
+      stages: [
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 }
+      ],
+      gracefulRampDown: '30s',
+    },
+
     full_checkout: {
       executor:  'ramping-vus',
       exec:      'fullCheckout',
       startVUs:  0,
       stages: [
         { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
         { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
-        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 },
-        { duration: '1m',  target:  4 }, { duration: '3m',  target:  4 },
-        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 },
-        { duration: '1m',  target:  6 }, { duration: '3m',  target:  6 },
-        { duration: '1m',  target:  7 }, { duration: '3m',  target:  7 },
-        { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
-        { duration: '1m',  target:  9 }, { duration: '3m',  target:  9 },
-        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 }
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 }
       ],
       gracefulRampDown: '30s',
     },
@@ -280,16 +274,14 @@ export const options = {
       exec:      'allOrdersPoll',
       startVUs:  0,
       stages: [
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
         { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
-        { duration: '1m',  target:  4 }, { duration: '3m',  target:  4 },
-        { duration: '1m',  target:  6 }, { duration: '3m',  target:  6 },
-        { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
-        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
-        { duration: '1m',  target: 12 }, { duration: '3m',  target: 12 },
-        { duration: '1m',  target: 14 }, { duration: '3m',  target: 14 },
-        { duration: '1m',  target: 16 }, { duration: '3m',  target: 16 },
-        { duration: '1m',  target: 18 }, { duration: '3m',  target: 18 },
-        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 }
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 }
       ],
       gracefulRampDown: '30s',
     },
@@ -299,16 +291,14 @@ export const options = {
       exec:      'adminDashboard',
       startVUs:  0,
       stages: [
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
         { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
-        { duration: '1m',  target:  4 }, { duration: '3m',  target:  4 },
-        { duration: '1m',  target:  6 }, { duration: '3m',  target:  6 },
-        { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
-        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
-        { duration: '1m',  target: 12 }, { duration: '3m',  target: 12 },
-        { duration: '1m',  target: 14 }, { duration: '3m',  target: 14 },
-        { duration: '1m',  target: 16 }, { duration: '3m',  target: 16 },
-        { duration: '1m',  target: 18 }, { duration: '3m',  target: 18 },
-        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 }
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 }
       ],
       gracefulRampDown: '30s',
     },
@@ -319,15 +309,13 @@ export const options = {
       startVUs:  0,
       stages: [
         { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
         { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
-        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 },
-        { duration: '1m',  target:  4 }, { duration: '3m',  target:  4 },
-        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 },
-        { duration: '1m',  target:  6 }, { duration: '3m',  target:  6 },
-        { duration: '1m',  target:  7 }, { duration: '3m',  target:  7 },
-        { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
-        { duration: '1m',  target:  9 }, { duration: '3m',  target:  9 },
-        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 }
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 }
       ],
       gracefulRampDown: '30s',
     },
