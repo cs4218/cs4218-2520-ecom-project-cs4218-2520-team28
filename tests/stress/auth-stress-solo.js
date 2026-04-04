@@ -24,7 +24,7 @@
 //   A single shared account keeps the CPU cost uniform and reproducible.
 //
 // SUBMISSION RUN (streams metrics to InfluxDB / Grafana):
-//   k6 run tests/stress/auth-stress-solo.js --out influxdb=http://localhost:8086/k6
+//   k6 run tests/stress/auth-stress-solo.js --out influxdb=http://localhost:8086/k6 2>&1 | Tee-Object -FilePath "tests/stress/results/auth-stress-solo.txt"
 
 import http from 'k6/http';
 import { check, sleep } from 'k6';

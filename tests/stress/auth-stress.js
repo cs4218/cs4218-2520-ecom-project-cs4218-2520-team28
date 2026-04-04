@@ -41,7 +41,7 @@
 //   (connection refused → http_req_failed threshold will catch it).
 //
 // SUBMISSION RUN (streams metrics to InfluxDB / Grafana):
-//   k6 run tests/stress/auth-stress.js --out influxdb=http://localhost:8086/k6
+//   k6 run tests/stress/auth-stress.js --out influxdb=http://localhost:8086/k6 2>&1 | Tee-Object -FilePath "tests/stress/results/auth-stress.txt"
 
 import http from 'k6/http';
 import { check, sleep } from 'k6';
