@@ -289,11 +289,14 @@ export const options = {
       { threshold: 'p(95)<3000', abortOnFail: true, delayAbortEval: '60s' },
     ],
 
-    // HTTP error gate — no delay: a sustained error spike is never a warm-up artefact.
-    'http_req_failed': [{ threshold: 'rate<0.01', abortOnFail: true }],
+    // HTTP error gate — delayed 60s so the React dev server has time to boot.
+    'http_req_failed': [{ threshold: 'rate<0.01', abortOnFail: true, delayAbortEval: '60s' }],
 
     // Explicit assertion gate — catches silent 200-OK error bodies.
-    'checks': [{ threshold: 'rate>0.99', abortOnFail: true }],
+    // delayAbortEval: '60s' gives the React frontend time to boot before the first
+    // page-load iteration fires — prevents a false abort if the dev server starts
+    // a few seconds after k6.
+    'checks': [{ threshold: 'rate>0.99', abortOnFail: true, delayAbortEval: '60s' }],
   },
 };
 
@@ -399,7 +402,9 @@ export function loginFlow(data) {
 // REQUIRES: React dev server running on FRONTEND_URL (npm run client, port 3000).
 // k6 fetches the HTML skeleton; JS bundle rendering is NOT evaluated here.
 export function loginPageLoad() {
-  const res = http.get(`${FRONTEND_URL}/login`);
+  // Accept: text/html is required so connect-history-api-fallback rewrites the
+  // SPA route to /index.html.  Without it the CRA dev server returns 404.
+  const res = http.get(`${FRONTEND_URL}/login`, { headers: { 'Accept': 'text/html' } });
 
   check(res, {
     // React dev server must respond successfully
@@ -454,7 +459,9 @@ export function registerFlow() {
 // Simulates users fetching the React /register SPA page.
 // REQUIRES: React dev server running on FRONTEND_URL (npm run client, port 3000).
 export function registerPageLoad() {
-  const res = http.get(`${FRONTEND_URL}/register`);
+  // Accept: text/html is required so connect-history-api-fallback rewrites the
+  // SPA route to /index.html.  Without it the CRA dev server returns 404.
+  const res = http.get(`${FRONTEND_URL}/register`, { headers: { 'Accept': 'text/html' } });
 
   check(res, {
     'register page status 200': (r) => r.status === 200,
