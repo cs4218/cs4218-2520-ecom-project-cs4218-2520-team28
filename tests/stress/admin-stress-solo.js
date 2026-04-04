@@ -12,9 +12,20 @@
 //   Compare against admin-stress.js (4B) to measure combined interference.
 //
 // VU STAIRCASE  (1 min ramp + 3 min hold per step)
-//   Step 1 :  15 VUs   — baseline; admin staff team size is small
-//   Step 2 :  30 VUs   — moderate; multiple browser tabs and background polling
-//   Step 3 :  50 VUs   — ceiling candidate; large result set ceiling expected here
+//   12 steps, constant increment of 10 VUs per step:
+//     Step 1  :  10 VUs
+//     Step 2  :  20 VUs
+//     Step 3  :  30 VUs
+//     Step 4  :  40 VUs
+//     Step 5  :  50 VUs
+//     Step 6  :  60 VUs
+//     Step 7  :  70 VUs
+//     Step 8  :  80 VUs
+//     Step 9  :  90 VUs
+//     Step 10 : 100 VUs
+//     Step 11 : 110 VUs
+//     Step 12 : 120 VUs
+//   Each step: 1 min ramp up, 3 min hold. Test aborts on p(95) > 2000 ms.
 //
 // THRESHOLD RATIONALE
 //   p(95) < 2000 ms — the admin orders list is a large dataset (all orders, all users).

@@ -30,20 +30,41 @@ $d1 = @'
     "time": {"from": "now-30m", "to": "now"},
     "panels": [{
       "id": 1,
-      "type": "graph",
+      "type": "timeseries",
       "title": "Active VUs / Error Rate / product_list p95",
       "gridPos": {"h": 12, "w": 24, "x": 0, "y": 0},
       "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
-      "lines": true, "linewidth": 2, "fill": 1, "nullPointMode": "null",
-      "yaxes": [
-        {"format": "short", "label": "VUs", "show": true, "logBase": 1, "min": 0},
-        {"format": "ms",    "label": "ms / %", "show": true, "logBase": 1, "min": 0}
-      ],
-      "seriesOverrides": [
-        {"alias": "Active VUs",         "color": "#73BF69", "yaxis": 1, "linewidth": 2},
-        {"alias": "Error Rate %",        "color": "#F2495C", "yaxis": 2, "linewidth": 1},
-        {"alias": "product_list p95 (ms)","color": "#5794F2", "yaxis": 2, "linewidth": 2}
-      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short", "custom": {"lineWidth": 2}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Active VUs"},
+           "properties": [
+             {"id": "color", "value": {"fixedColor": "#73BF69", "mode": "fixed"}},
+             {"id": "custom.axisLabel", "value": "VUs"}
+           ]},
+          {"matcher": {"id": "byName", "options": "Error Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "Checks Pass Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "color", "value": {"fixedColor": "#FADE2A", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "product_list p95 (ms)"},
+           "properties": [
+             {"id": "unit", "value": "ms"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#5794F2", "mode": "fixed"}}
+           ]}
+        ]
+      },
+      "options": {
+        "legend": {"displayMode": "list", "placement": "bottom"},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
       "targets": [
         {
           "refId": "A", "rawQuery": true, "resultFormat": "time_series",
@@ -62,6 +83,12 @@ $d1 = @'
           "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
           "alias": "product_list p95 (ms)",
           "query": "SELECT percentile(\"value\", 95) FROM \"http_req_duration\" WHERE (\"scenario\" = 'product_list') AND $timeFilter GROUP BY time($__interval) fill(null)"
+        },
+        {
+          "refId": "D", "rawQuery": true, "resultFormat": "time_series",
+          "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
+          "alias": "Checks Pass Rate %",
+          "query": "SELECT mean(\"value\") * 100 FROM \"checks\" WHERE $timeFilter GROUP BY time($__interval) fill(null)"
         }
       ]
     }]
@@ -84,22 +111,53 @@ $d2 = @'
     "time": {"from": "now-30m", "to": "now"},
     "panels": [{
       "id": 1,
-      "type": "graph",
+      "type": "timeseries",
       "title": "Active VUs / Error Rate / Catalog p95 Lines",
       "gridPos": {"h": 12, "w": 24, "x": 0, "y": 0},
       "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
-      "lines": true, "linewidth": 2, "fill": 1, "nullPointMode": "null",
-      "yaxes": [
-        {"format": "short", "label": "VUs",     "show": true, "logBase": 1, "min": 0},
-        {"format": "ms",    "label": "ms / %",  "show": true, "logBase": 1, "min": 0}
-      ],
-      "seriesOverrides": [
-        {"alias": "Active VUs",             "color": "#73BF69", "yaxis": 1, "linewidth": 2},
-        {"alias": "Error Rate %",            "color": "#F2495C", "yaxis": 2, "linewidth": 1},
-        {"alias": "photo_stress p99 (ms)",   "color": "#FF780A", "yaxis": 2, "linewidth": 2},
-        {"alias": "product_list p95 (ms)",   "color": "#5794F2", "yaxis": 2, "linewidth": 2},
-        {"alias": "search_stress p95 (ms)",  "color": "#FADE2A", "yaxis": 2, "linewidth": 2}
-      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short", "custom": {"lineWidth": 2}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Active VUs"},
+           "properties": [
+             {"id": "color", "value": {"fixedColor": "#73BF69", "mode": "fixed"}},
+             {"id": "custom.axisLabel", "value": "VUs"}
+           ]},
+          {"matcher": {"id": "byName", "options": "Error Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "Checks Pass Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "color", "value": {"fixedColor": "#FADE2A", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "photo_stress p99 (ms)"},
+           "properties": [
+             {"id": "unit", "value": "ms"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#FF780A", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "product_list p95 (ms)"},
+           "properties": [
+             {"id": "unit", "value": "ms"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#5794F2", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "search_stress p95 (ms)"},
+           "properties": [
+             {"id": "unit", "value": "ms"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#B877D9", "mode": "fixed"}}
+           ]}
+        ]
+      },
+      "options": {
+        "legend": {"displayMode": "list", "placement": "bottom"},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
       "targets": [
         {
           "refId": "A", "rawQuery": true, "resultFormat": "time_series",
@@ -130,6 +188,12 @@ $d2 = @'
           "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
           "alias": "search_stress p95 (ms)",
           "query": "SELECT percentile(\"value\", 95) FROM \"http_req_duration\" WHERE (\"scenario\" = 'search_stress') AND $timeFilter GROUP BY time($__interval) fill(null)"
+        },
+        {
+          "refId": "F", "rawQuery": true, "resultFormat": "time_series",
+          "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
+          "alias": "Checks Pass Rate %",
+          "query": "SELECT mean(\"value\") * 100 FROM \"checks\" WHERE $timeFilter GROUP BY time($__interval) fill(null)"
         }
       ]
     }]
@@ -152,20 +216,41 @@ $d3 = @'
     "time": {"from": "now-30m", "to": "now"},
     "panels": [{
       "id": 1,
-      "type": "graph",
+      "type": "timeseries",
       "title": "Active VUs / Error Rate / token_ramp p95",
       "gridPos": {"h": 12, "w": 24, "x": 0, "y": 0},
       "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
-      "lines": true, "linewidth": 2, "fill": 1, "nullPointMode": "null",
-      "yaxes": [
-        {"format": "short", "label": "VUs",    "show": true, "logBase": 1, "min": 0},
-        {"format": "ms",    "label": "ms / %", "show": true, "logBase": 1, "min": 0}
-      ],
-      "seriesOverrides": [
-        {"alias": "Active VUs",          "color": "#73BF69", "yaxis": 1, "linewidth": 2},
-        {"alias": "Error Rate %",         "color": "#F2495C", "yaxis": 2, "linewidth": 1},
-        {"alias": "token_ramp p95 (ms)",  "color": "#5794F2", "yaxis": 2, "linewidth": 2}
-      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short", "custom": {"lineWidth": 2}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Active VUs"},
+           "properties": [
+             {"id": "color", "value": {"fixedColor": "#73BF69", "mode": "fixed"}},
+             {"id": "custom.axisLabel", "value": "VUs"}
+           ]},
+          {"matcher": {"id": "byName", "options": "Error Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "Checks Pass Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "color", "value": {"fixedColor": "#FADE2A", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "token_ramp p95 (ms)"},
+           "properties": [
+             {"id": "unit", "value": "ms"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#5794F2", "mode": "fixed"}}
+           ]}
+        ]
+      },
+      "options": {
+        "legend": {"displayMode": "list", "placement": "bottom"},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
       "targets": [
         {
           "refId": "A", "rawQuery": true, "resultFormat": "time_series",
@@ -184,6 +269,12 @@ $d3 = @'
           "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
           "alias": "token_ramp p95 (ms)",
           "query": "SELECT percentile(\"value\", 95) FROM \"http_req_duration\" WHERE (\"scenario\" = 'token_ramp') AND $timeFilter GROUP BY time($__interval) fill(null)"
+        },
+        {
+          "refId": "D", "rawQuery": true, "resultFormat": "time_series",
+          "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
+          "alias": "Checks Pass Rate %",
+          "query": "SELECT mean(\"value\") * 100 FROM \"checks\" WHERE $timeFilter GROUP BY time($__interval) fill(null)"
         }
       ]
     }]
@@ -206,21 +297,47 @@ $d4 = @'
     "time": {"from": "now-30m", "to": "now"},
     "panels": [{
       "id": 1,
-      "type": "graph",
+      "type": "timeseries",
       "title": "Active VUs / Error Rate / Checkout p95 Lines",
       "gridPos": {"h": 12, "w": 24, "x": 0, "y": 0},
       "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
-      "lines": true, "linewidth": 2, "fill": 1, "nullPointMode": "null",
-      "yaxes": [
-        {"format": "short", "label": "VUs",    "show": true, "logBase": 1, "min": 0},
-        {"format": "ms",    "label": "ms / %", "show": true, "logBase": 1, "min": 0}
-      ],
-      "seriesOverrides": [
-        {"alias": "Active VUs",           "color": "#73BF69", "yaxis": 1, "linewidth": 2},
-        {"alias": "Error Rate %",          "color": "#F2495C", "yaxis": 2, "linewidth": 1},
-        {"alias": "token_ramp p95 (ms)",   "color": "#5794F2", "yaxis": 2, "linewidth": 2},
-        {"alias": "orders_ramp p95 (ms)",  "color": "#73BF69", "yaxis": 2, "linewidth": 2}
-      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short", "custom": {"lineWidth": 2}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Active VUs"},
+           "properties": [
+             {"id": "color", "value": {"fixedColor": "#73BF69", "mode": "fixed"}},
+             {"id": "custom.axisLabel", "value": "VUs"}
+           ]},
+          {"matcher": {"id": "byName", "options": "Error Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "Checks Pass Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "color", "value": {"fixedColor": "#FADE2A", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "token_ramp p95 (ms)"},
+           "properties": [
+             {"id": "unit", "value": "ms"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#5794F2", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "orders_ramp p95 (ms)"},
+           "properties": [
+             {"id": "unit", "value": "ms"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#73BF69", "mode": "fixed"}}
+           ]}
+        ]
+      },
+      "options": {
+        "legend": {"displayMode": "list", "placement": "bottom"},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
       "targets": [
         {
           "refId": "A", "rawQuery": true, "resultFormat": "time_series",
@@ -245,6 +362,12 @@ $d4 = @'
           "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
           "alias": "orders_ramp p95 (ms)",
           "query": "SELECT percentile(\"value\", 95) FROM \"http_req_duration\" WHERE (\"scenario\" = 'orders_ramp') AND $timeFilter GROUP BY time($__interval) fill(null)"
+        },
+        {
+          "refId": "E", "rawQuery": true, "resultFormat": "time_series",
+          "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
+          "alias": "Checks Pass Rate %",
+          "query": "SELECT mean(\"value\") * 100 FROM \"checks\" WHERE $timeFilter GROUP BY time($__interval) fill(null)"
         }
       ]
     }]
@@ -267,20 +390,41 @@ $d5 = @'
     "time": {"from": "now-30m", "to": "now"},
     "panels": [{
       "id": 1,
-      "type": "graph",
+      "type": "timeseries",
       "title": "Active VUs / Error Rate / all_orders_poll p95",
       "gridPos": {"h": 12, "w": 24, "x": 0, "y": 0},
       "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
-      "lines": true, "linewidth": 2, "fill": 1, "nullPointMode": "null",
-      "yaxes": [
-        {"format": "short", "label": "VUs",    "show": true, "logBase": 1, "min": 0},
-        {"format": "ms",    "label": "ms / %", "show": true, "logBase": 1, "min": 0}
-      ],
-      "seriesOverrides": [
-        {"alias": "Active VUs",               "color": "#73BF69", "yaxis": 1, "linewidth": 2},
-        {"alias": "Error Rate %",              "color": "#F2495C", "yaxis": 2, "linewidth": 1},
-        {"alias": "all_orders_poll p95 (ms)",  "color": "#5794F2", "yaxis": 2, "linewidth": 2}
-      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short", "custom": {"lineWidth": 2}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Active VUs"},
+           "properties": [
+             {"id": "color", "value": {"fixedColor": "#73BF69", "mode": "fixed"}},
+             {"id": "custom.axisLabel", "value": "VUs"}
+           ]},
+          {"matcher": {"id": "byName", "options": "Error Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "Checks Pass Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "color", "value": {"fixedColor": "#FADE2A", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "all_orders_poll p95 (ms)"},
+           "properties": [
+             {"id": "unit", "value": "ms"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#5794F2", "mode": "fixed"}}
+           ]}
+        ]
+      },
+      "options": {
+        "legend": {"displayMode": "list", "placement": "bottom"},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
       "targets": [
         {
           "refId": "A", "rawQuery": true, "resultFormat": "time_series",
@@ -299,6 +443,12 @@ $d5 = @'
           "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
           "alias": "all_orders_poll p95 (ms)",
           "query": "SELECT percentile(\"value\", 95) FROM \"http_req_duration\" WHERE (\"scenario\" = 'all_orders_poll') AND $timeFilter GROUP BY time($__interval) fill(null)"
+        },
+        {
+          "refId": "D", "rawQuery": true, "resultFormat": "time_series",
+          "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
+          "alias": "Checks Pass Rate %",
+          "query": "SELECT mean(\"value\") * 100 FROM \"checks\" WHERE $timeFilter GROUP BY time($__interval) fill(null)"
         }
       ]
     }]
@@ -321,22 +471,53 @@ $d6 = @'
     "time": {"from": "now-30m", "to": "now"},
     "panels": [{
       "id": 1,
-      "type": "graph",
+      "type": "timeseries",
       "title": "Active VUs / Error Rate / Admin p95 Lines",
       "gridPos": {"h": 12, "w": 24, "x": 0, "y": 0},
       "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
-      "lines": true, "linewidth": 2, "fill": 1, "nullPointMode": "null",
-      "yaxes": [
-        {"format": "short", "label": "VUs",    "show": true, "logBase": 1, "min": 0},
-        {"format": "ms",    "label": "ms / %", "show": true, "logBase": 1, "min": 0}
-      ],
-      "seriesOverrides": [
-        {"alias": "Active VUs",                   "color": "#73BF69", "yaxis": 1, "linewidth": 2},
-        {"alias": "Error Rate %",                  "color": "#F2495C", "yaxis": 2, "linewidth": 1},
-        {"alias": "order_status_updates p95 (ms)", "color": "#F2495C", "yaxis": 2, "linewidth": 2},
-        {"alias": "category_churn p95 (ms)",       "color": "#FF780A", "yaxis": 2, "linewidth": 2},
-        {"alias": "all_orders_poll p95 (ms)",      "color": "#5794F2", "yaxis": 2, "linewidth": 2}
-      ],
+      "fieldConfig": {
+        "defaults": {"unit": "short", "custom": {"lineWidth": 2}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Active VUs"},
+           "properties": [
+             {"id": "color", "value": {"fixedColor": "#73BF69", "mode": "fixed"}},
+             {"id": "custom.axisLabel", "value": "VUs"}
+           ]},
+          {"matcher": {"id": "byName", "options": "Error Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "Checks Pass Rate %"},
+           "properties": [
+             {"id": "unit", "value": "percent"},
+             {"id": "color", "value": {"fixedColor": "#FADE2A", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "order_status_updates p95 (ms)"},
+           "properties": [
+             {"id": "unit", "value": "ms"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "category_churn p95 (ms)"},
+           "properties": [
+             {"id": "unit", "value": "ms"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#FF780A", "mode": "fixed"}}
+           ]},
+          {"matcher": {"id": "byName", "options": "all_orders_poll p95 (ms)"},
+           "properties": [
+             {"id": "unit", "value": "ms"},
+             {"id": "custom.axisPlacement", "value": "right"},
+             {"id": "color", "value": {"fixedColor": "#5794F2", "mode": "fixed"}}
+           ]}
+        ]
+      },
+      "options": {
+        "legend": {"displayMode": "list", "placement": "bottom"},
+        "tooltip": {"mode": "multi", "sort": "desc"}
+      },
       "targets": [
         {
           "refId": "A", "rawQuery": true, "resultFormat": "time_series",
@@ -367,6 +548,12 @@ $d6 = @'
           "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
           "alias": "all_orders_poll p95 (ms)",
           "query": "SELECT percentile(\"value\", 95) FROM \"http_req_duration\" WHERE (\"scenario\" = 'all_orders_poll') AND $timeFilter GROUP BY time($__interval) fill(null)"
+        },
+        {
+          "refId": "F", "rawQuery": true, "resultFormat": "time_series",
+          "datasource": {"uid": "afhzsvtf0z85cf", "type": "influxdb"},
+          "alias": "Checks Pass Rate %",
+          "query": "SELECT mean(\"value\") * 100 FROM \"checks\" WHERE $timeFilter GROUP BY time($__interval) fill(null)"
         }
       ]
     }]

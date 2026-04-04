@@ -12,9 +12,18 @@
 //   Compare against checkout-stress.js (3B) to measure combined interference.
 //
 // VU STAIRCASE  (1 min ramp + 3 min hold per step)
-//   Step 1 :  50 VUs   — baseline; every cart visitor gets a Braintree client token
-//   Step 2 : 100 VUs   — moderate; watch connection pool and Braintree API rate limits
-//   Step 3 : 200 VUs   — ceiling candidate; breaking point expected at this step
+//   10 steps, constant increment of 30 VUs per step:
+//     Step 1  :  30 VUs
+//     Step 2  :  60 VUs
+//     Step 3  :  90 VUs
+//     Step 4  : 120 VUs
+//     Step 5  : 150 VUs
+//     Step 6  : 180 VUs
+//     Step 7  : 210 VUs
+//     Step 8  : 240 VUs
+//     Step 9  : 270 VUs
+//     Step 10 : 300 VUs
+//   Each step: 1 min ramp up, 3 min hold. Test aborts on p(95) > 1000 ms.
 //
 // THRESHOLD RATIONALE
 //   p(95) < 1000 ms — the Braintree token call is invisible to the user but blocks

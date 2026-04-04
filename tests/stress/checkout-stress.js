@@ -1,33 +1,35 @@
 // Foo Chao, A0272024R
 // AI Assistance: GitHub Copilot (Claude Sonnet 4.6)
 //
+
 // checkout-stress.js — Story 3B: all checkout endpoints + frontend pages simultaneous
 //
 // PURPOSE
 //   Run all five checkout scenarios simultaneously to find the combined breaking
-//   point under realistic mixed checkout traffic.  Complements checkout-stress-solo.js
-//   (3A) which tests braintree/token in isolation — compare to measure interference
-//   from simultaneous order history polling and full-checkout journeys.
+//   point under realistic mixed checkout traffic. Complements checkout-stress-solo.js (3A)
+//   which tests braintree/token in isolation — compare to measure interference from
+//   simultaneous order history polling and full-checkout journeys.
 //
-// VU STAIRCASE  (each scenario: 1 min ramp + 3 min hold per step)
-//   VU ratios reflect realistic checkout traffic distribution (from PLAN.md § Story 3).
-//   token_ramp starts at L = 80 (every cart page mount — dominant checkout endpoint).
-//   All other scenarios' VUs are derived from the same PLAN ratios.
+// VU STAIRCASE (each scenario: 1 min ramp + 3 min hold per step, 10 steps, constant increment)
+//   All scenarios start at 0 and ramp up in constant increments. Each scenario runs for
+//   40 min total (10 steps × 4 min/step). VU ratios reflect realistic checkout traffic.
+//   Counts are ÷4 vs original design — keeps Braintree sandbox under its ~12-conn limit
+//   at step 1 so the test can ramp gradually and find the real breaking point.
 //
-//   Scenario           Reasoning                                   Step 1   Step 2   Step 3
-//   ─────────────────  ──────────────────────────────────────────  ───────  ───────  ───────
-//   token_ramp         every cart mount — Braintree client token     80      120      200
-//   cart_page_load     frontend /cart — SPA HTML shell               60       90      150
-//   product_detail     frontend /product/:slug — SPA HTML            30       50       80
-//   orders_ramp        GET /auth/orders — user order history         20       40       60
-//   full_checkout      POST braintree/payment — actual purchases      10       15       25
+//   Scenario         | Step 1 | ... | Step 10 | Increment | Description
+//   -----------------|--------|-----|---------|-----------|-----------------------------
+//   token_ramp       |    8   | ... |    75   |   ~+8     | every cart mount (token)
+//   cart_page_load   |    5   | ... |    50   |   +5      | frontend /cart
+//   product_detail   |    3   | ... |    25   |   ~+2-3   | frontend /product/:slug
+//   orders_ramp      |    2   | ... |    20   |   +2      | GET /auth/orders
+//   full_checkout    |    1   | ... |    10   |   +1      | POST braintree/payment
 //
-// THRESHOLD RATIONALE  (Nielsen Norman UX benchmarks throughout)
-//   token_ramp     p(95) < 1000 ms  — invisible call that blocks cart page render
-//   orders_ramp    p(95) < 1000 ms  — user viewing their order history
-//   cart_page_load p(95) < 3000 ms  — standard web page load guideline
-//   product_detail p(95) < 3000 ms  — standard web page load guideline
-//   full_checkout  checks rate > 0.98 — payment success rate matters more than latency
+// THRESHOLD RATIONALE (Nielsen Norman UX benchmarks)
+//   token_ramp:     p(95) < 1000 ms  — invisible call that blocks cart page render
+//   orders_ramp:    p(95) < 1000 ms  — user viewing their order history
+//   cart_page_load: p(95) < 3000 ms  — standard web page load guideline
+//   product_detail: p(95) < 3000 ms  — standard web page load guideline
+//   full_checkout:  checks rate > 0.98 — payment success rate matters more than latency
 //
 // PREREQUISITES
 //   Backend:  npm run server  (port 6060, or override BASE_URL)
@@ -41,7 +43,7 @@
 import http from 'k6/http';
 import { check, group, sleep } from 'k6';
 import { getToken, authHeaders } from './helpers/auth.js';
-import { products } from './helpers/seed-data.js';
+import { fetchProducts } from './helpers/seed-data.js';
 
 // ─── URLs ──────────────────────────────────────────────────────────────────
 const BASE_URL     = __ENV.BASE_URL     || 'http://localhost:6060';
@@ -69,16 +71,16 @@ export const options = {
       exec:      'tokenRamp',
       startVUs:  0,
       stages: [
+        { duration: '1m',  target:   8 }, { duration: '3m',  target:   8 },
+        { duration: '1m',  target:  15 }, { duration: '3m',  target:  15 },
+        { duration: '1m',  target:  23 }, { duration: '3m',  target:  23 },
         { duration: '1m',  target:  30 }, { duration: '3m',  target:  30 },
+        { duration: '1m',  target:  38 }, { duration: '3m',  target:  38 },
+        { duration: '1m',  target:  45 }, { duration: '3m',  target:  45 },
+        { duration: '1m',  target:  53 }, { duration: '3m',  target:  53 },
         { duration: '1m',  target:  60 }, { duration: '3m',  target:  60 },
-        { duration: '1m',  target:  90 }, { duration: '3m',  target:  90 },
-        { duration: '1m',  target: 120 }, { duration: '3m',  target: 120 },
-        { duration: '1m',  target: 150 }, { duration: '3m',  target: 150 },
-        { duration: '1m',  target: 180 }, { duration: '3m',  target: 180 },
-        { duration: '1m',  target: 210 }, { duration: '3m',  target: 210 },
-        { duration: '1m',  target: 240 }, { duration: '3m',  target: 240 },
-        { duration: '1m',  target: 270 }, { duration: '3m',  target: 270 },
-        { duration: '1m',  target: 300 }, { duration: '3m',  target: 300 }
+        { duration: '1m',  target:  68 }, { duration: '3m',  target:  68 },
+        { duration: '1m',  target:  75 }, { duration: '3m',  target:  75 }
       ],
       gracefulRampDown: '30s',
     },
@@ -91,16 +93,16 @@ export const options = {
       exec:      'cartPageLoad',
       startVUs:  0,
       stages: [
-        { duration: '1m',  target:  20 }, { duration: '3m',  target:  20 },
-        { duration: '1m',  target:  40 }, { duration: '3m',  target:  40 },
-        { duration: '1m',  target:  60 }, { duration: '3m',  target:  60 },
-        { duration: '1m',  target:  80 }, { duration: '3m',  target:  80 },
-        { duration: '1m',  target: 100 }, { duration: '3m',  target: 100 },
-        { duration: '1m',  target: 120 }, { duration: '3m',  target: 120 },
-        { duration: '1m',  target: 140 }, { duration: '3m',  target: 140 },
-        { duration: '1m',  target: 160 }, { duration: '3m',  target: 160 },
-        { duration: '1m',  target: 180 }, { duration: '3m',  target: 180 },
-        { duration: '1m',  target: 200 }, { duration: '3m',  target: 200 }
+        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 },
+        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
+        { duration: '1m',  target: 15 }, { duration: '3m',  target: 15 },
+        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 },
+        { duration: '1m',  target: 25 }, { duration: '3m',  target: 25 },
+        { duration: '1m',  target: 30 }, { duration: '3m',  target: 30 },
+        { duration: '1m',  target: 35 }, { duration: '3m',  target: 35 },
+        { duration: '1m',  target: 40 }, { duration: '3m',  target: 40 },
+        { duration: '1m',  target: 45 }, { duration: '3m',  target: 45 },
+        { duration: '1m',  target: 50 }, { duration: '3m',  target: 50 }
       ],
       gracefulRampDown: '30s',
     },
@@ -113,16 +115,16 @@ export const options = {
       exec:      'productDetail',
       startVUs:  0,
       stages: [
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 },
+        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 },
+        { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
         { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
+        { duration: '1m',  target: 13 }, { duration: '3m',  target: 13 },
+        { duration: '1m',  target: 15 }, { duration: '3m',  target: 15 },
+        { duration: '1m',  target: 18 }, { duration: '3m',  target: 18 },
         { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 },
-        { duration: '1m',  target: 30 }, { duration: '3m',  target: 30 },
-        { duration: '1m',  target: 40 }, { duration: '3m',  target: 40 },
-        { duration: '1m',  target: 50 }, { duration: '3m',  target: 50 },
-        { duration: '1m',  target: 60 }, { duration: '3m',  target: 60 },
-        { duration: '1m',  target: 70 }, { duration: '3m',  target: 70 },
-        { duration: '1m',  target: 80 }, { duration: '3m',  target: 80 },
-        { duration: '1m',  target: 90 }, { duration: '3m',  target: 90 },
-        { duration: '1m',  target: 100 }, { duration: '3m', target: 100 }
+        { duration: '1m',  target: 23 }, { duration: '3m',  target: 23 },
+        { duration: '1m',  target: 25 }, { duration: '3m',  target: 25 }
       ],
       gracefulRampDown: '30s',
     },
@@ -135,16 +137,16 @@ export const options = {
       exec:      'ordersRamp',
       startVUs:  0,
       stages: [
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  4 }, { duration: '3m',  target:  4 },
+        { duration: '1m',  target:  6 }, { duration: '3m',  target:  6 },
         { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
+        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
+        { duration: '1m',  target: 12 }, { duration: '3m',  target: 12 },
+        { duration: '1m',  target: 14 }, { duration: '3m',  target: 14 },
         { duration: '1m',  target: 16 }, { duration: '3m',  target: 16 },
-        { duration: '1m',  target: 24 }, { duration: '3m',  target: 24 },
-        { duration: '1m',  target: 32 }, { duration: '3m',  target: 32 },
-        { duration: '1m',  target: 40 }, { duration: '3m',  target: 40 },
-        { duration: '1m',  target: 48 }, { duration: '3m',  target: 48 },
-        { duration: '1m',  target: 56 }, { duration: '3m',  target: 56 },
-        { duration: '1m',  target: 64 }, { duration: '3m',  target: 64 },
-        { duration: '1m',  target: 72 }, { duration: '3m',  target: 72 },
-        { duration: '1m',  target: 80 }, { duration: '3m',  target: 80 }
+        { duration: '1m',  target: 18 }, { duration: '3m',  target: 18 },
+        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 }
       ],
       gracefulRampDown: '30s',
     },
@@ -161,16 +163,16 @@ export const options = {
       exec:      'fullCheckout',
       startVUs:  0,
       stages: [
+        { duration: '1m',  target:  1 }, { duration: '3m',  target:  1 },
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 },
         { duration: '1m',  target:  4 }, { duration: '3m',  target:  4 },
+        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 },
+        { duration: '1m',  target:  6 }, { duration: '3m',  target:  6 },
+        { duration: '1m',  target:  7 }, { duration: '3m',  target:  7 },
         { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
-        { duration: '1m',  target: 12 }, { duration: '3m',  target: 12 },
-        { duration: '1m',  target: 16 }, { duration: '3m',  target: 16 },
-        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 },
-        { duration: '1m',  target: 24 }, { duration: '3m',  target: 24 },
-        { duration: '1m',  target: 28 }, { duration: '3m',  target: 28 },
-        { duration: '1m',  target: 32 }, { duration: '3m',  target: 32 },
-        { duration: '1m',  target: 36 }, { duration: '3m',  target: 36 },
-        { duration: '1m',  target: 40 }, { duration: '3m',  target: 40 }
+        { duration: '1m',  target:  9 }, { duration: '3m',  target:  9 },
+        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 }
       ],
       gracefulRampDown: '30s',
     },
@@ -179,7 +181,7 @@ export const options = {
   thresholds: {
     // token_ramp: invisible call that blocks cart page render.
     'http_req_duration{scenario:token_ramp}': [
-      { threshold: 'p(95)<1000', abortOnFail: true, delayAbortEval: '60s' },
+      { threshold: 'p(95)<1000', abortOnFail: true, delayAbortEval: '3m' },
     ],
 
     // orders_ramp: user viewing order history.
@@ -222,7 +224,8 @@ export function setup() {
     'checkout probe user ready': (r) =>
       r.status === 201 || (r.status === 200 && r.json('success') === false),
   });
-  return { email: PROBE_EMAIL, pass: PROBE_PASS };
+  const products = fetchProducts(BASE_URL);
+  return { email: PROBE_EMAIL, pass: PROBE_PASS, products };
 }
 
 // ─── Scenario: token_ramp ─────────────────────────────────────────────────────
@@ -259,7 +262,8 @@ export function cartPageLoad() {
 }
 
 // ─── Scenario: product_detail ─────────────────────────────────────────────────
-export function productDetail() {
+export function productDetail(data) {
+  const products = data.products;
   const p = products[Math.floor(Math.random() * products.length)];
   const slug = p.slug || 'unknown';
   const res = http.get(`${FRONTEND_URL}/product/${slug}`, { headers: { 'Accept': 'text/html' } });
@@ -302,6 +306,7 @@ export function fullCheckout(data) {
   if (!cachedToken) {
     cachedToken = getToken(BASE_URL, data.email, data.pass);
   }
+  const products = data.products;
   const hdr = authHeaders(cachedToken);
 
   let tokenOk    = false;

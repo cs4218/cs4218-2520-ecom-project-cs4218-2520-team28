@@ -10,9 +10,18 @@
 //   Compare against catalog-stress.js (2B) to measure combined-scenario interference.
 //
 // VU STAIRCASE  (1 min ramp + 3 min hold per step)
-//   Step 1 :  100 VUs   — baseline warm-up; expect sub-50 ms MongoDB reads
-//   Step 2 :  200 VUs   — moderate load; watch for connection pool pressure
-//   Step 3 :  300 VUs   — ceiling candidate; abortOnFail triggers if p(95) > 500 ms
+//   10 steps, constant increment of 100 VUs per step:
+//     Step 1  :  100 VUs
+//     Step 2  :  200 VUs
+//     Step 3  :  300 VUs
+//     Step 4  :  400 VUs
+//     Step 5  :  500 VUs
+//     Step 6  :  600 VUs
+//     Step 7  :  700 VUs
+//     Step 8  :  800 VUs
+//     Step 9  :  900 VUs
+//     Step 10 : 1000 VUs
+//   Each step: 1 min ramp up, 3 min hold. Test aborts on p(95) > 500 ms.
 //
 // THRESHOLD RATIONALE
 //   p(95) < 500 ms — users browse the shop and expect products to appear quickly.
@@ -34,7 +43,6 @@
 
 import http from 'k6/http';
 import { check, sleep } from 'k6';
-import { products } from './helpers/seed-data.js';
 
 // ─── URLs ──────────────────────────────────────────────────────────────────
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:6060';

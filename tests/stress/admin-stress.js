@@ -11,18 +11,14 @@
 //   the orders read query performance.
 //
 // VU STAIRCASE  (each scenario: 1 min ramp + 3 min hold per step)
-//   VU ratios reflect realistic admin traffic distribution (from PLAN.md § Story 4).
-//   all_orders_poll starts at L = 30 (dashboard auto-refresh — dominant admin read).
-//   All other scenarios' VUs are derived from the same PLAN ratios.
-//
-//   Scenario              Reasoning                                   Step 1  Step 2  Step 3
-//   ────────────────────  ──────────────────────────────────────────  ──────  ──────  ──────
-//   all_orders_poll       dashboard auto-refresh — every admin tab      30      40      50
-//   admin_dashboard       frontend /dashboard/admin — SPA HTML          25      35      45
-//   admin_products_page   frontend /dashboard/admin/products — SPA      20      25      35
-//   order_status_updates  PUT auth/order-status — write contention       15      20      30
-//   category_churn        POST/PUT/DELETE category CRUD                   7      10      15
-//   product_create        POST product/create-product — file upload        3       5       8
+//   6 scenarios, each with constant VU increments and 10 steps:
+//     all_orders_poll:      5 → 10 → 15 → 20 → 25 → 30 → 35 → 40 → 45 → 50 VUs (increment 5)
+//     admin_dashboard:      5 → 10 → 15 → 20 → 25 → 30 → 35 → 40 → 45 → 50 VUs (increment 5)
+//     admin_products_page:  4 → 8 → 12 → 16 → 20 → 24 → 28 → 32 → 36 → 40 VUs (increment 4)
+//     order_status_updates: 3 → 6 → 9 → 12 → 15 → 18 → 21 → 24 → 27 → 30 VUs (increment 3)
+//     category_churn:       2 → 4 → 6 → 8 → 10 → 12 → 14 → 16 → 18 → 20 VUs (increment 2)
+//     product_create:       1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 VUs (increment 1)
+//   Each step: 1 min ramp up, 3 min hold. Test aborts on scenario-specific thresholds.
 //
 // THRESHOLD RATIONALE  (admin UX expectations)
 //   order_status_updates  p(95) < 1000 ms  — admin clicks "Update Status"; expects immediate ack
@@ -45,7 +41,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { getToken, authHeaders } from './helpers/auth.js';
-import { products, categories, orderStatuses } from './helpers/seed-data.js';
+import { fetchCategories, orderStatuses } from './helpers/seed-data.js';
 
 // ─── URLs ──────────────────────────────────────────────────────────────────
 const BASE_URL     = __ENV.BASE_URL     || 'http://localhost:6060';
@@ -274,7 +270,8 @@ export function setup() {
     } catch { /* no orders yet — status update scenario will skip gracefully */ }
   }
 
-  return { email: ADMIN_EMAIL, pass: ADMIN_PASS, sampleOrderId };
+  const categories = fetchCategories(BASE_URL);
+  return { email: ADMIN_EMAIL, pass: ADMIN_PASS, sampleOrderId, categories };
 }
 
 // ─── Scenario: all_orders_poll ────────────────────────────────────────────────
@@ -405,7 +402,7 @@ export function productCreate(data) {
     cachedAdminToken = getToken(BASE_URL, data.email, data.pass);
   }
 
-  const cat = categories[Math.floor(Math.random() * categories.length)];
+  const cat = data.categories[Math.floor(Math.random() * data.categories.length)];
   const catId = cat._id || 'unknown';
   const productName = `stress.product.${__VU}.${__ITER}`;
 

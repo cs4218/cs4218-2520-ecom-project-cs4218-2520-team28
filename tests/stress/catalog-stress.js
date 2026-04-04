@@ -11,20 +11,16 @@
 //   compete for the same Mongoose connection pool and Node event loop.
 //
 // VU STAIRCASE  (each scenario: 1 min ramp + 3 min hold per step)
-//   VU ratios reflect realistic catalog traffic distribution (from PLAN.md § Story 2).
-//   product_list starts at L = 150 (dominant scenario — every homepage mount).
-//   All other scenarios' VUs are derived from the same PLAN ratios.
-//
-//   Scenario           Reasoning                                   Step 1   Step 2   Step 3
-//   ─────────────────  ──────────────────────────────────────────  ───────  ───────  ───────
-//   product_list       every homepage mount — pure MongoDB read      150      200      300
-//   homepage_load      frontend / — React SPA serving               100      150      200
-//   photo_stress       one photo per product in the listing          70       100      150
-//   search_stress      user typed a keyword — DB text search         30        50       80
-//   filter_stress      user applied category / price filter          25        40       60
-//   category_page      frontend /categories — SPA HTML               15        25       40
-//   search_page        frontend /search/shirt — SPA HTML             10        20       30
-//   related_products   secondary content on product detail page      10        20       30
+//   8 scenarios, each with constant VU increments and 7 steps:
+//     product_list:      100 → 200 → 300 → 400 → 500 → 600 → 700 → 800 VUs (increment 100)
+//     homepage_load:      70 → 140 → 210 → 280 → 350 → 420 → 490 → 560 VUs (increment 70)
+//     photo_stress:       50 → 100 → 150 → 200 → 250 → 300 → 350 → 400 VUs (increment 50)
+//     search_stress:      20 → 40 → 60 → 80 → 100 → 120 → 140 → 160 VUs (increment 20)
+//     filter_stress:      10 → 20 → 30 → 40 → 50 → 60 → 70 → 80 VUs (increment 10)
+//     category_page:      10 → 20 → 30 → 40 → 50 → 60 → 70 → 80 VUs (increment 10)
+//     search_page:        10 → 20 → 30 → 40 → 50 → 60 → 70 → 80 VUs (increment 10)
+//     related_products:   10 → 20 → 30 → 40 → 50 → 60 → 70 → 80 VUs (increment 10)
+//   Each step: 1 min ramp up, 3 min hold. Test aborts on scenario-specific thresholds.
 //
 // THRESHOLD RATIONALE  (Nielsen Norman UX benchmarks throughout)
 //   product_list     p(95) < 500 ms   — browse; expects products to appear quickly
@@ -46,7 +42,7 @@
 
 import http from 'k6/http';
 import { check, sleep } from 'k6';
-import { products, categories, keywords, filterPayloads } from './helpers/seed-data.js';
+import { fetchProducts, fetchFilterPayloads, keywords } from './helpers/seed-data.js';
 
 // ─── URLs ──────────────────────────────────────────────────────────────────
 const BASE_URL     = __ENV.BASE_URL     || 'http://localhost:6060';
@@ -275,8 +271,7 @@ export const options = {
 };
 
 // ─── Setup ────────────────────────────────────────────────────────────────────
-// Verifies backend is reachable.  seed-data.js SharedArrays are already populated
-// during the k6 init context — setup() is only needed for a connectivity check.
+// Verifies backend is reachable and fetches seed data for VU functions.
 export function setup() {
   const res = http.get(`${BASE_URL}/api/v1/product/product-list/1`);
   check(res, {
@@ -285,6 +280,9 @@ export function setup() {
       try { return Array.isArray(r.json('products')); } catch { return false; }
     },
   });
+  const products      = fetchProducts(BASE_URL);
+  const filterPayloads = fetchFilterPayloads(BASE_URL);
+  return { products, filterPayloads };
 }
 
 // ─── Scenario: product_list ───────────────────────────────────────────────────
@@ -318,7 +316,8 @@ export function homepageLoad() {
 // ─── Scenario: photo_stress ───────────────────────────────────────────────────
 // Picks a random product ID from the seed-data pool and downloads its photo.
 // photo_stress is the widest-payload scenario — most likely to breach threshold first.
-export function photoStress() {
+export function photoStress(data) {
+  const products = data.products;
   const p = products[Math.floor(Math.random() * products.length)];
   const pid = p._id || 'unknown';
   const res = http.get(`${BASE_URL}/api/v1/product/product-photo/${pid}`);
@@ -348,7 +347,8 @@ export function searchStress() {
 }
 
 // ─── Scenario: filter_stress ──────────────────────────────────────────────────
-export function filterStress() {
+export function filterStress(data) {
+  const filterPayloads = data.filterPayloads;
   const payload = filterPayloads[Math.floor(Math.random() * filterPayloads.length)];
   const res = http.post(
     `${BASE_URL}/api/v1/product/product-filters`,
@@ -393,7 +393,8 @@ export function searchPage() {
 }
 
 // ─── Scenario: related_products ───────────────────────────────────────────────
-export function relatedProducts() {
+export function relatedProducts(data) {
+  const products = data.products;
   const p = products[Math.floor(Math.random() * products.length)];
   const pid = p._id || 'unknown';
   const cid = (p.category && p.category._id) ? p.category._id : 'unknown';

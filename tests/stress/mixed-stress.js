@@ -15,24 +15,20 @@
 //
 // VU STAIRCASE  (each scenario: 1 min ramp + 3 min hold per step)
 //   All scenarios start from time zero (no startTime offset).
-//   VU ratios are directly from PLAN.md § Story 5.
-//
-//   ─── Catalog (dominant — anonymous browsing) ───
-//   product_list       : steps 100 → 200 → 300 VUs   ← every homepage mount
-//   homepage_load      : steps  80 → 150 → 220 VUs   [frontend /]
-//   photo_stress       : steps  50 → 100 → 150 VUs   ← one per listed product
-//   ─── Auth (high-frequency — every protected page) ───
-//   session_check      : steps  60 → 120 → 180 VUs   ← JWT verify on each nav
-//   login_flow         : steps  30 →  60 →  90 VUs   ← once per session
-//   login_page_load    : steps  25 →  50 →  80 VUs   [frontend /login]
-//   ─── Checkout (mid-frequency — cart visitors only) ───
-//   token_ramp         : steps  20 →  40 →  60 VUs   ← every cart mount
-//   cart_page_load     : steps  15 →  30 →  50 VUs   [frontend /cart]
-//   full_checkout      : steps   5 →  10 →  20 VUs   ← actual buyers (~5%)
-//   ─── Admin (lightest — small user base) ───
-//   all_orders_poll    : steps  10 →  15 →  20 VUs
-//   admin_dashboard    : steps   8 →  12 →  18 VUs   [frontend /dashboard/admin]
-//   order_status_updates: steps  5 →   8 →  12 VUs
+//   Each scenario uses constant VU increments and 10 steps (unless otherwise noted):
+//     product_list:         25 → 50 → 75 → 100 → 125 → 150 → 175 → 200 → 225 → 250 VUs (increment 25)
+//     homepage_load:        16 → 32 → 48 → 64 → 80 → 96 → 112 → 128 → 144 → 160 VUs (increment 16)
+//     photo_stress:         10 → 20 → 30 → 40 → 50 → 60 → 70 → 80 → 90 → 100 VUs (increment 10)
+//     session_check:        12 → 24 → 36 → 48 → 60 → 72 → 84 → 96 → 108 → 120 VUs (increment 12)
+//     login_flow:            6 → 12 → 18 → 24 → 30 → 36 → 42 → 48 → 54 → 60 VUs (increment 6)
+//     login_page_load:       5 → 10 → 15 → 20 → 25 → 30 → 35 → 40 → 45 → 50 VUs (increment 5)
+//     token_ramp:            2 → 4 → 6 → 8 → 10 → 12 → 14 → 16 → 18 → 20 VUs (increment 2)
+//     cart_page_load:        1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 VUs (increment 1)
+//     full_checkout:         1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 VUs (increment 1)
+//     all_orders_poll:       1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 VUs (increment 1)
+//     admin_dashboard:       1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 VUs (increment 1)
+//     order_status_updates:  1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 VUs (increment 1)
+//   Each step: 1 min ramp up, 3 min hold. Test aborts on scenario-specific thresholds.
 //
 // THRESHOLD RATIONALE
 //   Same UX-based values as Stories 1–4.  User experience expectations do not
@@ -54,7 +50,7 @@ import http from 'k6/http';
 import { check, group, sleep } from 'k6';
 import { Trend } from 'k6/metrics';
 import { getToken, authHeaders } from './helpers/auth.js';
-import { products, categories, keywords, filterPayloads, orderStatuses } from './helpers/seed-data.js';
+import { fetchProducts, keywords, orderStatuses } from './helpers/seed-data.js';
 
 // ─── URLs ──────────────────────────────────────────────────────────────────
 const BASE_URL     = __ENV.BASE_URL     || 'http://localhost:6060';
@@ -423,7 +419,8 @@ export function setup() {
     } catch { /* no orders yet */ }
   }
 
-  return { sampleOrderId };
+  const products = fetchProducts(BASE_URL);
+  return { sampleOrderId, products };
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -458,7 +455,8 @@ export function homepageLoad() {
   sleep(1);
 }
 
-export function photoStress() {
+export function photoStress(data) {
+  const products = data.products;
   const p = products[Math.floor(Math.random() * products.length)];
   const res = http.get(`${BASE_URL}/api/v1/product/product-photo/${p._id || 'unknown'}`);
 
@@ -571,7 +569,7 @@ export function fullCheckout() {
   if (!tokenOk) { sleep(1); return; }
 
   group('step2_payment', function () {
-    const p = products[Math.floor(Math.random() * products.length)];
+    const p = data.products[Math.floor(Math.random() * data.products.length)];
     const r = http.post(
       `${BASE_URL}/api/v1/product/braintree/payment`,
       JSON.stringify({ nonce: FAKE_NONCE, cart: [{ _id: p._id, price: 10 }] }),

@@ -22,17 +22,13 @@
 //   Seed at least 20 products and 5 categories first.
 
 import http from 'k6/http';
-import { SharedArray } from 'k6/data';
-
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:6060';
 
 // ─── Products ────────────────────────────────────────────────────────────────
-// Loads the first two pages of products (up to 12 × 2 = 24 items —
-// sufficient for randomisation without exhausting the catalogue).
-// Each entry: { id, slug, categoryId }
-export const products = new SharedArray('products', function () {
-  const page1 = http.get(`${BASE_URL}/api/v1/product/product-list/1`);
-  const page2 = http.get(`${BASE_URL}/api/v1/product/product-list/2`);
+// Fetches up to two pages of products. Call from setup(), NOT from init context.
+// Returns array of { _id, slug, category: { _id } }
+export function fetchProducts(baseUrl) {
+  const page1 = http.get(`${baseUrl}/api/v1/product/product-list/1`);
+  const page2 = http.get(`${baseUrl}/api/v1/product/product-list/2`);
 
   let items = [];
   try {
@@ -44,23 +40,23 @@ export const products = new SharedArray('products', function () {
     if (Array.isArray(p2.products)) items = items.concat(p2.products);
   } catch { /* page 2 may be empty — continue */ }
 
-  // Fallback: return at least one stub so the script doesn't crash
   if (items.length === 0) {
     return [{ _id: 'unknown', slug: 'unknown', category: { _id: 'unknown' } }];
   }
   return items;
-});
+}
 
 // ─── Categories ──────────────────────────────────────────────────────────────
-// Loads all categories from the API.  Each entry: { _id, name, slug }
-export const categories = new SharedArray('categories', function () {
-  const res = http.get(`${BASE_URL}/api/v1/category/get-category`);
+// Fetches all categories. Call from setup(), NOT from init context.
+// Returns array of { _id, name, slug }
+export function fetchCategories(baseUrl) {
+  const res = http.get(`${baseUrl}/api/v1/category/get-category`);
   try {
     const body = JSON.parse(res.body);
     if (Array.isArray(body.category) && body.category.length > 0) return body.category;
   } catch { /* fall through */ }
   return [{ _id: 'unknown', name: 'unknown', slug: 'unknown' }];
-});
+}
 
 // ─── Orders (for admin scenarios) ────────────────────────────────────────────
 // Orders are user-specific; admin scenarios fetch all orders via a pre-built
@@ -79,10 +75,10 @@ export const keywords = [
 ];
 
 // ─── Filter payloads ─────────────────────────────────────────────────────────
-// Pre-built POST bodies for /api/v1/product/product-filters.
-// Populated at init time once categories are known.
-export const filterPayloads = new SharedArray('filterPayloads', function () {
-  const res = http.get(`${BASE_URL}/api/v1/category/get-category`);
+// Builds POST bodies for /api/v1/product/product-filters.
+// Fetches categories internally. Call from setup(), NOT from init context.
+export function fetchFilterPayloads(baseUrl) {
+  const res = http.get(`${baseUrl}/api/v1/category/get-category`);
   let cats = [];
   try {
     const body = JSON.parse(res.body);
@@ -122,4 +118,4 @@ export const filterPayloads = new SharedArray('filterPayloads', function () {
     return [{ checked: [], radio: [0, 999] }];
   }
   return payloads;
-});
+}
