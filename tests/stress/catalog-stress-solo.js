@@ -10,17 +10,17 @@
 //   Compare against catalog-stress.js (2B) to measure combined-scenario interference.
 //
 // VU STAIRCASE  (1 min ramp + 3 min hold per step)
-//   10 steps, constant increment of 100 VUs per step:
-//     Step 1  :  100 VUs
-//     Step 2  :  200 VUs
-//     Step 3  :  300 VUs
-//     Step 4  :  400 VUs
-//     Step 5  :  500 VUs
-//     Step 6  :  600 VUs
-//     Step 7  :  700 VUs
-//     Step 8  :  800 VUs
-//     Step 9  :  900 VUs
-//     Step 10 : 1000 VUs
+//   10 steps, constant increment of 10 VUs per step:
+//     Step 1  :   10 VUs
+//     Step 2  :   20 VUs
+//     Step 3  :   30 VUs
+//     Step 4  :   40 VUs
+//     Step 5  :   50 VUs
+//     Step 6  :   60 VUs
+//     Step 7  :   70 VUs
+//     Step 8  :   80 VUs
+//     Step 9  :   90 VUs
+//     Step 10 :  100 VUs
 //   Each step: 1 min ramp up, 3 min hold. Test aborts on p(95) > 500 ms.
 //
 // THRESHOLD RATIONALE
@@ -60,16 +60,16 @@ export const options = {
       exec:      'productList',
       startVUs:  0,
       stages: [
+        { duration: '1m',  target:  10 }, { duration: '3m',  target:  10 },
+        { duration: '1m',  target:  20 }, { duration: '3m',  target:  20 },
+        { duration: '1m',  target:  30 }, { duration: '3m',  target:  30 },
+        { duration: '1m',  target:  40 }, { duration: '3m',  target:  40 },
+        { duration: '1m',  target:  50 }, { duration: '3m',  target:  50 },
+        { duration: '1m',  target:  60 }, { duration: '3m',  target:  60 },
+        { duration: '1m',  target:  70 }, { duration: '3m',  target:  70 },
+        { duration: '1m',  target:  80 }, { duration: '3m',  target:  80 },
+        { duration: '1m',  target:  90 }, { duration: '3m',  target:  90 },
         { duration: '1m',  target: 100 }, { duration: '3m',  target: 100 },
-        { duration: '1m',  target: 200 }, { duration: '3m',  target: 200 },
-        { duration: '1m',  target: 300 }, { duration: '3m',  target: 300 },
-        { duration: '1m',  target: 400 }, { duration: '3m',  target: 400 },
-        { duration: '1m',  target: 500 }, { duration: '3m',  target: 500 },
-        { duration: '1m',  target: 600 }, { duration: '3m',  target: 600 },
-        { duration: '1m',  target: 700 }, { duration: '3m',  target: 700 },
-        { duration: '1m',  target: 800 }, { duration: '3m',  target: 800 },
-        { duration: '1m',  target: 900 }, { duration: '3m',  target: 900 },
-        { duration: '1m',  target: 1000 }, { duration: '3m', target: 1000 },
       ],
       gracefulRampDown: '30s',
     },

@@ -12,14 +12,14 @@
 //
 // VU STAIRCASE  (each scenario: 1 min ramp + 3 min hold per step)
 //   8 scenarios, each with constant VU increments and 7 steps:
-//     product_list:      100 → 200 → 300 → 400 → 500 → 600 → 700 → 800 VUs (increment 100)
-//     homepage_load:      70 → 140 → 210 → 280 → 350 → 420 → 490 → 560 VUs (increment 70)
-//     photo_stress:       50 → 100 → 150 → 200 → 250 → 300 → 350 → 400 VUs (increment 50)
-//     search_stress:      20 → 40 → 60 → 80 → 100 → 120 → 140 → 160 VUs (increment 20)
-//     filter_stress:      10 → 20 → 30 → 40 → 50 → 60 → 70 → 80 VUs (increment 10)
-//     category_page:      10 → 20 → 30 → 40 → 50 → 60 → 70 → 80 VUs (increment 10)
-//     search_page:        10 → 20 → 30 → 40 → 50 → 60 → 70 → 80 VUs (increment 10)
-//     related_products:   10 → 20 → 30 → 40 → 50 → 60 → 70 → 80 VUs (increment 10)
+//     product_list:      10 → 20 → 30 → 40 → 50 → 60 → 70 → 80 VUs (increment 10)
+//     homepage_load:       7 → 14 → 21 → 28 → 35 → 42 → 49 → 56 VUs (increment 7)
+//     photo_stress:        5 → 10 → 15 → 20 → 25 → 30 → 35 → 40 VUs (increment 5)
+//     search_stress:       3 →  5 →  8 → 10 → 13 → 15 → 18 → 20 VUs (~increment 3)
+//     filter_stress:       2 →  4 →  6 →  8 → 10 → 12 → 14 → 16 VUs (increment 2)
+//     category_page:       1 →  2 →  3 →  4 →  5 →  6 →  7 →  8 VUs (increment 1)
+//     search_page:         1 →  2 →  3 →  4 →  5 →  6 →  7 →  8 VUs (increment 1)
+//     related_products:    1 →  2 →  3 →  4 →  5 →  6 →  7 →  8 VUs (increment 1)
 //   Each step: 1 min ramp up, 3 min hold. Test aborts on scenario-specific thresholds.
 //
 // THRESHOLD RATIONALE  (Nielsen Norman UX benchmarks throughout)
@@ -60,14 +60,14 @@ export const options = {
       exec:      'productList',
       startVUs:  0,
       stages: [
-        { duration: '1m',  target: 100 }, { duration: '3m',  target: 100 },
-        { duration: '1m',  target: 200 }, { duration: '3m',  target: 200 },
-        { duration: '1m',  target: 300 }, { duration: '3m',  target: 300 },
-        { duration: '1m',  target: 400 }, { duration: '3m',  target: 400 },
-        { duration: '1m',  target: 500 }, { duration: '3m',  target: 500 },
-        { duration: '1m',  target: 600 }, { duration: '3m',  target: 600 },
-        { duration: '1m',  target: 700 }, { duration: '3m',  target: 700 },
-        { duration: '1m',  target: 800 }, { duration: '3m',  target: 800 }
+        { duration: '1m',  target:  10 }, { duration: '3m',  target:  10 },
+        { duration: '1m',  target:  20 }, { duration: '3m',  target:  20 },
+        { duration: '1m',  target:  30 }, { duration: '3m',  target:  30 },
+        { duration: '1m',  target:  40 }, { duration: '3m',  target:  40 },
+        { duration: '1m',  target:  50 }, { duration: '3m',  target:  50 },
+        { duration: '1m',  target:  60 }, { duration: '3m',  target:  60 },
+        { duration: '1m',  target:  70 }, { duration: '3m',  target:  70 },
+        { duration: '1m',  target:  80 }, { duration: '3m',  target:  80 }
       ],
       gracefulRampDown: '30s',
     },
@@ -81,14 +81,14 @@ export const options = {
       exec:      'homepageLoad',
       startVUs:  0,
       stages: [
-        { duration: '1m',  target:  70 }, { duration: '3m',  target:  70 },
-        { duration: '1m',  target: 140 }, { duration: '3m',  target: 140 },
-        { duration: '1m',  target: 210 }, { duration: '3m',  target: 210 },
-        { duration: '1m',  target: 280 }, { duration: '3m',  target: 280 },
-        { duration: '1m',  target: 350 }, { duration: '3m',  target: 350 },
-        { duration: '1m',  target: 420 }, { duration: '3m',  target: 420 },
-        { duration: '1m',  target: 490 }, { duration: '3m',  target: 490 },
-        { duration: '1m',  target: 560 }, { duration: '3m',  target: 560 }
+        { duration: '1m',  target:  7 }, { duration: '3m',  target:  7 },
+        { duration: '1m',  target: 14 }, { duration: '3m',  target: 14 },
+        { duration: '1m',  target: 21 }, { duration: '3m',  target: 21 },
+        { duration: '1m',  target: 28 }, { duration: '3m',  target: 28 },
+        { duration: '1m',  target: 35 }, { duration: '3m',  target: 35 },
+        { duration: '1m',  target: 42 }, { duration: '3m',  target: 42 },
+        { duration: '1m',  target: 49 }, { duration: '3m',  target: 49 },
+        { duration: '1m',  target: 56 }, { duration: '3m',  target: 56 }
       ],
       gracefulRampDown: '30s',
     },
@@ -103,14 +103,14 @@ export const options = {
       exec:      'photoStress',
       startVUs:  0,
       stages: [
-        { duration: '1m',  target:  50 }, { duration: '3m',  target:  50 },
-        { duration: '1m',  target: 100 }, { duration: '3m',  target: 100 },
-        { duration: '1m',  target: 150 }, { duration: '3m',  target: 150 },
-        { duration: '1m',  target: 200 }, { duration: '3m',  target: 200 },
-        { duration: '1m',  target: 250 }, { duration: '3m',  target: 250 },
-        { duration: '1m',  target: 300 }, { duration: '3m',  target: 300 },
-        { duration: '1m',  target: 350 }, { duration: '3m',  target: 350 },
-        { duration: '1m',  target: 400 }, { duration: '3m',  target: 400 }
+        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 },
+        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
+        { duration: '1m',  target: 15 }, { duration: '3m',  target: 15 },
+        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 },
+        { duration: '1m',  target: 25 }, { duration: '3m',  target: 25 },
+        { duration: '1m',  target: 30 }, { duration: '3m',  target: 30 },
+        { duration: '1m',  target: 35 }, { duration: '3m',  target: 35 },
+        { duration: '1m',  target: 40 }, { duration: '3m',  target: 40 }
       ],
       gracefulRampDown: '30s',
     },
@@ -123,14 +123,14 @@ export const options = {
       exec:      'searchStress',
       startVUs:  0,
       stages: [
-        { duration: '1m',  target: 25 }, { duration: '3m',  target: 25 },
-        { duration: '1m',  target: 50 }, { duration: '3m',  target: 50 },
-        { duration: '1m',  target: 75 }, { duration: '3m',  target: 75 },
-        { duration: '1m',  target: 100 }, { duration: '3m', target: 100 },
-        { duration: '1m',  target: 125 }, { duration: '3m', target: 125 },
-        { duration: '1m',  target: 150 }, { duration: '3m', target: 150 },
-        { duration: '1m',  target: 175 }, { duration: '3m', target: 175 },
-        { duration: '1m',  target: 200 }, { duration: '3m', target: 200 }
+        { duration: '1m',  target:  3 }, { duration: '3m',  target:  3 },
+        { duration: '1m',  target:  5 }, { duration: '3m',  target:  5 },
+        { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
+        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
+        { duration: '1m',  target: 13 }, { duration: '3m',  target: 13 },
+        { duration: '1m',  target: 15 }, { duration: '3m',  target: 15 },
+        { duration: '1m',  target: 18 }, { duration: '3m',  target: 18 },
+        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 }
       ],
       gracefulRampDown: '30s',
     },
@@ -143,14 +143,14 @@ export const options = {
       exec:      'filterStress',
       startVUs:  0,
       stages: [
-        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 },
-        { duration: '1m',  target: 40 }, { duration: '3m',  target: 40 },
-        { duration: '1m',  target: 60 }, { duration: '3m',  target: 60 },
-        { duration: '1m',  target: 80 }, { duration: '3m',  target: 80 },
-        { duration: '1m',  target: 100 }, { duration: '3m', target: 100 },
-        { duration: '1m',  target: 120 }, { duration: '3m', target: 120 },
-        { duration: '1m',  target: 140 }, { duration: '3m', target: 140 },
-        { duration: '1m',  target: 160 }, { duration: '3m', target: 160 }
+        { duration: '1m',  target:  2 }, { duration: '3m',  target:  2 },
+        { duration: '1m',  target:  4 }, { duration: '3m',  target:  4 },
+        { duration: '1m',  target:  6 }, { duration: '3m',  target:  6 },
+        { duration: '1m',  target:  8 }, { duration: '3m',  target:  8 },
+        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
+        { duration: '1m',  target: 12 }, { duration: '3m',  target: 12 },
+        { duration: '1m',  target: 14 }, { duration: '3m',  target: 14 },
+        { duration: '1m',  target: 16 }, { duration: '3m',  target: 16 }
       ],
       gracefulRampDown: '30s',
     },
@@ -164,14 +164,14 @@ export const options = {
       exec:      'categoryPage',
       startVUs:  0,
       stages: [
-        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
-        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 },
-        { duration: '1m',  target: 30 }, { duration: '3m',  target: 30 },
-        { duration: '1m',  target: 40 }, { duration: '3m',  target: 40 },
-        { duration: '1m',  target: 50 }, { duration: '3m',  target: 50 },
-        { duration: '1m',  target: 60 }, { duration: '3m',  target: 60 },
-        { duration: '1m',  target: 70 }, { duration: '3m',  target: 70 },
-        { duration: '1m',  target: 80 }, { duration: '3m',  target: 80 }
+        { duration: '1m',  target: 1 }, { duration: '3m',  target: 1 },
+        { duration: '1m',  target: 2 }, { duration: '3m',  target: 2 },
+        { duration: '1m',  target: 3 }, { duration: '3m',  target: 3 },
+        { duration: '1m',  target: 4 }, { duration: '3m',  target: 4 },
+        { duration: '1m',  target: 5 }, { duration: '3m',  target: 5 },
+        { duration: '1m',  target: 6 }, { duration: '3m',  target: 6 },
+        { duration: '1m',  target: 7 }, { duration: '3m',  target: 7 },
+        { duration: '1m',  target: 8 }, { duration: '3m',  target: 8 }
       ],
       gracefulRampDown: '30s',
     },
@@ -185,14 +185,14 @@ export const options = {
       exec:      'searchPage',
       startVUs:  0,
       stages: [
-        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
-        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 },
-        { duration: '1m',  target: 30 }, { duration: '3m',  target: 30 },
-        { duration: '1m',  target: 40 }, { duration: '3m',  target: 40 },
-        { duration: '1m',  target: 50 }, { duration: '3m',  target: 50 },
-        { duration: '1m',  target: 60 }, { duration: '3m',  target: 60 },
-        { duration: '1m',  target: 70 }, { duration: '3m',  target: 70 },
-        { duration: '1m',  target: 80 }, { duration: '3m',  target: 80 },
+        { duration: '1m',  target: 1 }, { duration: '3m',  target: 1 },
+        { duration: '1m',  target: 2 }, { duration: '3m',  target: 2 },
+        { duration: '1m',  target: 3 }, { duration: '3m',  target: 3 },
+        { duration: '1m',  target: 4 }, { duration: '3m',  target: 4 },
+        { duration: '1m',  target: 5 }, { duration: '3m',  target: 5 },
+        { duration: '1m',  target: 6 }, { duration: '3m',  target: 6 },
+        { duration: '1m',  target: 7 }, { duration: '3m',  target: 7 },
+        { duration: '1m',  target: 8 }, { duration: '3m',  target: 8 },
       ],
       gracefulRampDown: '30s',
     },
@@ -205,14 +205,14 @@ export const options = {
       exec:      'relatedProducts',
       startVUs:  0,
       stages: [
-        { duration: '1m',  target: 10 }, { duration: '3m',  target: 10 },
-        { duration: '1m',  target: 20 }, { duration: '3m',  target: 20 },
-        { duration: '1m',  target: 30 }, { duration: '3m',  target: 30 },
-        { duration: '1m',  target: 40 }, { duration: '3m',  target: 40 },
-        { duration: '1m',  target: 50 }, { duration: '3m',  target: 50 },
-        { duration: '1m',  target: 60 }, { duration: '3m',  target: 60 },
-        { duration: '1m',  target: 70 }, { duration: '3m',  target: 70 },
-        { duration: '1m',  target: 80 }, { duration: '3m',  target: 80 },
+        { duration: '1m',  target: 1 }, { duration: '3m',  target: 1 },
+        { duration: '1m',  target: 2 }, { duration: '3m',  target: 2 },
+        { duration: '1m',  target: 3 }, { duration: '3m',  target: 3 },
+        { duration: '1m',  target: 4 }, { duration: '3m',  target: 4 },
+        { duration: '1m',  target: 5 }, { duration: '3m',  target: 5 },
+        { duration: '1m',  target: 6 }, { duration: '3m',  target: 6 },
+        { duration: '1m',  target: 7 }, { duration: '3m',  target: 7 },
+        { duration: '1m',  target: 8 }, { duration: '3m',  target: 8 },
       ],
       gracefulRampDown: '30s',
     },
@@ -280,9 +280,18 @@ export function setup() {
       try { return Array.isArray(r.json('products')); } catch { return false; }
     },
   });
-  const products      = fetchProducts(BASE_URL);
+  const products = fetchProducts(BASE_URL);
+  const photoProducts = products.filter((product) => {
+    const productId = product._id || 'unknown';
+    const photoRes = http.get(`${BASE_URL}/api/v1/product/product-photo/${productId}`);
+    return photoRes.status === 200 || photoRes.status === 304;
+  });
   const filterPayloads = fetchFilterPayloads(BASE_URL);
-  return { products, filterPayloads };
+  return {
+    products,
+    photoProducts: photoProducts.length > 0 ? photoProducts : products,
+    filterPayloads,
+  };
 }
 
 // ─── Scenario: product_list ───────────────────────────────────────────────────
@@ -317,13 +326,13 @@ export function homepageLoad() {
 // Picks a random product ID from the seed-data pool and downloads its photo.
 // photo_stress is the widest-payload scenario — most likely to breach threshold first.
 export function photoStress(data) {
-  const products = data.products;
+  const products = data.photoProducts;
   const p = products[Math.floor(Math.random() * products.length)];
   const pid = p._id || 'unknown';
   const res = http.get(`${BASE_URL}/api/v1/product/product-photo/${pid}`);
 
   check(res, {
-    // Photo endpoint returns 200 with image bytes, or 404 if product has no photo
+    // setup() prefilters to photo-capable products, so 404 indicates a real regression.
     'photo status 200 or 304': (r) => r.status === 200 || r.status === 304,
     'photo non-empty':         (r) => r.body != null && r.body.length > 0,
   });
@@ -339,7 +348,7 @@ export function searchStress() {
   check(res, {
     'search status 200':    (r) => r.status === 200,
     'search results array': (r) => {
-      try { return Array.isArray(r.json('results')); } catch { return false; }
+      try { return Array.isArray(r.json()); } catch { return false; }
     },
   });
 

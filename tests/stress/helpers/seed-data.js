@@ -43,7 +43,14 @@ export function fetchProducts(baseUrl) {
   if (items.length === 0) {
     return [{ _id: 'unknown', slug: 'unknown', category: { _id: 'unknown' } }];
   }
-  return items;
+  return items.map((item) => ({
+    ...item,
+    category: {
+      _id: item.category && typeof item.category === 'object'
+        ? (item.category._id || 'unknown')
+        : (item.category || 'unknown'),
+    },
+  }));
 }
 
 // ─── Categories ──────────────────────────────────────────────────────────────
