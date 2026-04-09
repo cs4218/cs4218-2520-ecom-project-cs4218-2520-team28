@@ -288,10 +288,11 @@ const HomePage = () => {
                 className="btn loadmore"
                 onClick={(e) => {
                   e.preventDefault();
-                  setPage(page + 1);
+                  setPage((prev) => prev + 1);
                 }}
               >
-                Loadmore <AiOutlineReload />
+                <span>Loadmore</span>
+                <AiOutlineReload className="ms-2" />
               </button>
             )}
           </div>

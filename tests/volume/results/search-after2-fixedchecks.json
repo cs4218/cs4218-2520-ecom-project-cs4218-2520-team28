@@ -1,0 +1,157 @@
+{
+    "metrics": {
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 10,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 1
+        },
+        "iteration_duration": {
+            "avg": 1220.2130000000002,
+            "min": 1095.8182,
+            "med": 1207.60285,
+            "max": 1352.1254,
+            "p(90)": 1343.7832099999998,
+            "p(95)": 1347.954305
+        },
+        "http_req_connecting": {
+            "p(90)": 0.1443099999999995,
+            "p(95)": 0.7937049999999984,
+            "avg": 0.14431,
+            "min": 0,
+            "med": 0,
+            "max": 1.4431
+        },
+        "http_req_waiting": {
+            "min": 87.9237,
+            "med": 199.3226,
+            "max": 345.4947,
+            "p(90)": 336.29868,
+            "p(95)": 340.89669000000004,
+            "avg": 212.80131
+        },
+        "vus_max": {
+            "value": 1,
+            "min": 1,
+            "max": 1
+        },
+        "http_req_tls_handshaking": {
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0
+        },
+        "iterations": {
+            "count": 10,
+            "rate": 0.8194722269430651
+        },
+        "http_req_duration{expected_response:true}": {
+            "med": 199.50725,
+            "max": 349.3493,
+            "p(90)": 340.73963000000003,
+            "p(95)": 345.044465,
+            "avg": 216.04788000000002,
+            "min": 93.2554
+        },
+        "http_req_sending": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "checks": {
+            "passes": 40,
+            "fails": 0,
+            "value": 1
+        },
+        "data_sent": {
+            "count": 1140,
+            "rate": 93.41983387150943
+        },
+        "http_req_duration": {
+            "med": 199.50725,
+            "max": 349.3493,
+            "p(90)": 340.73963000000003,
+            "p(95)": 345.044465,
+            "avg": 216.04788000000002,
+            "min": 93.2554,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "data_received": {
+            "count": 116860,
+            "rate": 9576.352444056658
+        },
+        "http_reqs": {
+            "count": 10,
+            "rate": 0.8194722269430651
+        },
+        "http_req_blocked": {
+            "p(90)": 1.4718799999999947,
+            "p(95)": 8.095339999999984,
+            "avg": 1.47188,
+            "min": 0,
+            "med": 0,
+            "max": 14.7188
+        },
+        "http_req_receiving": {
+            "med": 2.7731000000000003,
+            "max": 9.383,
+            "p(90)": 5.7368299999999985,
+            "p(95)": 7.559914999999995,
+            "avg": 3.2465699999999997,
+            "min": 0
+        }
+    },
+    "setup_data": {
+        "keyword": "laptop"
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "status is 200": {
+                    "fails": 0,
+                    "name": "status is 200",
+                    "path": "::status is 200",
+                    "id": "6210a8cd14cd70477eba5c5e4cb3fb5f",
+                    "passes": 10
+                },
+                "has products array": {
+                    "passes": 10,
+                    "fails": 0,
+                    "name": "has products array",
+                    "path": "::has products array",
+                    "id": "98da06983ffeb82b1c91874bbac78452"
+                },
+                "returns <= limit products": {
+                    "name": "returns <= limit products",
+                    "path": "::returns <= limit products",
+                    "id": "8f34ed84f7777374b9b7e769271e25a7",
+                    "passes": 10,
+                    "fails": 0
+                },
+                "response time is acceptable": {
+                    "name": "response time is acceptable",
+                    "path": "::response time is acceptable",
+                    "id": "a32d5d80b484caa548b3df34b8d5308b",
+                    "passes": 10,
+                    "fails": 0
+                }
+            }
+    }
+}
