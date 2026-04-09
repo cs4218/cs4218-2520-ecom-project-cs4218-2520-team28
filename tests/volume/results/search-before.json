@@ -1,0 +1,150 @@
+{
+    "metrics": {
+        "iteration_duration": {
+            "med": 29249.261449999998,
+            "max": 42321.9615,
+            "p(90)": 32291.246759999995,
+            "p(95)": 37306.604129999985,
+            "avg": 30088.69878,
+            "min": 25195.8502
+        },
+        "iterations": {
+            "count": 10,
+            "rate": 0.03323498261133579
+        },
+        "http_req_receiving": {
+            "avg": 93.71323999999998,
+            "min": 78.4009,
+            "med": 89.31184999999999,
+            "max": 125.7297,
+            "p(90)": 118.00419,
+            "p(95)": 121.86694499999999
+        },
+        "data_sent": {
+            "count": 980,
+            "rate": 3.2570282959109074
+        },
+        "data_received": {
+            "count": 791336890,
+            "rate": 2630006.7778858542
+        },
+        "checks": {
+            "passes": 20,
+            "fails": 10,
+            "value": 0.6666666666666666
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 10,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 27669.313619999994,
+            "min": 22083.546,
+            "med": 26877.61245,
+            "max": 40221.1773,
+            "p(90)": 29670.781049999998,
+            "p(95)": 34945.979174999986
+        },
+        "http_req_connecting": {
+            "p(95)": 0.2919399999999995,
+            "avg": 0.05308,
+            "min": 0,
+            "med": 0,
+            "max": 0.5308,
+            "p(90)": 0.053079999999999815
+        },
+        "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 1
+        },
+        "vus_max": {
+            "min": 1,
+            "max": 1,
+            "value": 1
+        },
+        "http_reqs": {
+            "count": 10,
+            "rate": 0.03323498261133579
+        },
+        "http_req_blocked": {
+            "avg": 0.84745,
+            "min": 0,
+            "med": 0,
+            "max": 8.4745,
+            "p(90)": 0.847449999999997,
+            "p(95)": 4.660974999999992
+        },
+        "http_req_sending": {
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0
+        },
+        "http_req_duration": {
+            "avg": 27669.313619999994,
+            "min": 22083.546,
+            "med": 26877.61245,
+            "max": 40221.1773,
+            "p(90)": 29670.781049999998,
+            "p(95)": 34945.979174999986,
+            "thresholds": {
+                "p(95)<2000": true
+            }
+        },
+        "http_req_tls_handshaking": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "http_req_waiting": {
+            "med": 26792.5575,
+            "max": 40104.0315,
+            "p(90)": 29570.349599999998,
+            "p(95)": 34837.190549999985,
+            "avg": 27575.60038,
+            "min": 21957.8163
+        }
+    },
+    "setup_data": {
+        "keyword": "laptop"
+    },
+    "root_group": {
+        "groups": {},
+        "checks": {
+                "status is 200": {
+                    "id": "6210a8cd14cd70477eba5c5e4cb3fb5f",
+                    "passes": 10,
+                    "fails": 0,
+                    "name": "status is 200",
+                    "path": "::status is 200"
+                },
+                "response returns array": {
+                    "name": "response returns array",
+                    "path": "::response returns array",
+                    "id": "905c5203c2dbc721f863144d3f657495",
+                    "passes": 10,
+                    "fails": 0
+                },
+                "response time is acceptable": {
+                    "name": "response time is acceptable",
+                    "path": "::response time is acceptable",
+                    "id": "a32d5d80b484caa548b3df34b8d5308b",
+                    "passes": 0,
+                    "fails": 10
+                }
+            },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+}

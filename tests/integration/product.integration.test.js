@@ -2624,20 +2624,29 @@ describe("public product query controller integration tests", () => {
       });
 
       test("should search products successfully by keyword", async () => {
-        const mockResults = [
-          { _id: "p1", name: "Phone", description: "A smartphone" },
-        ];
+        const mockResults = [{ _id: "p1", name: "Phone", description: "A smartphone" }];
 
-        const selectMock = jest.fn().mockResolvedValue(mockResults);
+        const queryChain = {
+          select: jest.fn().mockReturnThis(),
+          skip: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          sort: jest.fn().mockReturnThis(),
+          lean: jest.fn().mockResolvedValue(mockResults),
+        };
 
-        jest.spyOn(productModel, "find").mockReturnValue({
-          select: selectMock,
-        });
+        jest.spyOn(productModel, "find").mockReturnValue(queryChain);
+        jest.spyOn(productModel, "countDocuments").mockResolvedValue(mockResults.length);
 
         const res = await request(publicProductApp).get("/api/v1/product/search/phone");
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual(mockResults);
+        expect(res.body).toEqual({
+          success: true,
+          page: 1,
+          limit: 50,
+          total: 1,
+          products: mockResults,
+        });
 
         expect(productModel.find).toHaveBeenCalledWith({
           $or: [
@@ -2645,7 +2654,14 @@ describe("public product query controller integration tests", () => {
             { description: { $regex: "phone", $options: "i" } },
           ],
         });
-        expect(selectMock).toHaveBeenCalledWith("-photo");
+
+        expect(queryChain.select).toHaveBeenCalledWith(
+          "name slug price category rating shipping quantity createdAt"
+        );
+        expect(queryChain.skip).toHaveBeenCalledWith(0);
+        expect(queryChain.limit).toHaveBeenCalledWith(50);
+        expect(queryChain.sort).toHaveBeenCalledWith({ createdAt: -1 });
+        expect(queryChain.lean).toHaveBeenCalled();
       });
 
       test("should return 400 when product search fails", async () => {
@@ -2704,15 +2720,16 @@ describe("public product query controller integration tests", () => {
         const res = await request(publicProductApp).get("/api/v1/product/search/phone");
 
         expect(res.status).toBe(200);
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body).toHaveLength(2);
+        expect(res.body.success).toBe(true);
+        expect(Array.isArray(res.body.products)).toBe(true);
+        expect(res.body.products).toHaveLength(2);
 
-        const names = res.body.map((p) => p.name);
+        const names = res.body.products.map((p) => p.name);
         expect(names).toContain("iPhone");
         expect(names).toContain("Laptop");
         expect(names).not.toContain("Desk");
 
-        for (const product of res.body) {
+        for (const product of res.body.products) {
           expect(product.photo).toBeUndefined();
         }
       });
@@ -2721,8 +2738,10 @@ describe("public product query controller integration tests", () => {
         const res = await request(publicProductApp).get("/api/v1/product/search/PHONE");
 
         expect(res.status).toBe(200);
-        expect(res.body).toHaveLength(2);
+        expect(res.body.success).toBe(true);
+        expect(res.body.products).toHaveLength(2);
       });
+
     });
   });
 
@@ -3141,15 +3160,17 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
         shipping: true,
       });
 
-      const req = { params: { keyword: "iPhone" } };
+      const req = { params: { keyword: "iPhone" }, query: {} };
       const res = makeRes();
 
       await searchProductController(req, res);
 
-      expect(res.json).toHaveBeenCalledTimes(1);
-      const results = res.json.mock.calls[0][0];
-      expect(results).toHaveLength(1);
-      expect(results[0].name).toBe("iPhone 15");
+      expect(res.status).toHaveBeenCalledWith(200);
+
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.success).toBe(true);
+      expect(payload.products).toHaveLength(1);
+      expect(payload.products[0].name).toBe("iPhone 15");
     });
 
     test("should match products by description", async () => {
@@ -3172,15 +3193,16 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
         shipping: true,
       });
 
-      const req = { params: { keyword: "laptop" } };
+      const req = { params: { keyword: "laptop" }, query: {} };
       const res = makeRes();
 
       await searchProductController(req, res);
 
-      expect(res.json).toHaveBeenCalledTimes(1);
-      const results = res.json.mock.calls[0][0];
-      expect(results).toHaveLength(1);
-      expect(results[0].name).toBe("MacBook Pro");
+      expect(res.status).toHaveBeenCalledWith(200);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.success).toBe(true);
+      expect(payload.products).toHaveLength(1);
+      expect(payload.products[0].name).toBe("MacBook Pro");
     });
 
     test("should perform case-insensitive search", async () => {
@@ -3194,15 +3216,15 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
         shipping: true,
       });
 
-      const req = { params: { keyword: "IPHONE" } };
+      const req = { params: { keyword: "IPHONE" }, query: {} };
       const res = makeRes();
 
       await searchProductController(req, res);
 
-      expect(res.json).toHaveBeenCalledTimes(1);
-      const results = res.json.mock.calls[0][0];
-      expect(results).toHaveLength(1);
-      expect(results[0].name).toBe("iPhone 15");
+      expect(res.send).toHaveBeenCalledTimes(1);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.products).toHaveLength(1);
+      expect(payload.products[0].name).toBe("iPhone 15");
     });
 
     test("should return empty array when no products match", async () => {
@@ -3216,14 +3238,14 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
         shipping: true,
       });
 
-      const req = { params: { keyword: "NonExistentProduct" } };
+      const req = { params: { keyword: "NonExistentProduct" }, query: {} };
       const res = makeRes();
 
       await searchProductController(req, res);
 
-      expect(res.json).toHaveBeenCalledTimes(1);
-      const results = res.json.mock.calls[0][0];
-      expect(results).toHaveLength(0);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.products).toHaveLength(0);
     });
 
     test("should exclude photo field from results", async () => {
@@ -3241,17 +3263,17 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
         },
       });
 
-      const req = { params: { keyword: "iPhone" } };
+      const req = { params: { keyword: "iPhone" }, query: {} };
       const res = makeRes();
 
       await searchProductController(req, res);
 
-      expect(res.json).toHaveBeenCalledTimes(1);
-      const results = res.json.mock.calls[0][0];
-      expect(results).toHaveLength(1);
-      // select("-photo") excludes the photo field from Mongoose documents
-      expect("photo" in results[0].toObject()).toBe(false);
-      expect(results[0].name).toBe("iPhone 15");
+      expect(res.send).toHaveBeenCalledTimes(1);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.products).toHaveLength(1);
+      // select("-photo") and .lean() excludes the photo field from returned objects
+      expect("photo" in payload.products[0]).toBe(false);
+      expect(payload.products[0].name).toBe("iPhone 15");
     });
 
     test("should match products from both name and description with same keyword", async () => {
@@ -3283,15 +3305,15 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
         shipping: true,
       });
 
-      const req = { params: { keyword: "wireless" } };
+      const req = { params: { keyword: "wireless" }, query: {} };
       const res = makeRes();
 
       await searchProductController(req, res);
 
-      expect(res.json).toHaveBeenCalledTimes(1);
-      const results = res.json.mock.calls[0][0];
-      expect(results).toHaveLength(2);
-      const names = results.map((p) => p.name);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      const payload = res.send.mock.calls[0][0];
+      expect(payload.products).toHaveLength(2);
+      const names = payload.products.map((p) => p.name);
       expect(names).toContain("Wireless Headphones");
       expect(names).toContain("USB Cable");
     });
@@ -3301,7 +3323,7 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
         throw new Error("DB failure");
       });
 
-      const req = { params: { keyword: "test" } };
+      const req = { params: { keyword: "test" }, query: {} };
       const res = makeRes();
 
       await searchProductController(req, res);
@@ -3366,9 +3388,9 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
       );
 
       expect(res.status).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body).toHaveLength(1);
-      expect(res.body[0].name).toBe("iPhone 15");
+      expect(Array.isArray(res.body.products)).toBe(true);
+      expect(res.body.products).toHaveLength(1);
+      expect(res.body.products[0].name).toBe("iPhone 15");
     });
 
     test("should return empty array for non-matching keyword", async () => {
@@ -3377,8 +3399,8 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
       );
 
       expect(res.status).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body).toHaveLength(0);
+      expect(Array.isArray(res.body.products)).toBe(true);
+      expect(res.body.products).toHaveLength(0);
     });
 
     test("should match keyword in description via HTTP", async () => {
@@ -3387,8 +3409,8 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
       );
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveLength(1);
-      expect(res.body[0].name).toBe("Samsung Galaxy S24");
+      expect(res.body.products).toHaveLength(1);
+      expect(res.body.products[0].name).toBe("Samsung Galaxy S24");
     });
 
     test("should perform case-insensitive search via HTTP", async () => {
@@ -3397,8 +3419,8 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
       );
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveLength(1);
-      expect(res.body[0].name).toBe("Sony Headphones");
+      expect(res.body.products).toHaveLength(1);
+      expect(res.body.products[0].name).toBe("Sony Headphones");
     });
 
     test("should exclude photo field from HTTP response", async () => {
@@ -3422,9 +3444,9 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
       );
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveLength(1);
-      expect(res.body[0].name).toBe("Photo Test Product");
-      expect(res.body[0].photo).toBeUndefined();
+      expect(res.body.products).toHaveLength(1);
+      expect(res.body.products[0].name).toBe("Photo Test Product");
+      expect(res.body.products[0].photo).toBeUndefined();
     });
   });
 
@@ -3465,17 +3487,17 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
       const res = await request(app).get("/api/v1/product/search/MacBook");
 
       expect(res.status).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body).toHaveLength(1);
-      expect(res.body[0].name).toBe("MacBook Air");
+      expect(Array.isArray(res.body.products)).toBe(true);
+      expect(res.body.products).toHaveLength(1);
+      expect(res.body.products[0].name).toBe("MacBook Air");
     });
 
     test("should return products matching description via full app", async () => {
       const res = await request(app).get("/api/v1/product/search/laptop");
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveLength(1);
-      expect(res.body[0].name).toBe("MacBook Air");
+      expect(res.body.products).toHaveLength(1);
+      expect(res.body.products[0].name).toBe("MacBook Air");
     });
 
     test("should return empty array for unmatched keyword via full app", async () => {
@@ -3484,16 +3506,16 @@ describe("searchProductController integration tests (MS2 - bottom-up)", () => {
       );
 
       expect(res.status).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body).toHaveLength(0);
+      expect(Array.isArray(res.body.products)).toBe(true);
+      expect(res.body.products).toHaveLength(0);
     });
 
     test("should perform case-insensitive search via full app", async () => {
       const res = await request(app).get("/api/v1/product/search/DELL");
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveLength(1);
-      expect(res.body[0].name).toBe("Dell XPS 15");
+      expect(res.body.products).toHaveLength(1);
+      expect(res.body.products[0].name).toBe("Dell XPS 15");
     });
   });
 });

@@ -586,7 +586,9 @@ describe("getAllOrdersController integration tests", () => {
         },
       ];
 
-      const sortMock = jest.fn().mockResolvedValue(mockOrders);
+      const limitMock = jest.fn().mockResolvedValue(mockOrders);
+      const skipMock = jest.fn().mockReturnValue({ limit: limitMock });
+      const sortMock = jest.fn().mockReturnValue({ skip: skipMock });
       const populateBuyer = jest.fn().mockReturnValue({
         sort: sortMock,
       });
@@ -597,18 +599,28 @@ describe("getAllOrdersController integration tests", () => {
       jest.spyOn(orderModel, "find").mockReturnValue({
         populate: populateProducts,
       });
+      jest.spyOn(orderModel, "countDocuments").mockResolvedValue(2);
 
       const res = await request(app)
         .get("/api/v1/auth/all-orders")
         .set("Authorization", "valid-admin-token");
 
       expect(res.status).toBe(200);
-      expect(res.body).toEqual(mockOrders);
+      expect(res.body).toEqual({
+        success: true,
+        page: 1,
+        limit: 50,
+        total: 2,
+        orders: mockOrders,
+      });
 
       expect(orderModel.find).toHaveBeenCalledWith({});
       expect(populateProducts).toHaveBeenCalledWith("products", "-photo");
       expect(populateBuyer).toHaveBeenCalledWith("buyer", "name");
       expect(sortMock).toHaveBeenCalledWith({ createdAt: -1 });
+      expect(skipMock).toHaveBeenCalledWith(0);
+      expect(limitMock).toHaveBeenCalledWith(50);
+      expect(orderModel.countDocuments).toHaveBeenCalledWith({});
     });
 
     test("should return 403 when authenticated user is not admin", async () => {
@@ -742,14 +754,15 @@ describe("getAllOrdersController integration tests", () => {
         .set("Authorization", adminToken);
 
       expect(res.status).toBe(200);
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body).toHaveLength(2);
+      expect(Array.isArray(res.body.orders)).toBe(true);
+      expect(res.body.orders).toHaveLength(2);
+      expect(res.body.total).toBe(2);
 
-      const returnedStatuses = res.body.map((order) => order.status);
+      const returnedStatuses = res.body.orders.map((order) => order.status);
       expect(returnedStatuses).toContain("Processing");
       expect(returnedStatuses).toContain("Delivered");
 
-      const returnedBuyerNames = res.body.map((order) => order.buyer.name);
+      const returnedBuyerNames = res.body.orders.map((order) => order.buyer.name);
       expect(returnedBuyerNames).toContain("Buyer One");
       expect(returnedBuyerNames).toContain("Buyer Two");
     });
@@ -796,9 +809,9 @@ describe("getAllOrdersController integration tests", () => {
         .set("Authorization", adminToken);
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveLength(2);
-      expect(res.body[0]._id.toString()).toBe(newerOrder._id.toString());
-      expect(res.body[1]._id.toString()).toBe(olderOrder._id.toString());
+      expect(res.body.orders).toHaveLength(2);
+      expect(res.body.orders[0]._id.toString()).toBe(newerOrder._id.toString());
+      expect(res.body.orders[1]._id.toString()).toBe(olderOrder._id.toString());
     });
 
     test("should return 403 when non-admin user accesses all-orders", async () => {

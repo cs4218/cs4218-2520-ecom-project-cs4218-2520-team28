@@ -2508,15 +2508,16 @@ describe("productListController", () => {
 
 
 // Jian Tao - A0273320R
+// Ho Jin Han - A02662756W
+// Fix unit tests due to behaviour changes for volume testing
 describe("searchProductController", () => {
   let req;
   let res;
 
   beforeEach(() => {
     req = {
-      params: {
-        keyword: "phone",
-      },
+      params: { keyword: "phone" },
+      query: {}, // IMPORTANT: controller reads req.query.page/limit
     };
 
     res = {
@@ -2536,54 +2537,99 @@ describe("searchProductController", () => {
       { name: "Samsung Phone", description: "Android device" },
     ];
 
-    const selectMock = jest.fn().mockResolvedValue(mockResults);
+    const queryChain = {
+      select: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue(mockResults),
+    };
 
-    productModel.find.mockReturnValue({
-      select: selectMock,
-    });
+    productModel.find.mockReturnValue(queryChain);
+    productModel.countDocuments.mockResolvedValue(mockResults.length);
 
     await searchProductController(req, res);
 
-    expect(productModel.find).toHaveBeenCalledWith({
+    const expectedQuery = {
       $or: [
         { name: { $regex: "phone", $options: "i" } },
         { description: { $regex: "phone", $options: "i" } },
       ],
-    });
+    };
 
-    expect(selectMock).toHaveBeenCalledWith("-photo");
-    expect(res.json).toHaveBeenCalledWith(mockResults);
+    expect(productModel.find).toHaveBeenCalledWith(expectedQuery);
+    expect(productModel.countDocuments).toHaveBeenCalledWith(expectedQuery);
+
+    expect(queryChain.select).toHaveBeenCalledWith(
+      "name slug price category rating shipping quantity createdAt"
+    );
+    expect(queryChain.skip).toHaveBeenCalledWith(0);    // default page=1
+    expect(queryChain.limit).toHaveBeenCalledWith(50);  // default limit=50
+    expect(queryChain.sort).toHaveBeenCalledWith({ createdAt: -1 });
+    expect(queryChain.lean).toHaveBeenCalled();
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      page: 1,
+      limit: 50,
+      total: mockResults.length,
+      products: mockResults,
+    });
   });
 
   test("should handle different keyword values correctly", async () => {
     req.params.keyword = "laptop";
 
-    productModel.find.mockReturnValue({
-      select: jest.fn().mockResolvedValue([]),
-    });
+    const queryChain = {
+      select: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    };
+
+    productModel.find.mockReturnValue(queryChain);
+    productModel.countDocuments.mockResolvedValue(0);
 
     await searchProductController(req, res);
 
-    expect(productModel.find).toHaveBeenCalledWith({
+    const expectedQuery = {
       $or: [
         { name: { $regex: "laptop", $options: "i" } },
         { description: { $regex: "laptop", $options: "i" } },
       ],
-    });
+    };
 
-    expect(res.json).toHaveBeenCalledWith([]);
+    expect(productModel.find).toHaveBeenCalledWith(expectedQuery);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      page: 1,
+      limit: 50,
+      total: 0,
+      products: [],
+    });
   });
 
-  test("should call select with -photo to exclude photo field", async () => {
-    const selectMock = jest.fn().mockResolvedValue([]);
+  test("should call select with whitelisted fields to reduce payload", async () => {
+    const queryChain = {
+      select: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    };
 
-    productModel.find.mockReturnValue({
-      select: selectMock,
-    });
+    productModel.find.mockReturnValue(queryChain);
+    productModel.countDocuments.mockResolvedValue(0);
 
     await searchProductController(req, res);
 
-    expect(selectMock).toHaveBeenCalledWith("-photo");
+    expect(queryChain.select).toHaveBeenCalledWith(
+      "name slug price category rating shipping quantity createdAt"
+    );
   });
 
   test("should handle errors and return 400 status", async () => {

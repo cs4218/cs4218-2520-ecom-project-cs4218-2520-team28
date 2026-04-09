@@ -464,15 +464,31 @@ export const productListController = async (req, res) => {
 export const searchProductController = async (req, res) => {
   try {
     const { keyword } = req.params;
-    const resutls = await productModel
-      .find({
-        $or: [
-          { name: { $regex: keyword, $options: "i" } },
-          { description: { $regex: keyword, $options: "i" } },
-        ],
-      })
-      .select("-photo");
-    res.json(resutls);
+    // Ho Jin Han, A0266275W
+    // MS3 Volume Testing Fix: paginate & cap search results to prevent huge payloads
+    const page = Math.max(parseInt(req.query.page || "1", 10), 1);
+    const limitRaw = parseInt(req.query.limit || "50", 10);
+    const limit = Math.min(Math.max(limitRaw, 1), 100); // cap to 100
+    const skip = (page - 1) * limit;
+
+    const query = {
+      $or: [
+        { name: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+      ],
+    };
+
+    const [products, total] = await Promise.all([
+      productModel
+        .find(query)
+        .select("name slug price category rating shipping quantity createdAt") // keep it small
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean(),
+      productModel.countDocuments(query),
+    ]);
+    res.status(200).send({ success: true, page, limit, total, products });
   } catch (error) {
     res.status(400).send({
       success: false,
