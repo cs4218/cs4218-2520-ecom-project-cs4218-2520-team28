@@ -244,6 +244,10 @@ const HomePage = () => {
                     src={`/api/v1/product/product-photo/${p._id}`}
                     className="card-img-top"
                     alt={p.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/images/placeholder.jpg";
+                    }}
                   />
                   <div className="card-body">
                     <div className="card-name-price">
