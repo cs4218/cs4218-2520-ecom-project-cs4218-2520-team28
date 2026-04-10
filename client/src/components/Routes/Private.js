@@ -42,5 +42,7 @@ export default function PrivateRoute(){
         // eslint-disable-next-line
     }, [auth?.token]);
 
+    // Foo Chao, A0272024R
+    // Modified redirect path to login
     return ok ? <Outlet /> : <Spinner path="login"/>;
 }

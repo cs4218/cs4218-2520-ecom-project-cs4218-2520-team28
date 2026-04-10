@@ -8,4 +8,6 @@ coverage/
 playwright-report/
 .tmp/
 .scannerwork/
+.playwright-mcp/
 tests/volume/Volume_Testing_Report.md
+
