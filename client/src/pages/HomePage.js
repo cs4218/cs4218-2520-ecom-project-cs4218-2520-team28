@@ -244,6 +244,10 @@ const HomePage = () => {
                     src={`/api/v1/product/product-photo/${p._id}`}
                     className="card-img-top"
                     alt={p.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/images/placeholder.jpg";
+                    }}
                   />
                   <div className="card-body">
                     <div className="card-name-price">
@@ -288,10 +292,11 @@ const HomePage = () => {
                 className="btn loadmore"
                 onClick={(e) => {
                   e.preventDefault();
-                  setPage(page + 1);
+                  setPage((prev) => prev + 1);
                 }}
               >
-                Loadmore <AiOutlineReload />
+                <span>Loadmore</span>
+                <AiOutlineReload className="ms-2" />
               </button>
             )}
           </div>

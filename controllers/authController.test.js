@@ -376,8 +376,10 @@ describe("authController", () => {
   // Jian Tao - A0273320R
   // AI-assisted unit tests generated with guidance from ChatGPT-5.2
   // Test Coverage: Successfully returns all orders, Handles database error and returns 500
-  describe("getAllOrdersController", () => {
 
+  // Ho Jin Han - A0266275W
+  // Fixed unit test due to behaviour changes from volume testing
+  describe("getAllOrdersController", () => {
     let res;
 
     beforeEach(() => {
@@ -390,33 +392,47 @@ describe("authController", () => {
       };
     });
 
-
-    test("should return all orders", async () => {
+    test("should return all orders (paginated)", async () => {
       // Arrange
-      const req = {};
+      const req = { query: {} }; // IMPORTANT
       const mockOrders = [{ _id: "order1" }, { _id: "order2" }];
 
-      orderModel.find.mockReturnValue({
-        populate: jest.fn().mockReturnValue({
-          populate: jest.fn().mockReturnValue({
-            sort: jest.fn().mockImplementation(() =>
-              Promise.resolve(mockOrders)
-            ),
-          }),
-        }),
-      });
+      const queryChain = {
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue(mockOrders), // final awaitable
+      };
+
+      orderModel.find.mockReturnValue(queryChain);
+      orderModel.countDocuments.mockResolvedValue(mockOrders.length);
 
       // Act
       await getAllOrdersController(req, res);
 
       // Assert
       expect(orderModel.find).toHaveBeenCalledWith({});
-      expect(res.json).toHaveBeenCalledWith(mockOrders);
+      expect(orderModel.countDocuments).toHaveBeenCalledWith({});
+
+      expect(queryChain.populate).toHaveBeenCalledWith("products", "-photo");
+      expect(queryChain.populate).toHaveBeenCalledWith("buyer", "name");
+      expect(queryChain.sort).toHaveBeenCalledWith({ createdAt: -1 });
+      expect(queryChain.skip).toHaveBeenCalledWith(0);     // page=1, limit=50 => skip=0
+      expect(queryChain.limit).toHaveBeenCalledWith(50);   // default limit=50
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        page: 1,
+        limit: 50,
+        total: mockOrders.length,
+        orders: mockOrders,
+      });
     });
 
     test("should handle error and return 500", async () => {
       // Arrange
-      const req = {};
+      const req = { query: {} }; // IMPORTANT (avoid crashing before find)
       orderModel.find.mockImplementation(() => {
         throw new Error("DB error");
       });

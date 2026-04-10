@@ -1,0 +1,165 @@
+{
+    "metrics": {
+        "http_req_tls_handshaking": {
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 253.823625,
+            "min": 98.8848,
+            "med": 193.31725,
+            "max": 1073.0944,
+            "p(90)": 432.89494,
+            "p(95)": 468.48001000000045
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 20,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "data_received": {
+            "count": 1497670,
+            "rate": 98571.08098620601
+        },
+        "checks": {
+            "passes": 50,
+            "fails": 0,
+            "value": 1
+        },
+        "iteration_duration": {
+            "med": 1379.8665500000002,
+            "max": 2379.2183,
+            "p(90)": 1907.36135,
+            "p(95)": 2143.2898249999994,
+            "avg": 1519.30413,
+            "min": 1268.0622
+        },
+        "http_req_receiving": {
+            "p(95)": 8.130095000000003,
+            "avg": 2.6654999999999998,
+            "min": 0,
+            "med": 1.68675,
+            "max": 9.479,
+            "p(90)": 5.332190000000005
+        },
+        "http_req_duration": {
+            "avg": 253.823625,
+            "min": 98.8848,
+            "med": 193.31725,
+            "max": 1073.0944,
+            "p(90)": 432.89494,
+            "p(95)": 468.48001000000045,
+            "thresholds": {
+                "p(95)<3000": false
+            }
+        },
+        "http_req_waiting": {
+            "avg": 251.00284000000002,
+            "min": 90.3206,
+            "med": 192.45600000000002,
+            "max": 1070.5436,
+            "p(90)": 428.94871,
+            "p(95)": 463.5747300000005
+        },
+        "http_req_connecting": {
+            "min": 0,
+            "med": 0,
+            "max": 0.6089,
+            "p(90)": 0,
+            "p(95)": 0.030445000000000434,
+            "avg": 0.030445
+        },
+        "http_reqs": {
+            "count": 20,
+            "rate": 1.316325772516055
+        },
+        "http_req_sending": {
+            "avg": 0.155285,
+            "min": 0,
+            "med": 0,
+            "max": 0.5412,
+            "p(90)": 0.5119900000000001,
+            "p(95)": 0.532175
+        },
+        "vus_max": {
+            "value": 1,
+            "min": 1,
+            "max": 1
+        },
+        "iterations": {
+            "count": 10,
+            "rate": 0.6581628862580275
+        },
+        "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 1
+        },
+        "data_sent": {
+            "count": 3880,
+            "rate": 255.36719986811468
+        },
+        "http_req_blocked": {
+            "med": 0,
+            "max": 13.7406,
+            "p(90)": 0,
+            "p(95)": 0.6870300000000098,
+            "avg": 0.68703,
+            "min": 0
+        }
+    },
+    "setup_data": {
+        "limit": 100,
+        "pageToTest": 100
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "status is 200": {
+                    "fails": 0,
+                    "name": "status is 200",
+                    "path": "::status is 200",
+                    "id": "6210a8cd14cd70477eba5c5e4cb3fb5f",
+                    "passes": 10
+                },
+                "response is JSON": {
+                    "fails": 0,
+                    "name": "response is JSON",
+                    "path": "::response is JSON",
+                    "id": "23a1facfa2bd64a1546c60eda62ef64e",
+                    "passes": 10
+                },
+                "products is array": {
+                    "name": "products is array",
+                    "path": "::products is array",
+                    "id": "a8b191bb9b620f8bfe3f3fad54d863cc",
+                    "passes": 10,
+                    "fails": 0
+                },
+                "products length <= limit": {
+                    "passes": 10,
+                    "fails": 0,
+                    "name": "products length <= limit",
+                    "path": "::products length <= limit",
+                    "id": "815a3ea5aedbd1f8191cadc00d2ff9c4"
+                },
+                "page 1 and deep page differ": {
+                    "name": "page 1 and deep page differ",
+                    "path": "::page 1 and deep page differ",
+                    "id": "fd56e9bffe5551d2fe564ceb7c308bb2",
+                    "passes": 10,
+                    "fails": 0
+                }
+            }
+    }
+}

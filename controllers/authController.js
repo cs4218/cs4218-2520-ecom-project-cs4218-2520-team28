@@ -237,12 +237,31 @@ export const getOrdersController = async (req, res) => {
 //orders
 export const getAllOrdersController = async (req, res) => {
   try {
-    const orders = await orderModel
-      .find({})
-      .populate("products", "-photo")
-      .populate("buyer", "name")
-      .sort({ createdAt: -1 });
-    res.json(orders);
+    // Ho Jin Han, A0266275W
+    // // MS3 Volume Testing Fix: add pagination to avoid returning all orders at once
+    const page = Math.max(parseInt(req.query.page || "1", 10), 1);
+    const limitRaw = parseInt(req.query.limit || "50", 10);
+    const limit = Math.min(Math.max(limitRaw, 1), 200); // cap to prevent huge responses
+    const skip = (page - 1) * limit;
+
+    const [orders, total] = await Promise.all([
+      orderModel
+        .find({})
+        .populate("products", "-photo")
+        .populate("buyer", "name")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      orderModel.countDocuments({}),
+    ]);
+
+    res.status(200).send({
+      success: true,
+      page,
+      limit,
+      total,
+      orders,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
