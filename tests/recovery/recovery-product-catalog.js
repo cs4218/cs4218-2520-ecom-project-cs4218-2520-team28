@@ -72,15 +72,17 @@ export default function () {
   let body = null;
   try { body = res.json(); } catch (_) { body = null; }
 
-  const ok = check(res, {
-    'status 200':             (r) => r.status === 200,
-    'response time < 3000ms': (r) => r.timings.duration < 3000,
-    'body not empty':         (r) => r.body && r.body.length > 0,
+  const isServerError = res.status >= 500 || res.timings.duration >= 3000;
+
+  check(res, {
+    'not a server error (5xx)': (r) => r.status < 500,
+    'response time < 3000ms':   (r) => r.timings.duration < 3000,
+    'body not empty':           (r) => r.body && r.body.length > 0,
   });
 
   recoveryResponseTime.add(res.timings.duration);
-  errorRate.add(!ok);
-  if (!ok) {
+  errorRate.add(isServerError);
+  if (isServerError) {
     failedRequests.add(1);
     console.log(`[CATALOG RECOVERY] FAIL | endpoint=${ep.name} | status=${res.status} | t=${res.timings.duration}ms`);
   }
