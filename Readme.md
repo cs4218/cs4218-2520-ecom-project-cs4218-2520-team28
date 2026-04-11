@@ -419,3 +419,25 @@ To begin unit testing with Jest in your project, follow these steps:
 2. singleCategoryController
 
 ##### - tests/ui/profile-flow.spec.ts (Test the profile register/update/invalid flow)
+
+### Milestone 3
+
+#### Member 1: FOO CHAO
+
+#### Member 2: FOO TZIE HUANG
+
+##### - tests/recovery/recovery-auth.js (Recovery Test: Authentication)
+
+##### - tests/recovery/recovery-product-catalog.js (Recovery Test: Product Catalog)
+
+##### - tests/recovery/recovery-checkout.js (Recovery Test: Checkout/Payment/CartPage)
+
+##### - tests/recovery/recovery-admin.js (Recovery Test: Admin Operations)
+
+##### - tests/recovery/recovery-mixed.js (Recovery Test: Mixed)
+
+#### Member 3: HO CHI THANH
+
+#### Member 4: HO JIAN TAO
+
+#### Member 5: HO JIN HAN
