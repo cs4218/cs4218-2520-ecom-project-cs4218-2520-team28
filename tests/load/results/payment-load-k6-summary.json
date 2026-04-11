@@ -1,0 +1,357 @@
+{
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "checkout browse status 200": {
+                    "name": "checkout browse status 200",
+                    "path": "::checkout browse status 200",
+                    "id": "dae5ced007f6b57f1bf83b844a6fa02a",
+                    "passes": 3252,
+                    "fails": 4
+                },
+                "checkout browse products array": {
+                    "passes": 3252,
+                    "fails": 4,
+                    "name": "checkout browse products array",
+                    "path": "::checkout browse products array",
+                    "id": "dab8e5044609311c62490f6e02485c6c"
+                }
+            }
+    },
+    "metrics": {
+        "checkout_timeout_rate": {
+            "passes": 38,
+            "fails": 31065,
+            "thresholds": {
+                "rate<0.03": false
+            },
+            "value": 0.0012217470983506415
+        },
+        "order_placement_duration": {
+            "avg": 3756.052135054618,
+            "min": 1111,
+            "med": 3196.5,
+            "max": 12076,
+            "p(90)": 5993.500000000001,
+            "p(95)": 7106.35,
+            "thresholds": {
+                "p(95)<2000": true
+            }
+        },
+        "http_req_duration{endpoint:checkout_payment_token}": {
+            "p(95)": 4885.865959999999,
+            "avg": 1082.1760561673982,
+            "min": 285.6292,
+            "med": 463.19025,
+            "max": 7003.8446,
+            "p(90)": 3434.2046100000007,
+            "thresholds": {
+                "p(95)<1500": true
+            }
+        },
+        "http_req_duration{expected_response:true}": {
+            "max": 6995.0033,
+            "p(90)": 3037.9722400000005,
+            "p(95)": 3459.44202,
+            "avg": 1423.481971804268,
+            "min": 0,
+            "med": 1121.127
+        },
+        "oversell_risk_rate": {
+            "passes": 0,
+            "fails": 2014,
+            "thresholds": {
+                "rate<0.02": false
+            },
+            "value": 0
+        },
+        "dropped_iterations": {
+            "count": 2350,
+            "rate": 7.607385115061775
+        },
+        "iteration_duration": {
+            "avg": 6402.602251258437,
+            "min": 210.4735,
+            "med": 6358.5965,
+            "max": 26146.2522,
+            "p(90)": 11302.565960000002,
+            "p(95)": 16915.661399999997
+        },
+        "checkout_completions": {
+            "count": 982,
+            "rate": 3.178915822549218
+        },
+        "http_req_connecting": {
+            "avg": 0.009211352602642837,
+            "min": 0,
+            "med": 0,
+            "max": 9.1748,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "data_sent": {
+            "count": 9893433,
+            "rate": 32026.874443004664
+        },
+        "iterations": {
+            "rate": 22.50814838511682,
+            "count": 6953
+        },
+        "http_req_sending": {
+            "med": 0,
+            "max": 41.2193,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.03536788412693307,
+            "min": 0
+        },
+        "http_req_waiting": {
+            "min": 0,
+            "med": 1121.0116,
+            "max": 7013.1641,
+            "p(90)": 3051.0050599999995,
+            "p(95)": 3469.8924799999972,
+            "avg": 1429.338060428231
+        },
+        "http_reqs": {
+            "count": 31103,
+            "rate": 100.6861698867091
+        },
+        "payment_dependency_duration": {
+            "max": 7003.8446,
+            "p(90)": 3259.6833600000004,
+            "p(95)": 4792.006604999995,
+            "avg": 1122.5079172727308,
+            "min": 285.6292,
+            "med": 605.4964500000001,
+            "thresholds": {
+                "p(95)<1800": true
+            }
+        },
+        "duplicate_order_rate": {
+            "passes": 962,
+            "fails": 4731,
+            "thresholds": {
+                "rate<0.01": true
+            },
+            "value": 0.16897944844545934
+        },
+        "data_received": {
+            "count": 574613251,
+            "rate": 1860129.486201981
+        },
+        "unreconciled_payment_order_rate": {
+            "passes": 835,
+            "fails": 4858,
+            "thresholds": {
+                "rate<0.02": true
+            },
+            "value": 0.14667135078166169
+        },
+        "http_req_receiving": {
+            "avg": 0.9238020641095743,
+            "min": 0,
+            "med": 0.378,
+            "max": 50.4382,
+            "p(90)": 2.5413399999999995,
+            "p(95)": 3.9238099999999982
+        },
+        "checkout_success_rate": {
+            "passes": 982,
+            "fails": 3646,
+            "thresholds": {
+                "rate>0.70": true
+            },
+            "value": 0.2121866897147796
+        },
+        "dropoff_after_auth_rate": {
+            "passes": 330,
+            "fails": 2261,
+            "value": 0.1273639521420301
+        },
+        "checkout_end_to_end_duration": {
+            "avg": 8146.694036300778,
+            "min": 210,
+            "med": 8259.5,
+            "max": 26146,
+            "p(90)": 14520.100000000006,
+            "p(95)": 18886.799999999996,
+            "thresholds": {
+                "p(95)<2800": true
+            }
+        },
+        "vus_max": {
+            "value": 170,
+            "min": 29,
+            "max": 170
+        },
+        "http_req_duration": {
+            "max": 7013.1641,
+            "p(90)": 3051.5224,
+            "p(95)": 3470.575429999999,
+            "avg": 1430.2972303764782,
+            "min": 0,
+            "med": 1122.4335,
+            "thresholds": {
+                "p(95)<2200": true,
+                "p(99)<4500": true
+            }
+        },
+        "http_req_duration{endpoint:checkout_payment_submit}": {
+            "med": 598.33875,
+            "max": 7002.2153,
+            "p(90)": 3257.212470000002,
+            "p(95)": 4790.639814999998,
+            "avg": 1105.2842107745769,
+            "min": 346.5557,
+            "thresholds": {
+                "p(95)<2000": true
+            }
+        },
+        "http_req_failed": {
+            "passes": 38,
+            "fails": 31065,
+            "thresholds": {
+                "rate<0.05": false
+            },
+            "value": 0.0012217470983506415
+        },
+        "order_creation_accuracy_rate": {
+            "passes": 3314,
+            "fails": 2379,
+            "thresholds": {
+                "rate>0.95": true
+            },
+            "value": 0.5821183910064992
+        },
+        "http_req_tls_handshaking": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "dropoff_after_token_rate": {
+            "passes": 227,
+            "fails": 2014,
+            "value": 0.10129406514948684
+        },
+        "payment_dependency_failure_rate": {
+            "passes": 57,
+            "fails": 8303,
+            "thresholds": {
+                "rate<0.05": false
+            },
+            "value": 0.006818181818181818
+        },
+        "checkout_attempts": {
+            "count": 4628,
+            "rate": 14.981692898938679
+        },
+        "checks": {
+            "passes": 6504,
+            "fails": 8,
+            "value": 0.9987714987714987
+        },
+        "checkout_flow_error_rate": {
+            "passes": 2680,
+            "fails": 4272,
+            "thresholds": {
+                "rate<0.05": true
+            },
+            "value": 0.38550057537399307
+        },
+        "vus": {
+            "value": 8,
+            "min": 8,
+            "max": 170
+        },
+        "dropoff_before_auth_rate": {
+            "passes": 664,
+            "fails": 2592,
+            "value": 0.20393120393120392
+        },
+        "http_req_duration{endpoint:checkout_order_fetch}": {
+            "min": 221.7748,
+            "med": 2393.615,
+            "max": 7013.1641,
+            "p(90)": 3353.3010200000003,
+            "p(95)": 3525.72944,
+            "avg": 2250.7807798235,
+            "thresholds": {
+                "p(95)<1200": true
+            }
+        },
+        "http_req_blocked": {
+            "max": 15.329,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.01898105327460375,
+            "min": 0,
+            "med": 0
+        },
+        "order_create_attempts": {
+            "count": 2014,
+            "rate": 6.519690902865708
+        }
+    },
+    "setup_data": {
+        "products": [
+            {
+                "_id": "66db427fdb0119d9234b27f9",
+                "description": "A bestselling novel",
+                "name": "Novel",
+                "price": 14.99,
+                "quantity": 200
+            },
+            {
+                "_id": "67a2171ea6d9e00ef2ac0229",
+                "description": "A bestselling book in Singapore",
+                "name": "The Law of Contract in Singapore",
+                "price": 54.99,
+                "quantity": 200
+            },
+            {
+                "quantity": 200,
+                "_id": "67a21772a6d9e00ef2ac022a",
+                "description": "Plain NUS T-shirt for sale",
+                "name": "NUS T-shirt",
+                "price": 4.99
+            },
+            {
+                "quantity": 50,
+                "_id": "66db427fdb0119d9234b27f5",
+                "description": "A high-end smartphone",
+                "name": "Smartphone",
+                "price": 999.99
+            },
+            {
+                "name": "Laptop",
+                "price": 1499.99,
+                "quantity": 30,
+                "_id": "66db427fdb0119d9234b27f3",
+                "description": "A powerful laptop"
+            },
+            {
+                "description": "A comprehensive textbook",
+                "name": "Textbook",
+                "price": 79.99,
+                "quantity": 50,
+                "_id": "66db427fdb0119d9234b27f1"
+            }
+        ],
+        "quantityById": {
+            "67a2171ea6d9e00ef2ac0229": 200,
+            "67a21772a6d9e00ef2ac022a": 200,
+            "66db427fdb0119d9234b27f1": 50,
+            "66db427fdb0119d9234b27f3": 30,
+            "66db427fdb0119d9234b27f5": 50,
+            "66db427fdb0119d9234b27f9": 200
+        },
+        "userSeed": 1775842900432
+    }
+}

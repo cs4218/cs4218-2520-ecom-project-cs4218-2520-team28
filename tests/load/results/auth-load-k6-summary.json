@@ -1,0 +1,341 @@
+{
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "login status 200": {
+                    "fails": 3265,
+                    "name": "login status 200",
+                    "path": "::login status 200",
+                    "id": "a9f04e9f501317c68a9f824e04811bea",
+                    "passes": 207
+                },
+                "login success true": {
+                    "name": "login success true",
+                    "path": "::login success true",
+                    "id": "88befb7dc2e05393c09328bfc35dda8f",
+                    "passes": 207,
+                    "fails": 3265
+                },
+                "login has token": {
+                    "fails": 3265,
+                    "name": "login has token",
+                    "path": "::login has token",
+                    "id": "76fad3378234b1d9b3859991679a6c46",
+                    "passes": 207
+                },
+                "session validate status 200": {
+                    "path": "::session validate status 200",
+                    "id": "708ae8658c54b01325c015470ffc96fa",
+                    "passes": 170,
+                    "fails": 0,
+                    "name": "session validate status 200"
+                },
+                "session validate ok true": {
+                    "name": "session validate ok true",
+                    "path": "::session validate ok true",
+                    "id": "a316b1e2a9955fbe9d0b36567e63cc9c",
+                    "passes": 170,
+                    "fails": 0
+                },
+                "invalid burst returns non-5xx": {
+                    "name": "invalid burst returns non-5xx",
+                    "path": "::invalid burst returns non-5xx",
+                    "id": "eb0f68872417697d62e90acf66add47a",
+                    "passes": 2774,
+                    "fails": 0
+                },
+                "invalid burst returns expected status": {
+                    "passes": 1403,
+                    "fails": 1371,
+                    "name": "invalid burst returns expected status",
+                    "path": "::invalid burst returns expected status",
+                    "id": "c1716648228bc7900686699917742461"
+                },
+                "invalid burst has structured response": {
+                    "name": "invalid burst has structured response",
+                    "path": "::invalid burst has structured response",
+                    "id": "600671a3d3fd2065fea01ce3a6742af9",
+                    "passes": 1403,
+                    "fails": 1371
+                },
+                "refresh-like first login 200": {
+                    "passes": 107,
+                    "fails": 1361,
+                    "name": "refresh-like first login 200",
+                    "path": "::refresh-like first login 200",
+                    "id": "d29fa827873f97d0cc8d59fbe3aaa7f5"
+                },
+                "refresh-like first token exists": {
+                    "fails": 1361,
+                    "name": "refresh-like first token exists",
+                    "path": "::refresh-like first token exists",
+                    "id": "3333a512a4e877d1f67527184b2cf798",
+                    "passes": 107
+                },
+                "refresh-like second login 200": {
+                    "id": "d6d83d30f0aae3469809d47410d62b52",
+                    "passes": 76,
+                    "fails": 31,
+                    "name": "refresh-like second login 200",
+                    "path": "::refresh-like second login 200"
+                },
+                "refresh-like second token exists": {
+                    "name": "refresh-like second token exists",
+                    "path": "::refresh-like second token exists",
+                    "id": "6ec39ea06b68db41b0fda01e5cbefc10",
+                    "passes": 76,
+                    "fails": 31
+                }
+            }
+    },
+    "metrics": {
+        "vus_max": {
+            "value": 313,
+            "min": 72,
+            "max": 313
+        },
+        "vus": {
+            "value": 5,
+            "min": 5,
+            "max": 309
+        },
+        "http_reqs": {
+            "count": 13875,
+            "rate": 55.409245883242484
+        },
+        "http_req_tls_handshaking": {
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0
+        },
+        "http_req_failed": {
+            "passes": 11713,
+            "fails": 2162,
+            "thresholds": {
+                "rate<0.03": true
+            },
+            "value": 0.8441801801801802
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 1063.4666336725247,
+            "min": 0.5054,
+            "med": 213.88025,
+            "max": 4993.4408,
+            "p(90)": 3542.0195700000004,
+            "p(95)": 4233.587214999999
+        },
+        "http_req_duration{endpoint:refresh_like}": {
+            "avg": 4884.3959519414175,
+            "min": 313.048,
+            "med": 4999.3323,
+            "max": 5011.5131,
+            "p(90)": 5000.10045,
+            "p(95)": 5000.354325,
+            "thresholds": {
+                "p(95)<1300": true
+            }
+        },
+        "auth_business_failure_rate": {
+            "passes": 13976,
+            "fails": 2129,
+            "thresholds": {
+                "rate<0.03": true
+            },
+            "value": 0.867805029493946
+        },
+        "http_req_sending": {
+            "avg": 0.0623600144144144,
+            "min": 0,
+            "med": 0,
+            "max": 2.0789,
+            "p(90)": 0.5069,
+            "p(95)": 0.5515
+        },
+        "http_req_duration{endpoint:invalid_burst}": {
+            "avg": 2638.67899762077,
+            "min": 186.358,
+            "med": 3500.1237,
+            "max": 5021.2111,
+            "p(90)": 5000.48094,
+            "p(95)": 5000.64503,
+            "thresholds": {
+                "p(95)<1400": true
+            }
+        },
+        "http_req_duration{endpoint:session_validate}": {
+            "avg": 4641.364491915794,
+            "min": 0.5054,
+            "med": 4999.3228500000005,
+            "max": 5011.7558,
+            "p(90)": 5000.13462,
+            "p(95)": 5000.410205,
+            "thresholds": {
+                "p(95)<1200": true
+            }
+        },
+        "auth_session_validation_duration": {
+            "p(90)": 4.463349999999999,
+            "p(95)": 5.768569999999994,
+            "avg": 2.8631770588235286,
+            "min": 0.5054,
+            "med": 2.694,
+            "max": 9.552
+        },
+        "auth_timeout_rate": {
+            "passes": 11006,
+            "fails": 2161,
+            "thresholds": {
+                "rate<0.02": true
+            },
+            "value": 0.835877572719678
+        },
+        "http_req_duration{endpoint:login}": {
+            "p(90)": 5000.124750000001,
+            "p(95)": 5000.365645,
+            "avg": 4886.889545506911,
+            "min": 315.0833,
+            "med": 4999.36195,
+            "max": 5021.139,
+            "thresholds": {
+                "p(95)<1200": true
+            }
+        },
+        "auth_refresh_like_duration": {
+            "avg": 4897.218102689647,
+            "min": 1040.7577,
+            "med": 4999.43725,
+            "max": 5005.21775,
+            "p(90)": 5000.01608,
+            "p(95)": 5000.2669
+        },
+        "idp_dependency_duration": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "http_req_waiting": {
+            "avg": 4131.163215077494,
+            "min": 0,
+            "med": 4999.1911,
+            "max": 5021.2111,
+            "p(90)": 5000.16766,
+            "p(95)": 5000.443869999999
+        },
+        "iteration_duration": {
+            "avg": 4973.621368713671,
+            "min": 187.4415,
+            "med": 5000.8154,
+            "max": 10013.8257,
+            "p(90)": 10000.97986,
+            "p(95)": 10001.74584
+        },
+        "iterations": {
+            "count": 11529,
+            "rate": 46.040590687416405
+        },
+        "idp_fallback_success_rate": {
+            "passes": 27,
+            "fails": 680,
+            "thresholds": {
+                "rate>0.95": true
+            },
+            "value": 0.03818953323903819
+        },
+        "http_req_receiving": {
+            "p(95)": 1.4835699999999978,
+            "avg": 0.20888558558558554,
+            "min": 0,
+            "med": 0,
+            "max": 8.4357,
+            "p(90)": 0
+        },
+        "http_req_connecting": {
+            "max": 15.7814,
+            "p(90)": 1.6696,
+            "p(95)": 1.8372199999999996,
+            "avg": 0.8885336072072058,
+            "min": 0,
+            "med": 0.9879
+        },
+        "idp_unavailable_rate": {
+            "passes": 707,
+            "fails": 0,
+            "value": 1
+        },
+        "data_sent": {
+            "count": 3158686,
+            "rate": 12614.083548969778
+        },
+        "dropped_iterations": {
+            "count": 5018,
+            "rate": 20.039178078710687
+        },
+        "auth_login_duration": {
+            "p(90)": 5000.124750000001,
+            "p(95)": 5000.365645,
+            "avg": 4886.889545506911,
+            "min": 315.0833,
+            "med": 4999.36195,
+            "max": 5021.139
+        },
+        "auth_invalid_burst_duration": {
+            "max": 5021.2111,
+            "p(90)": 5000.48094,
+            "p(95)": 5000.64503,
+            "avg": 2638.67899762077,
+            "min": 186.358,
+            "med": 3500.1237
+        },
+        "http_req_blocked": {
+            "avg": 0.9285457081081065,
+            "min": 0,
+            "med": 1.0545,
+            "max": 15.7814,
+            "p(90)": 1.71158,
+            "p(95)": 1.88293
+        },
+        "invalid_burst_server_error_rate": {
+            "passes": 0,
+            "fails": 2774,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_duration": {
+            "avg": 4131.434460677489,
+            "min": 0,
+            "med": 4999.2667,
+            "max": 5021.2111,
+            "p(90)": 5000.21586,
+            "p(95)": 5000.4721899999995,
+            "thresholds": {
+                "p(95)<1500": true
+            }
+        },
+        "checks": {
+            "passes": 6907,
+            "fails": 15321,
+            "value": 0.31073420910563254
+        },
+        "data_received": {
+            "count": 902144,
+            "rate": 3602.675222925543
+        }
+    },
+    "setup_data": {
+        "validPassword": "LoadTest123!",
+        "invalidPassword": "WrongPass!234",
+        "unknownEmail": "unknown.1775840783936@example.com",
+        "validEmail": "load.user.1775840783936@example.com"
+    }
+}
