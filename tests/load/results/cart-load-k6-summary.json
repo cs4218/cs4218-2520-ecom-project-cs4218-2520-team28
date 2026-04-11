@@ -1,0 +1,400 @@
+{
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "basket read list status 200": {
+                    "name": "basket read list status 200",
+                    "path": "::basket read list status 200",
+                    "id": "14a9647cdce8edcea78ae4f64f93500c",
+                    "passes": 4182,
+                    "fails": 0
+                },
+                "basket read list has products": {
+                    "fails": 0,
+                    "name": "basket read list has products",
+                    "path": "::basket read list has products",
+                    "id": "7b9fcf3d14ae3e89b412ed4a66934b3b",
+                    "passes": 4182
+                },
+                "signed-in login status 200": {
+                    "fails": 0,
+                    "name": "signed-in login status 200",
+                    "path": "::signed-in login status 200",
+                    "id": "28936920d718d2c481112eb9cb100d35",
+                    "passes": 3503
+                },
+                "signed-in login token present": {
+                    "path": "::signed-in login token present",
+                    "id": "aef1fe020948634a6d0d35e980f304c0",
+                    "passes": 3503,
+                    "fails": 0,
+                    "name": "signed-in login token present"
+                },
+                "session validate status 200": {
+                    "path": "::session validate status 200",
+                    "id": "708ae8658c54b01325c015470ffc96fa",
+                    "passes": 3503,
+                    "fails": 0,
+                    "name": "session validate status 200"
+                },
+                "session validate ok": {
+                    "fails": 0,
+                    "name": "session validate ok",
+                    "path": "::session validate ok",
+                    "id": "33dd4f25e8e8ef6a2df1a52d174ce8f8",
+                    "passes": 3503
+                },
+                "guest add detail status 200": {
+                    "fails": 3,
+                    "name": "guest add detail status 200",
+                    "path": "::guest add detail status 200",
+                    "id": "f481e9b975cd8360aea6cfd3c2db71e2",
+                    "passes": 5272
+                },
+                "guest add detail has product": {
+                    "fails": 3,
+                    "name": "guest add detail has product",
+                    "path": "::guest add detail has product",
+                    "id": "4435cca27db118b05a16132e0715658e",
+                    "passes": 5272
+                },
+                "guest update detail status 200": {
+                    "name": "guest update detail status 200",
+                    "path": "::guest update detail status 200",
+                    "id": "2593435cf48ed8808d3e0a7eafb7e009",
+                    "passes": 5274,
+                    "fails": 0
+                },
+                "guest update detail has product": {
+                    "name": "guest update detail has product",
+                    "path": "::guest update detail has product",
+                    "id": "d7f8d185b36f99f44940e56fb188c98a",
+                    "passes": 5274,
+                    "fails": 0
+                }
+            }
+    },
+    "metrics": {
+        "iterations": {
+            "count": 18361,
+            "rate": 60.453201077432304
+        },
+        "data_sent": {
+            "count": 5708559,
+            "rate": 18795.30881157812
+        },
+        "checks": {
+            "passes": 43468,
+            "fails": 6,
+            "value": 0.9998619864746745
+        },
+        "basket_merge_violation_rate": {
+            "passes": 0,
+            "fails": 2401,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 1414.4791092206056,
+            "min": 0,
+            "med": 1638.9203499999999,
+            "max": 4998.5285,
+            "p(90)": 2078.4029499999997,
+            "p(95)": 2319.044554999999
+        },
+        "basket_operation_error_rate": {
+            "passes": 1373,
+            "fails": 16988,
+            "thresholds": {
+                "rate<0.03": true
+            },
+            "value": 0.07477806219704809
+        },
+        "basket_update_duration": {
+            "avg": 1945.5298473456369,
+            "min": 0,
+            "med": 1973,
+            "max": 5001,
+            "p(90)": 2133,
+            "p(95)": 2407.449999999999,
+            "thresholds": {
+                "p(95)<1200": true
+            }
+        },
+        "http_req_failed": {
+            "passes": 5,
+            "fails": 28740,
+            "thresholds": {
+                "rate<0.03": false
+            },
+            "value": 0.00017394329448599757
+        },
+        "basket_merge_duration": {
+            "med": 0,
+            "max": 1,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.045397750937109536,
+            "min": 0,
+            "thresholds": {
+                "p(95)<900": false
+            }
+        },
+        "basket_duplicate_line_violation_rate": {
+            "passes": 1368,
+            "fails": 12811,
+            "thresholds": {
+                "rate<0.02": true
+            },
+            "value": 0.09648071091050145
+        },
+        "basket_integrity_violation_rate": {
+            "passes": 0,
+            "fails": 18361,
+            "thresholds": {
+                "rate<0.02": false
+            },
+            "value": 0
+        },
+        "basket_read_duration": {
+            "med": 871,
+            "max": 3820,
+            "p(90)": 1323.9,
+            "p(95)": 1498.9499999999998,
+            "avg": 893.849593495935,
+            "min": 223,
+            "thresholds": {
+                "p(95)<1200": true
+            }
+        },
+        "http_req_duration{endpoint:cart_read_list}": {
+            "p(90)": 1323.4255300000002,
+            "p(95)": 1498.9631149999998,
+            "avg": 893.3661336680988,
+            "min": 221.516,
+            "med": 870.2615000000001,
+            "max": 3820.3579,
+            "thresholds": {
+                "p(95)<1200": true
+            }
+        },
+        "http_req_duration": {
+            "avg": 1415.1027414993991,
+            "min": 0,
+            "med": 1639.0903,
+            "max": 5000.3339,
+            "p(90)": 2078.7287400000005,
+            "p(95)": 2322.48302,
+            "thresholds": {
+                "p(95)<1500": true,
+                "p(99)<2800": true
+            }
+        },
+        "basket_write_ops": {
+            "count": 32843,
+            "rate": 108.13487734797174
+        },
+        "http_req_sending": {
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.021457867455209584,
+            "min": 0,
+            "med": 0,
+            "max": 8.1274
+        },
+        "basket_remove_duration": {
+            "p(95)": 0,
+            "avg": 0.03132832080200501,
+            "min": 0,
+            "med": 0,
+            "max": 4,
+            "p(90)": 0,
+            "thresholds": {
+                "p(95)<900": false
+            }
+        },
+        "vus": {
+            "value": 42,
+            "min": 0,
+            "max": 162
+        },
+        "http_reqs": {
+            "count": 28745,
+            "rate": 94.64229970975391
+        },
+        "basket_timeout_rate": {
+            "passes": 5,
+            "fails": 28738,
+            "thresholds": {
+                "rate<0.02": false
+            },
+            "value": 0.00017395539783599486
+        },
+        "http_req_tls_handshaking": {
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0
+        },
+        "dropped_iterations": {
+            "count": 3843,
+            "rate": 12.652995574346296
+        },
+        "basket_add_duration": {
+            "min": 810,
+            "med": 1776,
+            "max": 5001,
+            "p(90)": 2313,
+            "p(95)": 2619,
+            "avg": 1846.1473000683527,
+            "thresholds": {
+                "p(95)<1200": true
+            }
+        },
+        "http_req_receiving": {
+            "min": 0,
+            "med": 0,
+            "max": 9.8614,
+            "p(90)": 1.8766800000000008,
+            "p(95)": 2.61794,
+            "avg": 0.6626794051139357
+        },
+        "vus_max": {
+            "value": 178,
+            "min": 62,
+            "max": 178
+        },
+        "basket_data_loss_rate": {
+            "passes": 0,
+            "fails": 11778,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_blocked": {
+            "avg": 0.010494204209427727,
+            "min": 0,
+            "med": 0,
+            "max": 6.8265,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "basket_read_ops": {
+            "count": 4182,
+            "rate": 13.76914584749316
+        },
+        "http_req_duration{endpoint:cart_session_validate}": {
+            "p(95)": 9.60934,
+            "avg": 3.644011818441344,
+            "min": 0,
+            "med": 2.7389,
+            "max": 41.9954,
+            "p(90)": 7.083420000000001,
+            "thresholds": {
+                "p(95)<1200": false
+            }
+        },
+        "http_req_connecting": {
+            "min": 0,
+            "med": 0,
+            "max": 2.2247,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.004857269090276567
+        },
+        "iteration_duration": {
+            "avg": 2216.207540760297,
+            "min": 0,
+            "med": 1335.6459,
+            "max": 11035.4728,
+            "p(90)": 4780.8526,
+            "p(95)": 5027.3811
+        },
+        "data_received": {
+            "count": 18129944,
+            "rate": 59692.454123118965
+        },
+        "http_req_waiting": {
+            "p(90)": 2078.3167200000003,
+            "p(95)": 2321.32928,
+            "avg": 1414.418604226824,
+            "min": 0,
+            "med": 1638.5608,
+            "max": 5000.3339
+        },
+        "http_req_duration{endpoint:cart_update_detail}": {
+            "p(90)": 2132.31032,
+            "p(95)": 2404.1060999999986,
+            "avg": 1945.3056881736318,
+            "min": 419.6851,
+            "med": 1972.8985,
+            "max": 5000.3132,
+            "thresholds": {
+                "p(95)<1200": true
+            }
+        },
+        "http_req_duration{endpoint:cart_add_detail}": {
+            "p(95)": 2618.944065,
+            "avg": 1845.6892411597164,
+            "min": 807.6856,
+            "med": 1775.4739,
+            "max": 5000.3339,
+            "p(90)": 2312.3957800000003,
+            "thresholds": {
+                "p(95)<1200": true
+            }
+        }
+    },
+    "setup_data": {
+        "authUser": {
+            "email": "cart.load.1775841826340@example.com",
+            "password": "CartLoad123!"
+        },
+        "products": [
+            {
+                "_id": "66db427fdb0119d9234b27f9",
+                "price": 14.99,
+                "quantity": 200,
+                "slug": "novel"
+            },
+            {
+                "quantity": 200,
+                "slug": "the-law-of-contract-in-singapore",
+                "_id": "67a2171ea6d9e00ef2ac0229",
+                "price": 54.99
+            },
+            {
+                "_id": "67a21772a6d9e00ef2ac022a",
+                "price": 4.99,
+                "quantity": 200,
+                "slug": "nus-tshirt"
+            },
+            {
+                "_id": "66db427fdb0119d9234b27f5",
+                "price": 999.99,
+                "quantity": 50,
+                "slug": "smartphone"
+            },
+            {
+                "_id": "66db427fdb0119d9234b27f3",
+                "price": 1499.99,
+                "quantity": 30,
+                "slug": "laptop"
+            },
+            {
+                "_id": "66db427fdb0119d9234b27f1",
+                "price": 79.99,
+                "quantity": 50,
+                "slug": "textbook"
+            }
+        ]
+    }
+}
