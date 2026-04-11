@@ -423,6 +423,15 @@ To begin unit testing with Jest in your project, follow these steps:
 ### Milestone 3
 
 #### Member 1: FOO CHAO
+##### - tests\stress\admin-stress-solo.js
+##### - tests\stress\admin-stress.js
+##### - tests\stress\auth-stress-solo.js
+##### - tests\stress\auth-stress.js
+##### - tests\stress\calibration-probe.js
+##### - tests\stress\catalog-stress-solo.js
+##### - tests\stress\catalog-stress.js
+##### - tests\stress\checkout-stress-solo.js
+##### - tests\stress\checkout-stress.js
 
 #### Member 2: FOO TZIE HUANG
 
@@ -437,7 +446,21 @@ To begin unit testing with Jest in your project, follow these steps:
 ##### - tests/recovery/recovery-mixed.js (Recovery Test: Mixed)
 
 #### Member 3: HO CHI THANH
+##### - tests\load\authentication-load.js
+##### - tests\load\cart-operations-load.js
+##### - tests\load\catalog-browsing-load.js
+##### - tests\load\payment-flow-load.js
+##### - tests\load\product-detail-inventory-load.js
 
 #### Member 4: HO JIAN TAO
+##### - tests\spike_test\auth-login-spike.js
+##### - tests\spike_test\checkout-flow-spike.js
+##### - tests\spike_test\product-category-spike.js
+##### - tests\spike_test\product-listing-spike.js
+##### - tests\spike_test\product-search-spike.js
 
 #### Member 5: HO JIN HAN
+##### - tests\volume\k6-filter-products.js
+##### - tests\volume\k6-get-all-categories.js
+##### - tests\volume\k6-get-all-orders.js
+##### - tests\volume\k6-search-products.js
